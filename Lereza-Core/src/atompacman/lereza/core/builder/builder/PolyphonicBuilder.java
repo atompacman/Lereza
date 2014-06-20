@@ -41,7 +41,7 @@ public class PolyphonicBuilder implements Builder {
 			e.printStackTrace();
 		}
 
-		Log.normalMsg("Building a " + musicalForm.getName() + "."); //TODO
+		Log.normalMsg("Building a " + musicalForm.getSimpleName() + ".");
 		
 		setRythmicSignature();
 
@@ -74,6 +74,8 @@ public class PolyphonicBuilder implements Builder {
 	}
 
 	private void buildVoice(int voiceNo) throws BuilderException {
+		Log.normalMsg("Building voice nb " + voiceNo + " of " + tempMidiFile.getFile().getName() + ".");
+		
 		if (tempMidiFile.getNotes().get(voiceNo).isEmpty()) {
 			Log.normalMsg("Discarded a track with no notes: a voice won't be created.");
 			return;
@@ -101,6 +103,7 @@ public class PolyphonicBuilder implements Builder {
 				noteAddingVisualisation(midiNote.getLength() / tempPiece.getRythmicSignature().getValueOfShortestNote(), voice);		
 			}
 		}
+		tempPiece.addVoice(voice);
 	}
 
 	private boolean checkNoteIntegrity(MIDINote midiNote, int noteIndex, int voiceNo) {

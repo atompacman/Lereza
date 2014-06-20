@@ -9,7 +9,6 @@ import atompacman.lereza.core.solfege.RythmicSignature;
 
 public class Piece {
 	
-	private String name;
 	protected List<Section> sections;
 	protected RythmicSignature rythmicSignature;
 	
@@ -27,10 +26,6 @@ public class Piece {
 	//         SETTERS          //
 	//////////////////////////////
 	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	public void addSection(Section section) {
 		this.sections.add(section);
 	}
@@ -43,10 +38,6 @@ public class Piece {
 	//////////////////////////////
 	//         GETTERS          //
 	//////////////////////////////
-	
-	public String getName() {
-		return name;
-	}
 	
 	public Section getSection(int sectionIndex) {
 		return sections.get(sectionIndex);

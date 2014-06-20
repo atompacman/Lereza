@@ -50,7 +50,7 @@ public class Composition {
 	
 	public void addFile(MIDIFile midiFile, Piece piece) {
 		musicFiles.add(new MusicFile(midiFile, piece));
-		Log.normalMsg("Piece \"" + piece.getName() + "\" (" + midiFile.getFile().getPath() + ") to composition \"" + name + "\".");
+		Log.normalMsg("Piece \"" + midiFile.getFile().getName() + "\" (" + midiFile.getFile().getPath() + ") to composition \"" + name + "\".");
 	}
 	
 	

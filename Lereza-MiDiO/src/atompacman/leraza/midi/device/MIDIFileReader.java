@@ -179,10 +179,10 @@ public class MIDIFileReader {
 		noteLength = roundLength(noteLength);
 		
 		if (rawLength == 0) {
-			Log.warningMsg(printOffset() + "Adding a note of RAW length 0 (" + HexToNote.toString(note) + ").");
+			Log.warningMsg(printOffset() + "[RAW LENGTH 0 ] Adding a note of RAW length 0 (" + HexToNote.toString(note) + ").");
 		}
 		if (noteLength == 0) {
-			Log.essentialMsg(printOffset() + "Adding a note of length 0 (" + HexToNote.toString(note) + ").");
+			Log.essentialMsg(printOffset() + "[Note length 0] Adding a note of length 0 (" + HexToNote.toString(note) + ").");
 		}
 		
 		midiFile.getNotes().get(currentTrack).add(new MIDINote(note, noteLength));
@@ -224,7 +224,7 @@ public class MIDIFileReader {
 			for (int i = 15; i < 3000; i += 15) {
 				if (length <= (i + correction) && length >= (i - correction)) {
 					if (correction > Parameters.NOTE_LENGTH_CORRECTION_THRESHOLD) {
-						Log.warningMsg(printOffset() + "A note of length " + length + " had to be rounded of a value of " + correction + ".");
+						Log.warningMsg(printOffset() + "[Note rounding] A note of length " + length + " had to be rounded of a value of " + correction + ".");
 					}
 					return i;
 				}
