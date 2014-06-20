@@ -74,7 +74,7 @@ public class PolyphonicBuilder implements Builder {
 	}
 
 	private void buildVoice(int voiceNo) throws BuilderException {
-		Log.normalMsg("Building voice nb " + voiceNo + " of " + tempMidiFile.getFile().getName() + ".");
+		Log.normalMsg("Building voice nb " + voiceNo + " of " + tempMidiFile.getFilePath() + ".");
 		
 		if (tempMidiFile.getNotes().get(voiceNo).isEmpty()) {
 			Log.normalMsg("Discarded a track with no notes: a voice won't be created.");

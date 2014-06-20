@@ -1,6 +1,9 @@
 package atompacman.leraza.midi.device;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import atompacman.atomLog.Log;
 import atompacman.leraza.midi.MiDiO;
@@ -12,32 +15,61 @@ import atompacman.leraza.midi.utilities.HexToNote;
 
 public class MIDIFileReader {
 
-	private byte[] rawFile;
+	private MIDIFile midiFile;
+	private byte[] rawData;
 	private int offset;
 	private int currentTrack;
-
-	private MIDIFile midiFile;
-
-	
-	//////////////////////////////
-	//       CONSTRUCTOR        //
-	//////////////////////////////
-	
-	public MIDIFileReader(byte[] rawFile, File file) throws MIDIFileException {
-		this.rawFile = rawFile;
-		this.offset = 0;
-		this.currentTrack = 0;
-		this.midiFile = new MIDIFile(file);
-	}
 
 	
 	//////////////////////////////
 	//        READ FILE         //
 	//////////////////////////////
+
+	public MIDIFile readFile(String filePath) {
+		Log.normalMsg("================================ MIDIFileReader ===================================");
+		Log.normalMsg("= = = = = =  Loading file at: " + String.format("%-40s", filePath.length() > 40 ? filePath.substring(filePath.length() - 40) : filePath) + "= = = = = = = ");
+
+		try {
+			this.midiFile = new MIDIFile(filePath);
+			this.rawData = readBinaryFile(filePath);
 	
-	public MIDIFile readFile() throws MIDIFileException {
+			if (this.rawData.length > Parameters.MAX_FILE_SIZE) {
+				throw new MIDIFileException ("Size of selected file exceeds " + Parameters.MAX_FILE_SIZE / 1000 + " KB.");
+			}
+			Log.normalMsg("File at \"" + filePath + "\" loaded in memory (" + this.rawData.length / 1000 + " KB).");
+			Log.normalMsg("Reading the MIDI file...");
+	
+			this.offset = 0;
+			this.currentTrack = 0;
+			this.midiFile = readRawFile();
+		} catch (MIDIFileException e){
+			e.printStackTrace();
+		}
+		Log.normalMsg("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =");
+		Log.normalMsg("===================================================================================");
+
+		return this.midiFile;
+	}
+
+	private byte[] readBinaryFile(String filePath) throws MIDIFileException {
+		File file = new File(filePath);
+		byte[] rawFile = new byte[(int)file.length()];
+
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			fis.read(rawFile);
+			fis.close();
+		} catch (FileNotFoundException e) {
+			throw new MIDIFileException("ERROR: File not found at \"" + filePath + "\".");
+		} catch (IOException e) {
+			throw new MIDIFileException("ERROR: IOException at \"" + filePath + "\".");
+		}
+		return rawFile;
+	}
+
+	private MIDIFile readRawFile() throws MIDIFileException {
 		readHeader();
-		
+
 		offset = 14;
 		while (!endOfFile()) {
 			readTrack();
@@ -52,7 +84,7 @@ public class MIDIFileReader {
 		if (readInt() != 0x4d546864) {
 			throw new MIDIFileException(printOffset() + "ERROR : The selected file is not of MIDI format.");
 		}
-		
+
 		offset += 8;
 		int midiType = readShort();
 		if (midiType != 1){
@@ -60,12 +92,12 @@ public class MIDIFileReader {
 		}
 		midiFile.setMidiType(midiType);
 		Log.normalMsg(printOffset() + "  * File type: " + midiType + ".");
-		
+
 		offset += 2;
 		int nbTracks = readShort();
 		midiFile.setNbTracks(nbTracks);
 		Log.normalMsg(printOffset() + "  * Number of tracks: " + nbTracks + ".");
-		
+
 		offset += 2;
 		int divisionOfABeat = readShort();
 		midiFile.setDivisionOfABeat(divisionOfABeat);
@@ -75,10 +107,10 @@ public class MIDIFileReader {
 	private void readTrack() throws MIDIFileException {
 		Log.normalMsg(printOffset() + "= = = = = = = = = = = = = Reading track " + currentTrack + " = = = = = = = = = = = = = =");
 		int deltaTime = 0;
-		
+
 		readTrackHeader();
 		deltaTime = readEventDeltaTime();
-		
+
 		while (!endOfTrack() && !isANoteStart()) {
 			handleMetaEvent();
 			deltaTime = readEventDeltaTime();
@@ -100,14 +132,14 @@ public class MIDIFileReader {
 		offset += 8;
 	}
 
-	
+
 	//////////////////////////////
 	//      EVENT HANDLING      //
 	//////////////////////////////
-	
+
 	private void handleMetaEvent() throws MIDIFileException {
 		offset += 1;
-		
+
 		switch(readByte()) {
 		case 0x01: handleTextEvent(); break;
 		case 0x51: handleSetTempoMetaEvent(); break;
@@ -146,17 +178,17 @@ public class MIDIFileReader {
 		midiFile.setBeatPerMeasure(beatPerMeasure);
 		Log.normalMsg(printOffset() + "  * Beats per measure: " + beatPerMeasure + ".");
 		offset += 1;
-		
+
 		int valueOfTheBeatNote = (int) Math.pow(2, readByte());
 		midiFile.setValueOfTheBeatNote(valueOfTheBeatNote);
 		Log.normalMsg(printOffset() + "  * Length of the beat note: " + valueOfTheBeatNote + ".");
 		offset += 1;
-		
+
 		int clockTicksPerBeat = readByte();
 		midiFile.setClockTicksPerBeat(clockTicksPerBeat);
 		Log.normalMsg(printOffset() + "  * Clock ticks per beat: " + clockTicksPerBeat + ".");
 		offset += 1;
-		
+
 		int nb32thNotesPerBeat = readByte();
 		midiFile.setNb32thNotesPerBeat(nb32thNotesPerBeat);
 		if (nb32thNotesPerBeat != 8) {
@@ -168,31 +200,31 @@ public class MIDIFileReader {
 
 	private void handleNoteEvent() throws MIDIFileException {
 		int channel = readByte() % 0x10;
-		
+
 		offset += 1;
 		int note = readByte();
 		offset += 2;
 		MIDINote rest = new MIDINote(0, 0);
-		
+
 		int noteLength = readNoteAndRestDeltaTime(rest);
 		int rawLength = noteLength;
 		noteLength = roundLength(noteLength);
-		
+
 		if (rawLength == 0) {
 			Log.warningMsg(printOffset() + "[RAW LENGTH 0 ] Adding a note of RAW length 0 (" + HexToNote.toString(note) + ").");
 		}
 		if (noteLength == 0) {
 			Log.essentialMsg(printOffset() + "[Note length 0] Adding a note of length 0 (" + HexToNote.toString(note) + ").");
 		}
-		
+
 		midiFile.getNotes().get(currentTrack).add(new MIDINote(note, noteLength));
 		int restLength = roundLength(rest.getLength());
-		
+
 		if (restLength != 0) {
 			rest.setLength(restLength);
 			midiFile.getNotes().get(currentTrack).add(rest);
 		}
-		
+
 		if (Parameters.NOTE_VISUALISATION) {
 			StringBuilder noteSpacing = new StringBuilder();
 			for (int i = 0; i < note - 30; ++i) {
@@ -203,7 +235,7 @@ public class MIDIFileReader {
 				MiDiO.player.playNote(note);
 			}
 			int lengthOfLastNote = getLengthOfLastNote(currentTrack);
-			
+
 			for (int i = 0; i < lengthOfLastNote; ++i) {
 				Log.essentialMsg("");
 				sleep(Parameters.VISUALISATION_DELAY);
@@ -212,7 +244,7 @@ public class MIDIFileReader {
 		Log.unimportantMsg(printOffset() + "Adding note " + HexToNote.toString(note) + " of length " + noteLength + " (raw: " + rawLength + ") at channel " 
 				+ channel + (restLength == 0 ? "." : " | Adding rest of length " + restLength + " (raw: " + rest.getLength() + ")"));
 	}
-	
+
 	private int roundLength(int length) throws MIDIFileException {
 		if (length % 15 == 0){
 			return length;
@@ -235,25 +267,25 @@ public class MIDIFileReader {
 
 	private int getLengthOfLastNote(int track) {
 		int noteLength = 0;
-		
+
 		MIDINote previousNotation = midiFile.getNotes().get(track).get(midiFile.getNotes().get(track).size() - 1);
-		
+
 		for (int i = 0; previousNotation.isRest(); ++i) {
 			noteLength += previousNotation.getLength();
 			previousNotation = midiFile.getNotes().get(track).get(midiFile.getNotes().get(track).size() - 2 - i);
 		}
 		return (noteLength + previousNotation.getLength()) / 15;
 	}
-	
-	
+
+
 	//////////////////////////////
 	//      STATUS CHECKER      //
 	//////////////////////////////
-	
+
 	private boolean isANoteStart() {
 		return readByte() >= 0x90 && readByte() <= (0x90 + midiFile.getNbTracks());
 	}
-	
+
 	private boolean isARestStart() {
 		return readByte() >= 0x80 && readByte() <= 0x8f;
 	}
@@ -261,7 +293,7 @@ public class MIDIFileReader {
 	private boolean isAnEventStart() {
 		return readByte() == 0xff;
 	}
-			
+
 	private boolean endOfTrack() {
 		return read3Bytes() == 0xff2f00 || readInt() == 0x00ff2f00;
 	}
@@ -271,24 +303,24 @@ public class MIDIFileReader {
 	}
 
 
-	
+
 	//////////////////////////////
 	//       READ BINARY        //
 	//////////////////////////////
-	
+
 	private int readByte() {
-		return rawFile[offset] & 0xFF;
+		return rawData[offset] & 0xFF;
 	}
 
 	private int readShort() {
-		return rawFile[offset]<<8 & 0xFF00 | rawFile[offset + 1] & 0xFF;
+		return rawData[offset]<<8 & 0xFF00 | rawData[offset + 1] & 0xFF;
 	}
 
 	private int read3Bytes() {
 		int ret = 0;
 		for (int i = 0; i < 3; ++i) {
 			ret <<= 8;
-			ret |= (int)rawFile[i + offset] & 0xFF;
+			ret |= (int)rawData[i + offset] & 0xFF;
 		}
 		return ret;
 	}
@@ -309,7 +341,7 @@ public class MIDIFileReader {
 		}
 		deltaTime += readByte();
 		offset += 1;
-		
+
 		return deltaTime;
 	}
 
@@ -317,7 +349,7 @@ public class MIDIFileReader {
 		int ret = 0;
 		for (int i = 0; i < 4; ++i) {
 			ret <<= 8;
-			ret |= (int)rawFile[i + offset] & 0xFF;
+			ret |= (int)rawData[i + offset] & 0xFF;
 		}
 		return ret;
 	}
@@ -325,33 +357,33 @@ public class MIDIFileReader {
 	private int readNoteAndRestDeltaTime(MIDINote rest) {
 		int noteDeltaTime = readNoteDeltaTime();
 		int restDeltaTime = 0;
-		
+
 		while (isARestStart()) {
 			offset += 3;
 			restDeltaTime += readNoteDeltaTime();
 		}
 		rest.setLength(restDeltaTime);
-		
+
 		return noteDeltaTime;
 	}
-	
+
 	private int readNoteDeltaTime() {
 		int deltaTime = 0;
 		int length = 0;
-		
+
 		while (readByte() > 0x80) {
 			offset += 1;
 			++length;
 		}
 		offset -= length;
-		
+
 		for (int i = 0; i < length; ++i){
 			deltaTime += (readByte() - 128) * Math.pow(2,7 * (length - i));
 			offset += 1;
 		}
 		deltaTime += readByte();
 		offset += 1;
-		
+
 		return deltaTime;
 	}
 
@@ -373,21 +405,21 @@ public class MIDIFileReader {
 		}
 	}
 
-	
+
 	//////////////////////////////
 	//         GETTERS          //
 	//////////////////////////////
-	
+
 	public byte[] getRawFile() {
-		return rawFile;
+		return rawData;
 	}
-	
+
 
 	//////////////////////////////
 	//         OTHERS           //
 	//////////////////////////////
-	
-	
+
+
 	private String printOffset() {
 		return String.format("[OFFSET %4d] ", offset);
 	}

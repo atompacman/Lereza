@@ -30,7 +30,7 @@ public class PieceFactory {
 	
 	public void load(MIDIFile file) {
 		this.midiFiles.push(file);
-		Log.normalMsg("File \"" + file.getFile().getPath() + "\" loaded in the builder.");
+		Log.normalMsg("File \"" + file.getFilePath() + "\" loaded in the builder.");
 	}
 	
 	public void load(List<MIDIFile> files) {

@@ -1,6 +1,5 @@
 package atompacman.leraza.midi.container;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,18 +15,18 @@ public class MIDIFile {
 	private List<String> infos;
 	private List<Integer> timeBeforeFirstTrackNote;
 	private List<List<MIDINote>> notes;
-	private File file;
+	private String filePath;
 
 	
 	//////////////////////////////
 	//       Constructor        //
 	//////////////////////////////
 	
-	public MIDIFile(File file){
+	public MIDIFile(String filePath){
 		this.infos = new ArrayList<String>();
 		this.timeBeforeFirstTrackNote = new ArrayList<Integer>();
 		this.notes = new ArrayList<List<MIDINote>>();
-		this.file = file;
+		this.filePath = filePath;
 	}
 	
 	
@@ -136,7 +135,7 @@ public class MIDIFile {
 		return infos;
 	}
 
-	public File getFile() {
-		return file;
+	public String getFilePath() {
+		return filePath;
 	}
 }

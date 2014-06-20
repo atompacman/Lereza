@@ -6,7 +6,6 @@ import atompacman.atomLog.Log;
 import atompacman.atomLog.Log.Verbose;
 import atompacman.leraza.midi.MiDiO;
 import atompacman.leraza.midi.container.MIDIFile;
-import atompacman.leraza.midi.exception.MIDIFileException;
 import atompacman.lereza.core.builder.PieceFactory;
 import atompacman.lereza.core.container.Composition;
 import atompacman.lereza.core.container.Set;
@@ -14,22 +13,18 @@ import atompacman.lereza.core.container.form.fugue.Fugue;
 import atompacman.lereza.core.container.piece.Piece;
 import atompacman.lereza.core.menu.Session;
 import atompacman.lereza.core.solfege.Genre;
+
 public class Test {
 
 	private static final String FILE_PATH = "..\\Data\\Fugue1.mid";
 	
 	public static void main(String args[]) {
 		Log.setVerbose(Verbose.ESSENTIAL);
-		MiDiO.initialize();
 		listFiles();
-
-		try {
-			MiDiO.browser.loadFile(FILE_PATH);
-		} catch (MIDIFileException e) {
-			e.printStackTrace();
-		}
 		
-		MIDIFile midiFile = MiDiO.browser.getLastFile();
+		MiDiO.initialize();
+		MIDIFile midiFile = MiDiO.reader.readFile(FILE_PATH);
+
 		Log.setVerbose(Verbose.UNIMPORTANT);
 		
 		PieceFactory pieceFactory = new PieceFactory();
