@@ -15,6 +15,7 @@ import atompacman.leraza.midi.Parameters;
 import atompacman.leraza.midi.container.MIDIFile;
 import atompacman.leraza.midi.container.MIDINote;
 import atompacman.leraza.midi.utilities.Formatting;
+import atompacman.leraza.midi.utilities.HexToNote;
 
 public class MIDIFilePlayer {
 
@@ -121,6 +122,7 @@ public class MIDIFilePlayer {
 			Log.error("MIDI Simple Note Player: Cannot play note; MIDIFilePlayer not initialized.");
 			return;
 		}
+		Log.extra("Playing the note " + HexToNote.toString(note));
 		channels[0].noteOn(note, 600);
 	}
 
@@ -137,6 +139,7 @@ public class MIDIFilePlayer {
 			Log.error("MIDI Simple Note Player: Cannot play note; MIDIFilePlayer not initialized.");
 			return;
 		}
+		Log.extra("Playing the note " + HexToNote.toString(note) + " (length: " + length + ") (channel: " + channel + ")");
 		channels[channel].noteOn(note, 600);
 		try {
 			Thread.sleep(length);
@@ -156,12 +159,19 @@ public class MIDIFilePlayer {
 	//////////////////////////////
 	
 	public void playMIDItrack(List<MIDINote> notes, int channelNo, Instrument instrument) {
+		Log.infos(Formatting.lineSeparation("MIDI Player", 0));
+		Log.infos(Formatting.lineSeparation("Playing a track on channel " + channelNo + ".", 1));
 		try {
-			setInstrument(channelNo, instrument);
+			setInstrument(instrument, channelNo);
 			
-			for (int j = 0; j < notes.size() - 1; ++j) {
+			for (int j = 0; j < notes.size(); ++j) {
 				MIDINote note = notes.get(j);
-				MIDINote nextNote = notes.get(j + 1);
+				MIDINote nextNote;
+				if (j != notes.size() - 1) {
+					nextNote = notes.get(j + 1);
+				} else {
+					nextNote = new MIDINote(1, 1);
+				}
 				if (note.getLength() < 16 && nextNote.isRest()) {
 					MiDiO.player.playFor(note.getNote(), (note.getLength() + nextNote.getLength() / 2) * Parameters.PLAYBACK_SPEED_CORRECTION, channelNo);
 					Thread.sleep(nextNote.getLength() * Parameters.PLAYBACK_SPEED_CORRECTION / 2);
@@ -194,13 +204,9 @@ public class MIDIFilePlayer {
 		playMIDIFile(midiFile, null);
 	}
 	
-	public void playMIDIFile(MIDIFile midiFile, List<Instrument> instruments) {	
-		if (instruments == null) {
-			instruments = new ArrayList<Instrument>();
-			for (int i = 0; i < midiFile.getNotes().size(); ++i) {
-				instruments.add(Instrument.Acoustic_Grand_Piano);
-			}
-		}
+	public void playMIDIFile(MIDIFile midiFile, List<Instrument> instruments) {
+		Log.infos(Formatting.lineSeparation("MIDI Player", 0));
+		Log.infos(Formatting.lineSeparation("Now playing: " + midiFile.getFilePath(), 1));
 		try {
 			List<Thread> threads = new ArrayList<Thread>();
 			List<List<MIDINote>> notes = midiFile.getNotes();
@@ -210,11 +216,11 @@ public class MIDIFilePlayer {
 					notes.get(i).add(0, new MIDINote(0, midiFile.getTimeBeforeFirstNote(i)));
 				}
 			}
-			
 			for (int i = 0; i < notes.size(); ++i) {
 				List<MIDINote> midiTrack = notes.get(i);
 				if (!midiTrack.isEmpty()) {
-					Thread thread = new Thread(new TrackPlayer(midiTrack, i, instruments.get(i)));
+					Thread thread = new Thread(new TrackPlayer(midiTrack, i, (instruments == null) ? Instrument.Acoustic_Grand_Piano : instruments.get(i)));
+					thread.setName("MiDiO Player: Track " + i);
 					thread.start();
 					threads.add(thread);
 				}
@@ -232,11 +238,12 @@ public class MIDIFilePlayer {
 	//    CHANGE INSTRUMENT     //
 	//////////////////////////////
 
-	public void setInstrument(int channel, Instrument instr) {
+	public void setInstrument(Instrument instr, int channel) {
+		Log.infos("Setting channel no." + channel + " to the instrument \"" + instr.name() + "\".");
 		channels[channel].programChange(instr.ordinal());
 	}
 	
 	public void setInstrument(Instrument instr) {
-		channels[0].programChange(instr.ordinal());
+		setInstrument(instr, 0);
 	}
 }

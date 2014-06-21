@@ -52,8 +52,9 @@ public class MIDIFileReader {
 		} catch (MIDIFileException e){
 			e.printStackTrace();
 		}
-		printErrorSummary();
 		
+		Log.infos(Formatting.lineSeparation(0));
+		printErrorSummary();
 		Log.infos(Formatting.lineSeparation(1));
 		Log.infos(Formatting.lineSeparation(0));
 
@@ -217,8 +218,9 @@ public class MIDIFileReader {
 		MIDINote rest = new MIDINote(0, 0);
 
 		int rawNoteLength = readNoteAndRestDeltaTime(rest);
+		int rawRestLength = rest.getLength();
 		int noteLength = roundLength(rawNoteLength, "note");
-		int restLength = roundLength(rest.getLength(), "rest");
+		int restLength = roundLength(rawRestLength, "rest");
 		
 		if (rawNoteLength == 0) {
 			errors.get(currentTrack).incrementRawNoteLengthZeroCount();
@@ -226,7 +228,7 @@ public class MIDIFileReader {
 		}
 		if (noteLength == 0) {
 			errors.get(currentTrack).incrementNoteLengthZeroCount();
-			Log.vital(printOffset() + "[Note length 0] Adding a note of length 0 (" + HexToNote.toString(note) + ").");
+			Log.vital(printOffset() + "[Round to zero] A note is of rounded length 0 (" + HexToNote.toString(note) + ").");
 		}
 
 		midiFile.getNotes().get(currentTrack).add(new MIDINote(note, noteLength));
@@ -249,11 +251,11 @@ public class MIDIFileReader {
 
 			for (int i = 0; i < lengthOfLastNote; ++i) {
 				Log.vital("");
-				sleep(Parameters.VISUALISATION_DELAY);
+				sleep(Parameters.VISUALISATION_SPEED);
 			}
 		}
-		Log.extra(printOffset() + "Adding note " + HexToNote.toString(note) + " of length " + noteLength + " (raw: " + rawNoteLength + ") at channel " 
-				+ channel + (restLength == 0 ? "." : " | Adding rest of length " + restLength + " (raw: " + rest.getLength() + ")"));
+		Log.extra(printOffset() + "[ Adding note ] " + String.format("%-3s of length %3d (raw: %3d) at channel %d", HexToNote.toString(note), noteLength, rawNoteLength, channel) 
+				+ (restLength == 0 ? "." : " | Adding rest of length " + restLength + " (raw: " + rawRestLength + ")"));
 	}
 
 	private int roundLength(int length, String notation) throws MIDIFileException {
@@ -264,15 +266,23 @@ public class MIDIFileReader {
 			return 0;
 		}
 		for (int correction = 2; correction < 15; ++correction){
-			for (int i = 15; i < 3000; i += 15) {
+			for (int i = 15; i < Parameters.MAX_NOTE_MIDI_LENGTH; i += 15) {
 				if (length <= (i + correction) && length >= (i - correction)) {
-					if (correction > Parameters.NOTE_LENGTH_CORRECTION_THRESHOLD) {
+					correction = (length < i) ? correction : -correction;
+					
+					if (Math.abs(correction) > Parameters.NOTE_LENGTH_CORRECTION_THRESHOLD) {
 						errors.get(currentTrack).incrementRoundingOverThresholdCount();
-						correction = (length < i) ? correction : -correction;
-						errors.get(currentTrack).adjustNoteRoundingTotalOffset(correction);					
-						Log.warng(printOffset() + "[Note rounding] A " + notation + " of length " + length 
-								+ " had to be rounded of a value of " + correction + ".");
+						
+						if (notation.equalsIgnoreCase("rest") && length < Parameters.MIN_RAW_REST_LENGTH) {
+							i = 0;
+							correction = length;
+						} else {
+							Log.warng(printOffset() + "[Note rounding] A " + notation + " of length " + length 
+									+ " had to be EXCESSIVELY rounded of a value of " + correction + ".");
+						}
 					}
+					errors.get(currentTrack).adjustNoteRoundingTotalOffset(correction);	
+					
 					return i;
 				}
 			}

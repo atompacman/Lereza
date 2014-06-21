@@ -75,9 +75,9 @@ public class MIDIFileErrorSummary {
 	
 	public void print() {
 		Log.infos("· Musical texture prediction : " + (isAHomophonicPiece() ? "HOMOPHONIC" : "POLYPHONIC"));
-		Log.infos("· Excessice note rounding    : " + roundingOverThresholdCount);
-		Log.infos("· Notes of length zero       : " + noteLengthZeroCount);
-		if (noteRoundingTotalOffset == 0) {
+		Log.infos("· Excessive note rounding    : " + roundingOverThresholdCount);
+		Log.infos("· Notes rounded length zero  : " + noteLengthZeroCount);
+		if (rawNoteLengthZeroCount == 0) {
 			Log.infos("· NOTES OF RAW LENGTH ZERO   : 0");
 		} else {
 			Log.infos("· NOTES OF RAW LENGTH ZERO   : " + rawNoteLengthZeroCount + " (WARNING: CHORDS ARE NOT NORMAL IN POLYPHONY)");

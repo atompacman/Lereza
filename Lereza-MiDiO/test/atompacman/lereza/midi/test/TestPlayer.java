@@ -16,6 +16,7 @@ public class TestPlayer {
 		MiDiO.initialize();
 		MIDIFile midiFile = null;
 		
+		Log.setVerbose(Verbose.EXTRA);
 		if (args.length != 0) {
 			midiFile = MiDiO.reader.readFile(args[0]);
 		} else {
@@ -23,7 +24,8 @@ public class TestPlayer {
 			return;
 		}
 
-		MiDiO.player.setInstrument(Instrument.Slap_Bass_1);
+		Log.setVerbose(Verbose.EXTRA);
+		MiDiO.player.setInstrument(Instrument.Harmonica);
 		MiDiO.player.startNote(63);
 		Thread.sleep(500);
 		MiDiO.player.stopNote(63);
@@ -33,7 +35,7 @@ public class TestPlayer {
 		MiDiO.player.playFor(75, 200);
 		MiDiO.player.playFor(77, 200); 
 		
-		List<Instrument> instruments = Arrays.asList(Instrument.Alto_Sax, Instrument.Cello, Instrument.Trombone, Instrument.Synth_Brass_1, Instrument.Sitar);
+		List<Instrument> instruments = Arrays.asList(Instrument.Steel_Drums, Instrument.Steel_Drums, Instrument.Brass_Section, Instrument.Synth_Strings_1, Instrument.Overdriven_Guitar);
 		MiDiO.player.playMIDIFile(midiFile, instruments);
 	}
 }
