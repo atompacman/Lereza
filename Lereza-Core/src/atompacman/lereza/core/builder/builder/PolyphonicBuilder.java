@@ -4,6 +4,7 @@ import atompacman.atomLog.Log;
 import atompacman.leraza.midi.MiDiO;
 import atompacman.leraza.midi.container.MIDIFile;
 import atompacman.leraza.midi.container.MIDINote;
+import atompacman.leraza.midi.utilities.Formatting;
 import atompacman.lereza.core.Parameters;
 import atompacman.lereza.core.container.part.Voice;
 import atompacman.lereza.core.container.piece.Piece;
@@ -33,7 +34,7 @@ public class PolyphonicBuilder implements Builder {
 	//////////////////////////////
 
 	public Piece build(Class<? extends Piece> musicalForm) {
-		Log.normalMsg("=============================== PolyphonicBuilder =================================");
+		Log.infos(Formatting.lineSeparation("PolyphonicBuilder", 0));
 		
 		try {
 			tempPiece = musicalForm.asSubclass(PolyphonicPiece.class).newInstance();
@@ -41,7 +42,7 @@ public class PolyphonicBuilder implements Builder {
 			e.printStackTrace();
 		}
 
-		Log.normalMsg("Building a " + musicalForm.getSimpleName() + ".");
+		Log.infos("Building a " + musicalForm.getSimpleName() + ".");
 		
 		setRythmicSignature();
 
@@ -68,16 +69,16 @@ public class PolyphonicBuilder implements Builder {
 		Grouping noteGrouping = Grouping.DUPLETS;
 
 		if(meter.getDenominator() != 4) {
-			Log.errorMsg("The time signature of the piece can not be used to determine the grouping of the notes.");
+			Log.error("The time signature of the piece can not be used to determine the grouping of the notes.");
 		}
 		tempPiece.setRythmicSignature(new RythmicSignature(meter, noteGrouping, midiBeatNoteValue, valueOfShortestNote));
 	}
 
 	private void buildVoice(int voiceNo) throws BuilderException {
-		Log.normalMsg("Building voice nb " + voiceNo + " of " + tempMidiFile.getFilePath() + ".");
+		Log.infos("Building voice nb " + voiceNo + " of " + tempMidiFile.getFilePath() + ".");
 		
 		if (tempMidiFile.getNotes().get(voiceNo).isEmpty()) {
-			Log.normalMsg("Discarded a track with no notes: a voice won't be created.");
+			Log.infos("Discarded a track with no notes: a voice won't be created.");
 			return;
 		}
 		Voice voice = new Voice(tempPiece.getRythmicSignature());
@@ -117,7 +118,7 @@ public class PolyphonicBuilder implements Builder {
 				midiNote.setLength(-(midiNote.getLength() + nextNote.getLength()));
 				tempMidiFile.getNotes().get(voiceNo).remove(noteIndex + 1);
 			} else {
-				Log.warningMsg("A note of length 0 that is not followed by a rest was DISCARDED (" + midiNote.toString() + ") at voice " + voiceNo + ".");
+				Log.warng("A note of length 0 that is not followed by a rest was DISCARDED (" + midiNote.toString() + ") at voice " + voiceNo + ".");
 				return false;
 			}
 		} else if (nextNote.isRest() && hasAVeryShortMIDIValue(nextNote)) {
@@ -138,7 +139,7 @@ public class PolyphonicBuilder implements Builder {
 
 	private void noteAddingVisualisation(int midiLength, Voice voice) {
 		try {
-			Log.unimportantMsg(voice.beforeLastMeasure().fusionToPartition(voice.lastMeasure().toString()));
+			Log.extra(voice.beforeLastMeasure().fusionToPartition(voice.lastMeasure().toString()));
 			Thread.sleep((int)(midiLength /  16d * (double)tempMidiFile.getTempo() / 1000d * Parameters.NOTE_VISUALISATION_CORRECTION));
 		} catch (InterruptedException e) {
 			e.printStackTrace();

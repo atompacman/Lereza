@@ -22,7 +22,7 @@ public class Session {
 		this.sessionName = sessionName;
 		this.compositionSets = new ArrayList<Set>();
 		this.timestamp = new Date();
-		Log.normalMsg("Lereza Session \"" + sessionName + "\" started at " + getTimestamp() + ".");
+		Log.infos("Lereza Session \"" + sessionName + "\" started at " + getTimestamp() + ".");
 	}
 	
 	
@@ -32,7 +32,7 @@ public class Session {
 	
 	public void addCompositionSet(Set set) {
 		this.compositionSets.add(set);
-		Log.normalMsg("Composition set \"" + set.getName() + "\" (" + set.getNbComposition() 
+		Log.infos("Composition set \"" + set.getName() + "\" (" + set.getNbComposition() 
 				+ " composition, " + set.getNbPieces() + " pieces) added to session \"" + sessionName + "\".");
 	}
 

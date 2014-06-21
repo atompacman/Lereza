@@ -34,7 +34,7 @@ public class Set {
 	
 	public void add(Composition composition) {
 		this.compositions.add(composition);
-		Log.normalMsg("Composition \"" + composition.getCompositionName() + "\" add to set " + setName + ".");
+		Log.infos("Composition \"" + composition.getCompositionName() + "\" add to set " + setName + ".");
 	}
 	
 	

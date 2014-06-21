@@ -5,42 +5,42 @@ import java.util.Date;
 
 public class Log {
 
-	public enum Verbose{ OFF, ESSENTIAL, NORMAL, UNIMPORTANT }
+	public enum Verbose{ OFF, VITAL, INFOS, EXTRA }
 
-	private static final int CLASSNAME_LENGTH = 30;
+	private static final int CLASSNAME_LENGTH = 32;
 	private static final char CLASSNAME_FILLER = '=';
 	
-	private static Verbose verbose = Verbose.NORMAL;
+	private static Verbose verbose = Verbose.INFOS;
 	
 	
 	//////////////////////////////
 	//      PRINT MESSAGES      //
 	//////////////////////////////
 	
-	public static void essentialMsg(String message) {
-		if (verbose.ordinal() >= Verbose.ESSENTIAL.ordinal()){
+	public static void vital(String message) {
+		if (verbose.ordinal() >= Verbose.VITAL.ordinal()){
 			System.out.println(timestamp() + " " + className() + " {VITAL} : " + message);
 		}
 	}
 	
-	public static void normalMsg(String message) {
-		if (verbose.ordinal() >= Verbose.NORMAL.ordinal()){
+	public static void infos(String message) {
+		if (verbose.ordinal() >= Verbose.INFOS.ordinal()){
 			System.out.println(timestamp() + " " + className() + " {INFOS} : " + message);
 		}
 	}
 	
-	public static void unimportantMsg(String message) {
-		if (verbose.ordinal() >= Verbose.UNIMPORTANT.ordinal()){
+	public static void extra(String message) {
+		if (verbose.ordinal() >= Verbose.EXTRA.ordinal()){
 			System.out.println(timestamp() + " " + className() + " {EXTRA} : " + message);
 		}
 	}
 	
-	public static void errorMsg(String message) {
+	public static void error(String message) {
 		System.out.println(timestamp() + " " + className() + " {ERROR} : " + message);
 	}
 	
-	public static void warningMsg(String message){
-		if (verbose.ordinal() >= Verbose.ESSENTIAL.ordinal()) {
+	public static void warng(String message){
+		if (verbose.ordinal() >= Verbose.VITAL.ordinal()) {
 			System.out.println(timestamp() + " " + className() + " {WARNG} : " + message);
 		}
 	}

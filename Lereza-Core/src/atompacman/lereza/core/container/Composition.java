@@ -40,7 +40,7 @@ public class Composition {
 	public Composition(String compositionName) {
 		this.name = compositionName;
 		this.musicFiles = new ArrayList<MusicFile>();
-		Log.normalMsg("Composition \"" + name + "\" created.");
+		Log.infos("Composition \"" + name + "\" created.");
 	}
 
 	
@@ -50,7 +50,7 @@ public class Composition {
 	
 	public void addFile(MIDIFile midiFile, Piece piece) {
 		musicFiles.add(new MusicFile(midiFile, piece));
-		Log.normalMsg("Piece \"" + midiFile.getFilePath() + "\" (" + midiFile.getFilePath() + ") to composition \"" + name + "\".");
+		Log.infos("Piece \"" + midiFile.getFilePath() + "\" (" + midiFile.getFilePath() + ") to composition \"" + name + "\".");
 	}
 	
 	
@@ -68,7 +68,7 @@ public class Composition {
 	
 	public Piece getPiece(int index) {
 		if (index >= musicFiles.size()) {
-			Log.errorMsg("Cannot get piece at index \"" + index + "\" of composition \"" + name + "\".");
+			Log.error("Cannot get piece at index \"" + index + "\" of composition \"" + name + "\".");
 			return null;
 		}
 		return musicFiles.get(index).getPiece();
@@ -80,7 +80,7 @@ public class Composition {
 	
 	public MIDIFile getFiles(int index) {
 		if (index >= musicFiles.size()) {
-			Log.errorMsg("Cannot get piece at index \"" + index + "\" of composition \"" + name + "\".");
+			Log.error("Cannot get piece at index \"" + index + "\" of composition \"" + name + "\".");
 			return null;
 		}
 		return musicFiles.get(index).getFile();

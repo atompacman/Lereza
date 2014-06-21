@@ -30,7 +30,7 @@ public class PieceFactory {
 	
 	public void load(MIDIFile file) {
 		this.midiFiles.push(file);
-		Log.normalMsg("File \"" + file.getFilePath() + "\" loaded in the builder.");
+		Log.infos("File \"" + file.getFilePath() + "\" loaded in the builder.");
 	}
 	
 	public void load(List<MIDIFile> files) {
@@ -46,14 +46,14 @@ public class PieceFactory {
 	
 	public Piece build(Class<? extends Piece> musicalForm) {
 		if (midiFiles.isEmpty()) {
-			Log.errorMsg("Trying to build a piece without any midi file loaded in the factory.");
+			Log.error("Trying to build a piece without any midi file loaded in the factory.");
 			return null;
 		}
 		if (PolyphonicPiece.class.isAssignableFrom(musicalForm)) {
 			PolyphonicBuilder polyphonicBuilder = new PolyphonicBuilder(midiFiles.pop());
 			return polyphonicBuilder.build(musicalForm.asSubclass(PolyphonicPiece.class));
 		}
-		Log.errorMsg("Trying to build a piece in a texture that isn's supported by the builders.");
+		Log.error("Trying to build a piece in a texture that isn's supported by the builders.");
 		return null;
 	}
 	
