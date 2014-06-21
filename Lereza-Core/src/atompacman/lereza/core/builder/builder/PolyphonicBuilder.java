@@ -100,7 +100,7 @@ public class PolyphonicBuilder implements Builder {
 				}
 			}
 			if (Parameters.NOTE_ADDING_VISUALISATION) {
-				MiDiO.player.playNote(midiNote.getNote());
+				MiDiO.player.startNote(midiNote.getNote());
 				noteAddingVisualisation(midiNote.getLength() / tempPiece.getRythmicSignature().getValueOfShortestNote(), voice);		
 			}
 		}

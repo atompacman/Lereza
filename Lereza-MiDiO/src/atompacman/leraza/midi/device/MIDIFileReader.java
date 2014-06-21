@@ -243,7 +243,7 @@ public class MIDIFileReader {
 			}
 			Log.vital(noteSpacing.toString() + HexToNote.toString(note) + " (" + noteLength + " , " + rawNoteLength + ")");
 			if (Parameters.NOTE_PLAY_AUDIO) {
-				MiDiO.player.playNote(note);
+				MiDiO.player.startNote(note);
 			}
 			int lengthOfLastNote = getLengthOfLastNote(currentTrack);
 

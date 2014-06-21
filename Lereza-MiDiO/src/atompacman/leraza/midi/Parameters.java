@@ -11,4 +11,7 @@ public class Parameters {
 	
 	// MIDIFileReaderErrorSummary
 	public static final int		MAX_NB_CHORDS_WITHOUT_HOMOPHONIC = 2;
+	
+	// MIDIFilePlayer
+	public static final int		PLAYBACK_SPEED_CORRECTION = 4;
 }
