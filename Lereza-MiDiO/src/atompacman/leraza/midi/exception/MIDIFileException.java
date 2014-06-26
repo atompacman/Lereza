@@ -20,4 +20,9 @@ public class MIDIFileException extends Exception {
 	public MIDIFileException(Throwable cause) { 
 		super(cause); 
 	}
+	
+	public void printStackTrace() {
+		super.printStackTrace();
+		System.exit(1);
+	}
 }

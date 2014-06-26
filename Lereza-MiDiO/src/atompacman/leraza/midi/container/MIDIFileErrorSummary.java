@@ -7,8 +7,8 @@ public class MIDIFileErrorSummary {
 	
 	private int roundingOverThresholdCount;
 	private int noteLengthZeroCount;
-	private int rawNoteLengthZeroCount;
 	private int noteRoundingTotalOffset;
+	private int totalTimestamp;
 	
 	
 	//////////////////////////////
@@ -18,7 +18,6 @@ public class MIDIFileErrorSummary {
 	public MIDIFileErrorSummary() {
 		this.roundingOverThresholdCount = 0;
 		this.noteLengthZeroCount = 0;
-		this.rawNoteLengthZeroCount = 0;
 		this.noteRoundingTotalOffset = 0;
 	}
 
@@ -35,12 +34,12 @@ public class MIDIFileErrorSummary {
 		++this.noteLengthZeroCount;
 	}
 
-	public void incrementRawNoteLengthZeroCount() {
-		++this.rawNoteLengthZeroCount;
-	}
-
 	public void adjustNoteRoundingTotalOffset(int offset) {
 		this.noteRoundingTotalOffset += offset;
+	}
+	
+	public void setTotalTimestamp(int totalTimestamp) {
+		this.totalTimestamp = totalTimestamp;
 	}
 
 	
@@ -56,36 +55,22 @@ public class MIDIFileErrorSummary {
 		return noteLengthZeroCount;
 	}
 
-	public int getRawNoteLengthZeroCount() {
-		return rawNoteLengthZeroCount;
-	}
-
 	public int getNoteRoundingTotalOffset() {
 		return noteRoundingTotalOffset;
 	}
 	
-	public boolean isAHomophonicPiece() {
-		return (rawNoteLengthZeroCount > Parameters.MAX_NB_CHORDS_WITHOUT_HOMOPHONIC);
-	}
-
 	
 	//////////////////////////////
 	//          PRINT           //
 	//////////////////////////////
 	
 	public void print() {
-		Log.infos("· Musical texture prediction : " + (isAHomophonicPiece() ? "HOMOPHONIC" : "POLYPHONIC"));
 		Log.infos("· Excessive note rounding    : " + roundingOverThresholdCount);
 		Log.infos("· Notes rounded length zero  : " + noteLengthZeroCount);
-		if (rawNoteLengthZeroCount == 0) {
-			Log.infos("· NOTES OF RAW LENGTH ZERO   : 0");
+		if (noteRoundingTotalOffset <= Parameters.TOTAL_ROUND_OFFSET_LIMIT) {
+			Log.infos("· Total rounding offset      : " + noteRoundingTotalOffset + "/" + totalTimestamp);
 		} else {
-			Log.infos("· NOTES OF RAW LENGTH ZERO   : " + rawNoteLengthZeroCount + " (WARNING: CHORDS ARE NOT NORMAL IN POLYPHONY)");
-		}
-		if (noteRoundingTotalOffset == 0) {
-			Log.infos("· TOTAL ROUNDING OFFSET      : 0");
-		} else {
-			Log.warng("· TOTAL ROUNDING OFFSET      : " + noteRoundingTotalOffset + " (WARNING: THIS CAN CAUSE RYTHMN ERRORS IN THE FUTURE)");
+			Log.warng("· TOTAL ROUNDING OFFSET      : " + noteRoundingTotalOffset + "/" + totalTimestamp + " (WARNING: THIS CAN CAUSE RYTHMN ERRORS IN THE FUTURE)");
 		}
 	}
 }

@@ -2,6 +2,8 @@ package atompacman.leraza.midi.device;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiDevice;
@@ -10,50 +12,54 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Synthesizer;
 
 import atompacman.atomLog.Log;
-import atompacman.leraza.midi.MiDiO;
 import atompacman.leraza.midi.Parameters;
 import atompacman.leraza.midi.container.MIDIFile;
 import atompacman.leraza.midi.container.MIDINote;
 import atompacman.leraza.midi.utilities.Formatting;
 import atompacman.leraza.midi.utilities.HexToNote;
+import atompacman.leraza.midi.utilities.Instrument;
 
 public class MIDIFilePlayer {
 
 	private MidiChannel[] channels;
 	private Synthesizer synthesizer;
 	private boolean initialized = false;
-
-	public enum Instrument {
-		Acoustic_Grand_Piano, Bright_Acoustic_Piano, Electric_Grand_Piano, Honky_tonk_Piano, Electric_Piano_1, Electric_Piano_2,
-		Harpsichord, Clavinet, Celesta, Glockenspiel, Music_Box, Vibraphone, Marimba, Xylophone, Tubular_Bells, Dulcimer, Drawbar_Organ,
-		Percussive_Organ, Rock_Organ, Church_Organ, Reed_Organ, Accordion, Harmonica, Tango_Accordion, Acoustic_Guitar_nylon, 
-		Acoustic_Guitar_steel, Electric_Guitar_jazz, Electric_Guitar_clean, Electric_Guitar_muted, Overdriven_Guitar, Distortion_Guitar, 
-		Guitar_harmonics, Acoustic_Bass, Electric_Bass_finger, Electric_Bass_pick, Fretless_Bass, Slap_Bass_1, Slap_Bass_2, Synth_Bass_1,
-		Synth_Bass_2, Violin, Viola, Cello, Contrabass, Tremolo_Strings, Pizzicato_Strings, Orchestral_Harp, Timpani, String_Ensemble_1,
-		String_Ensemble_2, Synth_Strings_1, Synth_Strings_2, Choir_Aahs, Voice_Oohs, Synth_Voice, Orchestra_Hit, Trumpet, Trombone, Tuba,
-		Muted_Trumpet, French_Horn, Brass_Section, Synth_Brass_1, Synth_Brass_2, Soprano_Sax, Alto_Sax, Tenor_Sax, Baritone_Sax, Oboe,
-		English_Horn, Bassoon, Clarinet, Piccolo, Flute, Recorder, Pan_Flute, Blown_Bottle, Shakuhachi, Whistle, Ocarina, Lead_1_square,
-		Lead_2_sawtooth, Lead_3_calliope, Lead_4_chiff, Lead_5_charang, Lead_6_voice, Lead_7_fifths, Lead_8_bass_lead, Pad_1_new_age, 
-		Pad_2_warm, Pad_3_polysynth, Pad_4_choir, Pad_5_bowed, Pad_6_metallic, Pad_7_halo, Pad_8_sweep, FX_1_rain, FX_2_soundtrack,
-		FX_3_crystal, FX_4_atmosphere, FX_5_brightness, FX_6_goblins, FX_7_echoes, FX_8_sci_fi, Sitar, Banjo, Shamisen, Koto,Kalimba,
-		Bag_pipe, Fiddle, Shanai, Tinkle_Bell, Agogo, Steel_Drums, Woodblock, Taiko_Drum, Melodic_Tom, Synth_Drum, Reverse_Cymbal,
-	 	Guitar_Fret_Noise, Breath_Noise, Seashore, Bird_Tweet, Telephone_Ring, Helicopter, Applause, Gunshot;
-	}
+	
 
 	private class TrackPlayer implements Runnable {
 	
-		private List<MIDINote> midiTrack;
+		private Map<Integer, Stack<MIDINote>> midiTrack;
 		private int channelNo;
+		private int finalTimestamp;
+		private double tempo;
 		private Instrument instrument;
 		
-		public TrackPlayer(List<MIDINote> midiTrack, int channelNo, Instrument instrument) {
+		public TrackPlayer(Map<Integer, Stack<MIDINote>> midiTrack, int channelNo, int finalTimestamp, double tempo, Instrument instrument) {
 			this.midiTrack = midiTrack;
 			this.channelNo = channelNo;
+			this.finalTimestamp = finalTimestamp;
+			this.tempo = tempo;
 			this.instrument = instrument;
 		}
 
 		public void run() {
-			playMIDItrack(midiTrack, channelNo, instrument);
+			playMIDItrack(midiTrack, finalTimestamp, channelNo, tempo, instrument);
+		}
+	}
+	
+	private class NotePlayer implements Runnable {
+		private MIDINote note;
+		private int channelNo;
+		private double tempo;
+		
+		public NotePlayer(MIDINote note, int channelNo, double tempo) {
+			this.note = note;
+			this.channelNo = channelNo;
+			this.tempo = tempo;
+		}
+
+		public void run() {
+			playFor(note.getNote(), note.getLength(), channelNo, tempo);
 		}
 	}
 	
@@ -118,12 +124,16 @@ public class MIDIFilePlayer {
 	//////////////////////////////
 
 	public void startNote(int note) {
+		startNote(note, 0);
+	}
+	
+	public void startNote(int note, int channel) {
 		if (!initialized) {
 			Log.error("MIDI Simple Note Player: Cannot play note; MIDIFilePlayer not initialized.");
 			return;
 		}
-		Log.extra("Playing the note " + HexToNote.toString(note));
-		channels[0].noteOn(note, 600);
+		Log.extra("Starting note " + HexToNote.toString(note));
+		channels[channel].noteOn(note, 600);
 	}
 
 	public void stopNote(int note) {
@@ -131,10 +141,11 @@ public class MIDIFilePlayer {
 			Log.error("MIDI Simple Note Player: Cannot stop note; MIDIFilePlayer not initialized.");
 			return;
 		}
+		Log.extra("Stopping note " + HexToNote.toString(note));
 		channels[0].noteOff(note);
 	}
 
-	public void playFor(int note, int length, int channel) {
+	public void playFor(int note, int length, int channel, double tempo) {
 		if (!initialized) {
 			Log.error("MIDI Simple Note Player: Cannot play note; MIDIFilePlayer not initialized.");
 			return;
@@ -142,15 +153,15 @@ public class MIDIFilePlayer {
 		Log.extra("Playing the note " + HexToNote.toString(note) + " (length: " + length + ") (channel: " + channel + ")");
 		channels[channel].noteOn(note, 600);
 		try {
-			Thread.sleep(length);
+			Thread.sleep((int)((length - Parameters.CONSECUTIVE_NOTE_CORRECTION) * Parameters.PLAYBACK_SPEED_CORRECTION * tempo));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		channels[channel].noteOff(note);
 	}
 	
-	public void playFor(int note, int length) {
-		playFor(note, length, 0);
+	public void playFor(int note, int length, double tempo) {
+		playFor(note, length, 0, tempo);
 	}
 
 	
@@ -158,41 +169,32 @@ public class MIDIFilePlayer {
 	//     PLAY MIDI TRACK      //
 	//////////////////////////////
 	
-	public void playMIDItrack(List<MIDINote> notes, int channelNo, Instrument instrument) {
+	public void playMIDItrack(Map<Integer,Stack<MIDINote>> notes, int finalTimestamp, int channelNo, double tempo, Instrument instrument) {
 		Log.infos(Formatting.lineSeparation("MIDI Player", 0));
 		Log.infos(Formatting.lineSeparation("Playing a track on channel " + channelNo + ".", 1));
+		setInstrument(instrument, channelNo);
 		try {
-			setInstrument(instrument, channelNo);
-			
-			for (int j = 0; j < notes.size(); ++j) {
-				MIDINote note = notes.get(j);
-				MIDINote nextNote;
-				if (j != notes.size() - 1) {
-					nextNote = notes.get(j + 1);
-				} else {
-					nextNote = new MIDINote(1, 1);
+			for (int j = 0; j <= finalTimestamp; ++j) {
+				Stack<MIDINote> noteStack = notes.get(j);
+				if (noteStack != null) {
+					for (MIDINote note : noteStack) {
+						Thread notePlayer = new Thread(new NotePlayer(note, channelNo, tempo));
+						notePlayer.start();
+					}
 				}
-				if (note.getLength() < 16 && nextNote.isRest()) {
-					MiDiO.player.playFor(note.getNote(), (note.getLength() + nextNote.getLength() / 2) * Parameters.PLAYBACK_SPEED_CORRECTION, channelNo);
-					Thread.sleep(nextNote.getLength() * Parameters.PLAYBACK_SPEED_CORRECTION / 2);
-					++j;
-				} else if (note.isRest()) {
-					Thread.sleep(note.getLength() * Parameters.PLAYBACK_SPEED_CORRECTION);
-				} else {
-					MiDiO.player.playFor(note.getNote(), note.getLength() * Parameters.PLAYBACK_SPEED_CORRECTION, channelNo);
-				}
+				Thread.sleep((int)(Parameters.PLAYBACK_SPEED_CORRECTION * tempo));
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void playMIDItrack(List<MIDINote> notes, Instrument instrument) {
-		playMIDItrack(notes, 0, instrument);
+	public void playMIDItrack(Map<Integer,Stack<MIDINote>> notes, int finalTimestamp, double tempo, Instrument instrument) {
+		playMIDItrack(notes, finalTimestamp, 0, tempo, instrument);
 	}
 	
-	public void playMIDItrack(List<MIDINote> notes) {
-		playMIDItrack(notes, 0, Instrument.Acoustic_Grand_Piano);
+	public void playMIDItrack(Map<Integer,Stack<MIDINote>> notes, int finalTimestamp, double tempo) {
+		playMIDItrack(notes, finalTimestamp, 0, tempo, Instrument.Acoustic_Grand_Piano);
 	}
 	
 	
@@ -201,7 +203,7 @@ public class MIDIFilePlayer {
 	//////////////////////////////
 	
 	public void playMIDIFile(MIDIFile midiFile) {
-		playMIDIFile(midiFile, null);
+		playMIDIFile(midiFile, midiFile.getInstruments());
 	}
 	
 	public void playMIDIFile(MIDIFile midiFile, List<Instrument> instruments) {
@@ -209,17 +211,13 @@ public class MIDIFilePlayer {
 		Log.infos(Formatting.lineSeparation("Now playing: " + midiFile.getFilePath(), 1));
 		try {
 			List<Thread> threads = new ArrayList<Thread>();
-			List<List<MIDINote>> notes = midiFile.getNotes();
+			List<Map<Integer, Stack<MIDINote>>> notes = midiFile.getNotes();
 			
 			for (int i = 0; i < notes.size(); ++i) {
-				if (!notes.get(i).isEmpty()) {
-					notes.get(i).add(0, new MIDINote(0, midiFile.getTimeBeforeFirstNote(i)));
-				}
-			}
-			for (int i = 0; i < notes.size(); ++i) {
-				List<MIDINote> midiTrack = notes.get(i);
+				Map<Integer, Stack<MIDINote>> midiTrack = notes.get(i);
 				if (!midiTrack.isEmpty()) {
-					Thread thread = new Thread(new TrackPlayer(midiTrack, i, (instruments == null) ? Instrument.Acoustic_Grand_Piano : instruments.get(i)));
+					Instrument instr = (instruments == null) ? Instrument.Acoustic_Grand_Piano : instruments.isEmpty() ? Instrument.Acoustic_Grand_Piano : instruments.get(i);
+					Thread thread = new Thread(new TrackPlayer(midiTrack, i, midiFile.getFinalTimestamp(), 1.0/** / midiFile.getTempo()**/, instr));
 					thread.setName("MiDiO Player: Track " + i);
 					thread.start();
 					threads.add(thread);

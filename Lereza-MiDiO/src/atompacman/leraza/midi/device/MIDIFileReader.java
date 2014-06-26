@@ -6,9 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import atompacman.atomLog.Log;
-import atompacman.leraza.midi.MiDiO;
 import atompacman.leraza.midi.Parameters;
 import atompacman.leraza.midi.container.MIDIFile;
 import atompacman.leraza.midi.container.MIDIFileErrorSummary;
@@ -16,43 +16,54 @@ import atompacman.leraza.midi.container.MIDINote;
 import atompacman.leraza.midi.exception.MIDIFileException;
 import atompacman.leraza.midi.utilities.Formatting;
 import atompacman.leraza.midi.utilities.HexToNote;
+import atompacman.leraza.midi.utilities.Instrument;
 
 public class MIDIFileReader {
 
 	private MIDIFile midiFile;
+
 	private byte[] rawData;
 	private int offset;
 	private int currentTrack;
-	
-	private Map<Integer, MIDIFileErrorSummary> errors;
+	private int currentChannel;
+	private int timestamp;
+	private boolean runningStatusOn;
 
-	
+	private Map<Integer, MIDIFileErrorSummary> errors;
+	private Map<Integer, Integer> noteBuffer;
+	private MIDIFilePlayer midiFilePlayer;
+
+
 	//////////////////////////////
 	//        READ FILE         //
 	//////////////////////////////
-
+	/**
+	 * Reads a <i>.midi</i> file on disk and generates a {@link MIDIFile}, which contains
+	 * tracks of {@link MIDINote} and information about how to play them.
+	 * <p>
+	 * @param filePath | A string containing the path to a <i>.midi</i> file
+	 * 
+	 * @return A {@link MIDIFile} structure
+	 */
 	public MIDIFile readFile(String filePath) {
 		Log.infos(Formatting.lineSeparation("MIDIFileReader", 0));
 		Log.infos(Formatting.lineSeparation("Loading file at: " + filePath, 1));
 
+		reset();
+
 		try {
 			this.midiFile = new MIDIFile(filePath);
-			this.rawData = readBinaryFile(filePath);
-	
+			this.rawData = loadBinaryFile(filePath);
+
 			if (this.rawData.length > Parameters.MAX_FILE_SIZE) {
 				throw new MIDIFileException ("Size of selected file exceeds " + Parameters.MAX_FILE_SIZE / 1000 + " KB.");
 			}
 			Log.infos("File at \"" + filePath + "\" loaded in memory (" + this.rawData.length / 1000 + " KB).");
-			Log.infos("Reading the MIDI file...");
-	
-			this.offset = 0;
-			this.currentTrack = 0;
-			this.errors = new HashMap<Integer, MIDIFileErrorSummary>();
-			this.midiFile = readRawFile();
+
+			readBinaryFile();
 		} catch (MIDIFileException e){
 			e.printStackTrace();
 		}
-		
 		Log.infos(Formatting.lineSeparation(0));
 		printErrorSummary();
 		Log.infos(Formatting.lineSeparation(1));
@@ -61,7 +72,7 @@ public class MIDIFileReader {
 		return this.midiFile;
 	}
 
-	private byte[] readBinaryFile(String filePath) throws MIDIFileException {
+	private byte[] loadBinaryFile(String filePath) throws MIDIFileException {
 		File file = new File(filePath);
 		byte[] rawFile = new byte[(int)file.length()];
 
@@ -77,63 +88,63 @@ public class MIDIFileReader {
 		return rawFile;
 	}
 
-	private MIDIFile readRawFile() throws MIDIFileException {
-		readHeader();
+	private void readBinaryFile() throws MIDIFileException {
+		readFileHeader();
 
-		offset = 14;
 		while (!endOfFile()) {
 			readTrack();
-			offset += 3;
+			++currentTrack;
+			if (timestamp > midiFile.getFinalTimestamp()) {
+				midiFile.setFinalTimestamp(timestamp);
+			}
+			timestamp = 0;
 		}
-		return midiFile;
 	}
 
-	private void readHeader() throws MIDIFileException {
+	private void readFileHeader() throws MIDIFileException {
 		Log.infos(printOffset() + "Reading header.");
 
 		if (readInt() != 0x4d546864) {
 			throw new MIDIFileException(printOffset() + "ERROR : The selected file is not of MIDI format.");
 		}
-
 		offset += 8;
+
 		int midiType = readShort();
 		if (midiType != 1){
 			throw new MIDIFileException(printOffset() + "ERROR : MIDI type " + midiType + " is not supported.");
 		}
 		midiFile.setMidiType(midiType);
-		Log.infos(printOffset() + "  * File type: " + midiType + ".");
-
+		Log.infos(printOffset() + "  * MIDI File type: " + midiType + ".");
 		offset += 2;
+
 		int nbTracks = readShort();
 		midiFile.setNbTracks(nbTracks);
 		Log.infos(printOffset() + "  * Number of tracks: " + nbTracks + ".");
-
+		for (int i = 0; i < nbTracks; ++i) {
+			//midiFile.getNotes().add(new HashMap<Integer, Stack<MIDINote>>());
+		}
 		offset += 2;
+
 		int divisionOfABeat = readShort();
 		midiFile.setDivisionOfABeat(divisionOfABeat);
 		Log.infos(printOffset() + "  * Number of divisions of a beat: " + divisionOfABeat + ".");
+		offset += 2;
 	}
 
 	private void readTrack() throws MIDIFileException {
 		Log.infos(Formatting.lineSeparation("Reading track " + currentTrack, 1));
-		errors.put(currentTrack, new MIDIFileErrorSummary());
-		int deltaTime = 0;
+		errors.put(currentTrack, new MIDIFileErrorSummary());	
 
 		readTrackHeader();
-		deltaTime = readEventDeltaTime();
+		int deltaTime = readDeltaTime();
 
-		while (!endOfTrack() && !isANoteStart()) {
-			handleMetaEvent();
-			deltaTime = readEventDeltaTime();
-		}
-		if (!endOfTrack()) {
-			midiFile.setTimeBeforeFirstNote(deltaTime, currentTrack);
-		}
 		while (!endOfTrack()) {
-			handleNoteEvent();
+			handleEvent(deltaTime);
+			deltaTime = readDeltaTime();
 		}
 		Log.infos(printOffset() + "End of Track no." + currentTrack + ": " + midiFile.getNotes().get(currentTrack).size() + " notes read.");
-		++currentTrack;
+		currentChannel = -1;
+		offset += 3;
 	}
 
 	private void readTrackHeader() throws MIDIFileException {
@@ -148,15 +159,130 @@ public class MIDIFileReader {
 	//      EVENT HANDLING      //
 	//////////////////////////////
 
-	private void handleMetaEvent() throws MIDIFileException {
-		offset += 1;
-
-		switch(readByte()) {
-		case 0x01: handleTextEvent(); break;
-		case 0x51: handleSetTempoMetaEvent(); break;
-		case 0x58: handleTimeSignatureMetaEvent(); break;
-		default: throw new MIDIFileException(printOffset() + "ERROR: Unknown meta event with Id \"" + readByte() + ".");
+	private void handleEvent(int deltaTime) throws MIDIFileException {
+		if (isAMetaEvent()) {
+			offset += 1;
+			handleMetaEvent();
+		} else if (isAMIDIEvent()){
+			handleMIDIEvent(deltaTime);
+			runningStatusOn = true;
+		} else if (runningStatusOn) {
+			int note = readByte();
+			if (noteBuffer.containsKey(note)) {
+				handleNoteOffEvent(deltaTime);
+			} else {
+				handleNoteOnEvent(deltaTime);
+			}	
+		} else {
+			throw new MIDIFileException(printOffset() + "ERROR: Unknown event with Id \"" + readByte() + "\".");
 		}
+	}
+
+	private void handleMetaEvent() throws MIDIFileException {
+		switch(readByte()) {
+		case 0x01: case 0x02: case 0x03: case 0x04: case 0x05: case 0x06: case 0x07: handleTextEvent(); return;
+		case 0x21: handleMIDIportEvent(); return;
+		case 0x51: handleSetTempoMetaEvent(); return;
+		case 0x58: handleTimeSignatureMetaEvent(); return;
+		case 0x59: handleKeySignatureMetaEvent(); return;
+		default: throw new MIDIFileException(printOffset() + "ERROR: Unknown meta event with Id \"" + readByte() + "\".");
+		}
+	}
+
+	private void handleMIDIEvent(int deltaTime) throws MIDIFileException {
+		switch(firstHexDigit()) {
+		case 0x80:
+			verifyChannel();
+			offset += 1;
+			handleNoteOffEvent(deltaTime);
+			return;
+		case 0x90: 
+			verifyChannel();
+			offset += 1;
+			handleNoteOnEvent(deltaTime);
+			return;
+		case 0xa0: handlePolyphonicPressureChangeEvent(); return;
+		case 0xb0: handleControllerChangeEvent(); return;
+		case 0xc0: handleProgramChangeEvent(); return;
+		default: throw new MIDIFileException(printOffset() + "ERROR: Unknown midi event with Id \"" + readByte() + "\".");
+		}
+	}
+
+	private void handleNoteOnEvent(int deltaTime) throws MIDIFileException {
+		if (timestamp == 0) {
+			if (Parameters.NOTE_VISUALISATION) {
+				sleep((int)(deltaTime * Parameters.VISUALISATION_SPEED_CORRECTION));
+			}
+		}
+		timestamp += deltaTime;
+		int note = readByte();
+
+		noteBuffer.put(note, timestamp);
+
+		if (Parameters.NOTE_VISUALISATION) {
+			StringBuilder noteSpacing = new StringBuilder();
+			for (int i = 0; i < note - 30; ++i) {
+				noteSpacing.append("   ");
+			}
+			Log.vital(noteSpacing.toString() + HexToNote.toString(note));
+			if (Parameters.NOTE_PLAY_AUDIO) {
+				midiFilePlayer.startNote(note);
+			}
+		}
+		offset += 2;
+	}
+
+	private void handleNoteOffEvent(int deltaTime) throws MIDIFileException {
+		if (Parameters.NOTE_VISUALISATION) {
+			sleep((int)(deltaTime * Parameters.VISUALISATION_SPEED_CORRECTION));
+		}
+		if (timestamp == 0) {
+			throw new MIDIFileException(printOffset() + "ERROR: A noteOff event came before any noteOn event.");
+		}
+		timestamp += deltaTime;
+
+		int note = readByte();
+		Integer startTimestamp = noteBuffer.get(note);
+		noteBuffer.remove(note);
+
+		if (startTimestamp == null) {
+			throw new MIDIFileException(printOffset() + "ERROR: Stopping a note that has never been started.");
+		}
+		int noteDuration = roundLength(timestamp - startTimestamp);
+		if (midiFile.getNotes().get(currentTrack).get(startTimestamp) == null) {
+			midiFile.getNotes().get(currentTrack).put(startTimestamp, new Stack<MIDINote>());
+		}
+		midiFile.getNotes().get(currentTrack).get(startTimestamp).push(new MIDINote(note, noteDuration));
+		if (noteDuration == 0) {
+			errors.get(currentTrack).incrementNoteLengthZeroCount();
+		}
+		if (Parameters.NOTE_VISUALISATION) {
+			if (Parameters.NOTE_PLAY_AUDIO) {
+				midiFilePlayer.stopNote(note);
+			}
+		}
+		Log.extra(printOffset() + "[ Adding note ] " + String.format("%-3s of length %3d at channel %d at track %d", HexToNote.toString(note), 
+				noteDuration, currentChannel, currentTrack));
+
+		offset += 2;
+	}
+
+	private int roundLength(int length) throws MIDIFileException {
+		int valueOfTheSmallestNote = midiFile.getDivisionOfABeat() / midiFile.getNb32thNotesPerBeat() / 2;
+		int delta = length % valueOfTheSmallestNote;
+		if (delta == 0){
+			return length;
+		}
+		if (delta > valueOfTheSmallestNote / 2) {
+			delta -= valueOfTheSmallestNote;
+		}
+		if (Math.abs(delta) > Parameters.NOTE_LENGTH_CORRECTION_THRESHOLD) {
+			errors.get(currentTrack).incrementRoundingOverThresholdCount();
+			Log.warng(printOffset() + "[Note rounding] A note of length " + length 
+					+ " had to be EXCESSIVELY rounded of a value of " + delta + ".");
+		}
+		errors.get(currentTrack).adjustNoteRoundingTotalOffset(delta);
+		return length - delta;
 	}
 
 	private void handleTextEvent() {
@@ -171,14 +297,40 @@ public class MIDIFileReader {
 		Log.infos(printOffset() + "  * Event text: " + info + ".");
 	}
 
+	private void handlePolyphonicPressureChangeEvent() {
+		Log.infos(printOffset() + "Skipping polyphonic pressure change event.");
+		offset += 3;
+	}
+
+	private void handleControllerChangeEvent() {
+		Log.infos(printOffset() + "Skipping controller change event.");
+		offset += 3;
+	}
+
+	private void handleProgramChangeEvent() {
+		Log.infos(printOffset() + "Processing program (instrument) change event.");
+		int track = readByte() % 0x10;
+		offset += 1;
+		int instr = readByte();
+		midiFile.setTrackInstrument(currentTrack, Instrument.values()[instr]);
+		midiFilePlayer.setInstrument(Instrument.values()[instr]);
+		Log.infos(printOffset() + "  * Track " + track + " instrument changed to " + Instrument.values()[instr].name() + ".");
+		offset += 1;
+	}
+
+	private void handleMIDIportEvent() {
+		Log.infos(printOffset() + "Skipping MIDI port specification event.");
+		offset += 3;
+	}
+
 	private void handleSetTempoMetaEvent() throws MIDIFileException {
 		Log.infos(printOffset() + "Processing tempo event.");
 
 		offset += 2;
 		int tempo = read3Bytes();
 		midiFile.setTempo(tempo);
-		offset += 3;
 		Log.infos(printOffset() + "  * Tempo changed to " + tempo + ".");
+		offset += 3;
 	}
 
 	private void handleTimeSignatureMetaEvent() throws MIDIFileException {
@@ -205,101 +357,29 @@ public class MIDIFileReader {
 		if (nb32thNotesPerBeat != 8) {
 			throw new MIDIFileException(printOffset() + "ERROR : "+ nb32thNotesPerBeat + " 32th notes per beat is not supported.");
 		}
-		offset += 1;
 		Log.infos(printOffset() + "  * Number of 32th notes per beat: " + nb32thNotesPerBeat + ".");
-	}
-
-	private void handleNoteEvent() throws MIDIFileException {
-		int channel = readByte() % 0x10;
-
 		offset += 1;
-		int note = readByte();
+	}
+
+	private void handleKeySignatureMetaEvent() throws MIDIFileException {
+		Log.infos(printOffset() + "Processing key signature event.");
 		offset += 2;
-		MIDINote rest = new MIDINote(0, 0);
 
-		int rawNoteLength = readNoteAndRestDeltaTime(rest);
-		int rawRestLength = rest.getLength();
-		int noteLength = roundLength(rawNoteLength, "note");
-		int restLength = roundLength(rawRestLength, "rest");
-		
-		if (rawNoteLength == 0) {
-			errors.get(currentTrack).incrementRawNoteLengthZeroCount();
-			Log.warng(printOffset() + "[RAW LENGTH 0 ] Adding a note of RAW length 0 (" + HexToNote.toString(note) + ").");
+		int nbSharps = readByte();
+		midiFile.setNbSharps(nbSharps);
+		if (nbSharps > 7) {
+			throw new MIDIFileException(printOffset() + "ERROR : The key signature cannot contain "+ nbSharps + " sharps. FLAT KEYS NOT YET SUUPORTED.");
 		}
-		if (noteLength == 0) {
-			errors.get(currentTrack).incrementNoteLengthZeroCount();
-			Log.vital(printOffset() + "[Round to zero] A note is of rounded length 0 (" + HexToNote.toString(note) + ").");
+		Log.infos(printOffset() + "  * Number of sharps: " + nbSharps + ".");
+		offset += 1;
+
+		int majorOrMinor = readByte();
+		midiFile.setIfIsInMajorKey((majorOrMinor == 0) ? true : false);
+		if (majorOrMinor != 0 && majorOrMinor != 1) {
+			throw new MIDIFileException(printOffset() + "ERROR : The key signature must be major (0) or minor (1).");
 		}
-
-		midiFile.getNotes().get(currentTrack).add(new MIDINote(note, noteLength));
-
-		if (restLength != 0) {
-			rest.setLength(restLength);
-			midiFile.getNotes().get(currentTrack).add(rest);
-		}
-
-		if (Parameters.NOTE_VISUALISATION) {
-			StringBuilder noteSpacing = new StringBuilder();
-			for (int i = 0; i < note - 30; ++i) {
-				noteSpacing.append("  ");
-			}
-			Log.vital(noteSpacing.toString() + HexToNote.toString(note) + " (" + noteLength + " , " + rawNoteLength + ")");
-			if (Parameters.NOTE_PLAY_AUDIO) {
-				MiDiO.player.startNote(note);
-			}
-			int lengthOfLastNote = getLengthOfLastNote(currentTrack);
-
-			for (int i = 0; i < lengthOfLastNote; ++i) {
-				Log.vital("");
-				sleep(Parameters.VISUALISATION_SPEED);
-			}
-		}
-		Log.extra(printOffset() + "[ Adding note ] " + String.format("%-3s of length %3d (raw: %3d) at channel %d", HexToNote.toString(note), noteLength, rawNoteLength, channel) 
-				+ (restLength == 0 ? "." : " | Adding rest of length " + restLength + " (raw: " + rawRestLength + ")"));
-	}
-
-	private int roundLength(int length, String notation) throws MIDIFileException {
-		if (length % 15 == 0){
-			return length;
-		}
-		if (length < 5 ){
-			return 0;
-		}
-		for (int correction = 2; correction < 15; ++correction){
-			for (int i = 15; i < Parameters.MAX_NOTE_MIDI_LENGTH; i += 15) {
-				if (length <= (i + correction) && length >= (i - correction)) {
-					correction = (length < i) ? correction : -correction;
-					
-					if (Math.abs(correction) > Parameters.NOTE_LENGTH_CORRECTION_THRESHOLD) {
-						errors.get(currentTrack).incrementRoundingOverThresholdCount();
-						
-						if (notation.equalsIgnoreCase("rest") && length < Parameters.MIN_RAW_REST_LENGTH) {
-							i = 0;
-							correction = length;
-						} else {
-							Log.warng(printOffset() + "[Note rounding] A " + notation + " of length " + length 
-									+ " had to be EXCESSIVELY rounded of a value of " + correction + ".");
-						}
-					}
-					errors.get(currentTrack).adjustNoteRoundingTotalOffset(correction);	
-					
-					return i;
-				}
-			}
-		}
-		throw new MIDIFileException(printOffset() + "A " + notation + " of length " + length + " has been read in the file. Cannot continue the reading.");
-	}
-
-	private int getLengthOfLastNote(int track) {
-		int noteLength = 0;
-
-		MIDINote previousNotation = midiFile.getNotes().get(track).get(midiFile.getNotes().get(track).size() - 1);
-
-		for (int i = 0; previousNotation.isRest(); ++i) {
-			noteLength += previousNotation.getLength();
-			previousNotation = midiFile.getNotes().get(track).get(midiFile.getNotes().get(track).size() - 2 - i);
-		}
-		return (noteLength + previousNotation.getLength()) / 15;
+		Log.infos(printOffset() + "  * " + ((majorOrMinor == 0) ? "Major" : "Minor") + " key.");
+		offset += 1;
 	}
 
 
@@ -307,16 +387,12 @@ public class MIDIFileReader {
 	//      STATUS CHECKER      //
 	//////////////////////////////
 
-	private boolean isANoteStart() {
-		return readByte() >= 0x90 && readByte() <= (0x90 + midiFile.getNbTracks());
-	}
-
-	private boolean isARestStart() {
-		return readByte() >= 0x80 && readByte() <= 0x8f;
-	}
-
-	private boolean isAnEventStart() {
+	private boolean isAMetaEvent() {
 		return readByte() == 0xff;
+	}
+
+	private boolean isAMIDIEvent() {
+		return readByte() >= 0x80 && readByte() <= 0xcf;
 	}
 
 	private boolean endOfTrack() {
@@ -326,7 +402,6 @@ public class MIDIFileReader {
 	private boolean endOfFile() {
 		return currentTrack == midiFile.getNotes().size();
 	}
-
 
 
 	//////////////////////////////
@@ -350,26 +425,6 @@ public class MIDIFileReader {
 		return ret;
 	}
 
-	private int readEventDeltaTime() {
-		int deltaTime = 0;
-		int length = 0;
-
-		while (!isAnEventStart() && !isANoteStart()) {
-			offset += 1;
-			++length;
-		}
-		offset -= length;
-
-		for (int i = 1; i < length; ++i){
-			deltaTime += (readByte() - 128) * Math.pow(2,7 * (length - i));
-			offset += 1;
-		}
-		deltaTime += readByte();
-		offset += 1;
-
-		return deltaTime;
-	}
-
 	private int readInt() {
 		int ret = 0;
 		for (int i = 0; i < 4; ++i) {
@@ -377,39 +432,6 @@ public class MIDIFileReader {
 			ret |= (int)rawData[i + offset] & 0xFF;
 		}
 		return ret;
-	}
-
-	private int readNoteAndRestDeltaTime(MIDINote rest) {
-		int noteDeltaTime = readNoteDeltaTime();
-		int restDeltaTime = 0;
-
-		while (isARestStart()) {
-			offset += 3;
-			restDeltaTime += readNoteDeltaTime();
-		}
-		rest.setLength(restDeltaTime);
-
-		return noteDeltaTime;
-	}
-
-	private int readNoteDeltaTime() {
-		int deltaTime = 0;
-		int length = 0;
-
-		while (readByte() > 0x80) {
-			offset += 1;
-			++length;
-		}
-		offset -= length;
-
-		for (int i = 0; i < length; ++i){
-			deltaTime += (readByte() - 128) * Math.pow(2,7 * (length - i));
-			offset += 1;
-		}
-		deltaTime += readByte();
-		offset += 1;
-
-		return deltaTime;
 	}
 
 	private String readString(int length){
@@ -422,21 +444,40 @@ public class MIDIFileReader {
 		return fileString;
 	}
 
+	private int readDeltaTime() {
+		int deltaTime = 0;
+		int timestampLength = 0;
+
+		if (isAMetaEvent()) {
+			return 0;
+		}
+
+		while (readByte() >= 0x80) {
+			offset += 1;
+			++timestampLength;
+		}
+		offset -= timestampLength;
+
+		for (int i = 0; i < timestampLength; ++i){
+			deltaTime += (readByte() - 128) * Math.pow(2,7 * (timestampLength - i));
+			offset += 1;
+		}
+		deltaTime += readByte();
+		offset += 1;
+
+		return deltaTime;
+	}
+
+	private int firstHexDigit() {
+		return readByte() - (readByte() % 0x10);
+	}
+
 	private void sleep(int ms) {
 		try {
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-	}
-
-
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
-
-	public byte[] getRawFile() {
-		return rawData;
 	}
 
 
@@ -450,12 +491,43 @@ public class MIDIFileReader {
 
 	private void printErrorSummary() {
 		Log.infos(Formatting.lineSeparation("Error Summary", 0));
-		
+
 		for (int trackNo = 0; trackNo < midiFile.getNbTracks(); ++trackNo) {
 			if (midiFile.getNotes().get(trackNo).size() != 0) {
 				Log.infos(Formatting.lineSeparation("Track no." + trackNo, 1));
+				errors.get(trackNo).setTotalTimestamp(midiFile.getFinalTimestamp());
 				errors.get(trackNo).print();
 			}
+		}
+	}
+
+	private void verifyChannel() throws MIDIFileException {
+		if (currentChannel == -1) {
+			currentChannel = readByte() % 0x10;
+		} else if (currentChannel != readByte() % 0x10) {
+			throw new MIDIFileException(printOffset() + "ERROR: A noteOn event aiming channel " + readByte() % 0x10 + " occured while all the others where "
+					+ " aiming channel " + currentChannel + ".");
+		}
+	}
+
+
+	//////////////////////////////
+	//          RESET           //
+	//////////////////////////////
+
+	public void reset() {
+		this.midiFile = null;
+		this.rawData = null;
+		this.offset = 0;
+		this.currentTrack = 0;
+		this.currentChannel = -1;
+		this.timestamp = 0;
+		this.runningStatusOn = false;
+		this.errors = new HashMap<Integer, MIDIFileErrorSummary>();
+		this.noteBuffer = new HashMap<Integer, Integer>();
+		if (Parameters.NOTE_PLAY_AUDIO) {
+			this.midiFilePlayer = new MIDIFilePlayer();
+			this.midiFilePlayer.initialize();
 		}
 	}
 }

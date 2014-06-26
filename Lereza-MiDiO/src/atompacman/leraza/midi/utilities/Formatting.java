@@ -31,7 +31,11 @@ public class Formatting {
 		int titleLength = title.length();
 		int titleStartPos = (LINE_LENGTH - titleLength + 1) / 2;
 		
-		line.replace(titleStartPos, titleStartPos + titleLength, title);
+		if (titleStartPos < 0) {
+			line.replace(0, title.length() - 1, title.substring(1));
+		} else {
+			line.replace(titleStartPos, titleStartPos + titleLength, title);
+		}
 		
 		return line.toString();
 	}

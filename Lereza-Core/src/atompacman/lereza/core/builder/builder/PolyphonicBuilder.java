@@ -1,7 +1,6 @@
 package atompacman.lereza.core.builder.builder;
 
 import atompacman.atomLog.Log;
-import atompacman.leraza.midi.MiDiO;
 import atompacman.leraza.midi.container.MIDIFile;
 import atompacman.leraza.midi.container.MIDINote;
 import atompacman.leraza.midi.utilities.Formatting;
@@ -10,6 +9,7 @@ import atompacman.lereza.core.container.part.Voice;
 import atompacman.lereza.core.container.piece.Piece;
 import atompacman.lereza.core.container.piece.PolyphonicPiece;
 import atompacman.lereza.core.exception.BuilderException;
+import atompacman.lereza.core.menu.LerezaWizard;
 import atompacman.lereza.core.solfege.Grouping;
 import atompacman.lereza.core.solfege.Meter;
 import atompacman.lereza.core.solfege.RythmicSignature;
@@ -20,6 +20,7 @@ public class PolyphonicBuilder implements Builder {
 	private PolyphonicPiece tempPiece;
 	private MIDIFile tempMidiFile;
 
+	
 	//////////////////////////////
 	//       CONSTRUCTORS       //
 	//////////////////////////////
@@ -100,7 +101,7 @@ public class PolyphonicBuilder implements Builder {
 				}
 			}
 			if (Parameters.NOTE_ADDING_VISUALISATION) {
-				MiDiO.player.startNote(midiNote.getNote());
+				LerezaWizard.midiFilePlayer.startNote(midiNote.getNote());
 				noteAddingVisualisation(midiNote.getLength() / tempPiece.getRythmicSignature().getValueOfShortestNote(), voice);		
 			}
 		}

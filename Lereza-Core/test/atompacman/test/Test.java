@@ -1,35 +1,31 @@
 package atompacman.test;
 
-import java.io.File;
-
 import atompacman.atomLog.Log;
 import atompacman.atomLog.Log.Verbose;
-import atompacman.leraza.midi.MiDiO;
 import atompacman.leraza.midi.container.MIDIFile;
-import atompacman.lereza.core.builder.PieceFactory;
 import atompacman.lereza.core.container.Composition;
 import atompacman.lereza.core.container.Set;
 import atompacman.lereza.core.container.form.fugue.Fugue;
 import atompacman.lereza.core.container.piece.Piece;
-import atompacman.lereza.core.menu.Session;
+import atompacman.lereza.core.menu.CompositionBrowser;
+import atompacman.lereza.core.menu.LerezaWizard;
 import atompacman.lereza.core.solfege.Genre;
 
 public class Test {
 
-	private static final String FILE_PATH = "..\\Data\\Fugue1.mid";
+	private static final String FILE_PATH = "..\\Data\\Bach\\Vol.10 - Keyboard Works II\\CD.10 - Concerto Arrangements For Harpsichord I - After Vivaldi\\Concerto In D, BWV 972 - I - Allegro.mid";
+	//private static final String FILE_PATH = "..\\Data\\Fugue1.mid";
+	
 	
 	public static void main(String args[]) {
-		Log.setVerbose(Verbose.VITAL);
-		listFiles();
+		Log.setVerbose(Verbose.EXTRA);
+		LerezaWizard.initialize();
 		
-		MiDiO.initialize();
-		MIDIFile midiFile = MiDiO.reader.readFile(FILE_PATH);
+		MIDIFile midiFile = LerezaWizard.midiFileReader.readFile(FILE_PATH);
 
 		Log.setVerbose(Verbose.EXTRA);
 		
-		PieceFactory pieceFactory = new PieceFactory();
-		pieceFactory.load(midiFile);
-		Piece piece = pieceFactory.build(Fugue.class);
+		Piece piece = LerezaWizard.pieceFactory.build(midiFile, Fugue.class);
 		
 		Composition composition = new Composition("Test composition");
 		composition.addFile(midiFile, piece);
@@ -37,12 +33,11 @@ public class Test {
 		Set set = new Set("Test set", "Johann Sebastian Bach", Genre.BAROQUE.EARLY_BAROQUE);
 		set.add(composition);
 		
-		Session session = new Session("Test session");
+		CompositionBrowser session = new CompositionBrowser();
 		session.addCompositionSet(set);
-		
-		Log.infos(session.getSessionName());
 	}
 
+	/**
 	private static void listFiles() {
 		File folder = new File("..\\Data");
 		File[] listOfFiles = folder.listFiles();
@@ -55,4 +50,5 @@ public class Test {
 			}
 		}
 	}
+	**/
 }

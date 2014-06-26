@@ -19,4 +19,9 @@ public class BuilderException extends Exception {
 	public BuilderException(Throwable cause) { 
 		super(cause); 
 	}
+	
+	public void printStackTrace() {
+		super.printStackTrace();
+		System.exit(1);
+	}
 }
