@@ -16,4 +16,8 @@ public class Meter {
 	public int getDenominator() {
 		return denominator;
 	}
+	
+	public String toString() {
+		return numerator + "/" + denominator;
+	}
 }

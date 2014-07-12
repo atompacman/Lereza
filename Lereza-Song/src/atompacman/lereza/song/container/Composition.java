@@ -2,7 +2,6 @@ package atompacman.lereza.song.container;
 
 import atompacman.atomLog.Log;
 import atompacman.leraza.midi.container.MidiFile;
-import atompacman.lereza.song.container.piece.Piece;
 
 public class Composition {
 	

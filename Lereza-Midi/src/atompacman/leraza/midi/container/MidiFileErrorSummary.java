@@ -71,7 +71,7 @@ public class MidiFileErrorSummary {
 		if (noteLengthZeroCount != 0) {
 			Log.infos("· Notes rounded length zero  : " + noteLengthZeroCount);
 		}
-		if (noteRoundingTotalOffset <= Parameters.TOTAL_ROUND_OFFSET_LIMIT) {
+		if (Math.abs(noteRoundingTotalOffset) <= Parameters.TOTAL_ROUND_OFFSET_LIMIT) {
 			Log.infos("· Total rounding offset      : " + noteRoundingTotalOffset + "/" + totalTimestamp);
 		} else {
 			Log.warng("· TOTAL ROUNDING OFFSET      : " + noteRoundingTotalOffset + "/" + totalTimestamp + " (WARNING: THIS CAN CAUSE RYTHMN ERRORS IN THE FUTURE)");

@@ -14,6 +14,7 @@ public class MidiFile {
 	private int valueOfTheBeatNote;
 	private int clockTicksPerBeat;
 	private int nb32thNotesPerBeat;
+	private int valueOfShortestNote;
 	private int nbSharps;
 	private boolean isInMajorKey;
 	private int tempo;
@@ -75,6 +76,10 @@ public class MidiFile {
 		this.nb32thNotesPerBeat = nb32thNotesPerBeat;
 	}
 
+	public void setValueOfShortestNote(int valueOfShortestNote) {
+		this.valueOfShortestNote = valueOfShortestNote;
+	}
+	
 	public void setNbSharps(int nbSharps) {
 		this.nbSharps = nbSharps;
 	}
@@ -142,6 +147,10 @@ public class MidiFile {
 		return nb32thNotesPerBeat;
 	}
 
+	public int getValueOfShortestNote() {
+		return valueOfShortestNote;
+	}
+	
 	public int getNbSharps() {
 		return nbSharps;
 	}

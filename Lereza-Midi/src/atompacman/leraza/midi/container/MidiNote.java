@@ -18,15 +18,7 @@ public class MidiNote {
 	}
 
 	public int getLength() {
-		return Math.abs(length);
-	}
-
-	public boolean isRest() {
-		return (note == 0);
-	}
-	
-	public boolean isStaccato() {
-		return length < 0;
+		return length;
 	}
 	
 	public void setLength(int length) {
@@ -34,10 +26,6 @@ public class MidiNote {
 	}
 	
 	public String toString() {
-		if (isRest()) {
-			return "[R] (" + length + ")";
-		} else {
-			return HexToNote.toString(note) + " (" + length + ")";
-		}
+		return HexToNote.toString(note) + " (" + length + ")";
 	}
 }

@@ -18,16 +18,15 @@ import atompacman.leraza.midi.container.MidiFileErrorSummary;
 import atompacman.leraza.midi.container.MidiNote;
 import atompacman.leraza.midi.exception.MidiFileException;
 import atompacman.leraza.midi.utils.HexToNote;
-import atompacman.lereza.common.architecture.Device;
 import atompacman.lereza.common.formatting.Formatting;
 
-public class MidiFileReader implements MidiFileReaderAPI, Device {
+public class MidiFileReader implements MidiFileReaderAPI {
 
 	private MidiFile tempMidiFile;
 	private Map<Integer, MidiFileErrorSummary> errors;
 
 	private Map<String, MidiFile> midiFiles;
-	
+
 	private byte[] rawData;
 	private int offset;
 	private int currentTrack;
@@ -36,7 +35,7 @@ public class MidiFileReader implements MidiFileReaderAPI, Device {
 	private boolean runningStatusOn;
 	private Map<Integer, Integer> noteBuffer;
 
-	
+
 	//////////////////////////////
 	//        READ FILE         //
 	//////////////////////////////
@@ -89,7 +88,7 @@ public class MidiFileReader implements MidiFileReaderAPI, Device {
 			readTrack();
 			++currentTrack;
 			if (timestamp > tempMidiFile.getFinalTimestamp()) {
-				tempMidiFile.setFinalTimestamp(timestamp);
+				tempMidiFile.setFinalTimestamp(timestamp / tempMidiFile.getValueOfShortestNote());
 			}
 			timestamp = 0;
 		}
@@ -236,18 +235,34 @@ public class MidiFileReader implements MidiFileReaderAPI, Device {
 		timestamp += deltaTime;
 
 		int note = readByte();
-		Integer startTimestamp = noteBuffer.get(note);
-		noteBuffer.remove(note);
 
-		if (startTimestamp == null) {
+		if (noteBuffer.get(note) == null) {
 			throw new MidiFileException(printOffset() + "ERROR: Stopping a note that has never been started.");
 		}
-		int noteDuration = roundLength(timestamp - startTimestamp);
-		if (tempMidiFile.getNotes().get(currentTrack).get(startTimestamp) == null) {
-			tempMidiFile.getNotes().get(currentTrack).put(startTimestamp, new Stack<MidiNote>());
+		Integer startTimestamp = noteBuffer.get(note);
+		Integer roundedStartTimestamp = roundLength(startTimestamp);
+		Integer roundedStopTimestamp = roundLength(timestamp);
+		int noteDuration = roundedStopTimestamp - roundedStartTimestamp;
+		noteBuffer.remove(note);
+		
+		int deltaLength = noteDuration - (timestamp - startTimestamp);
+		if (Math.abs(deltaLength) > Parameters.NOTE_LENGTH_CORRECTION_THRESHOLD) {
+			errors.get(currentTrack).incrementRoundingOverThresholdCount();
+			Log.warng(printOffset() + "[Note rounding] A note of length " + noteDuration 
+					+ " had to be EXCESSIVELY rounded of a value of " + deltaLength + ".");
 		}
-		tempMidiFile.getNotes().get(currentTrack).get(startTimestamp).push(new MidiNote(note, noteDuration));
-		if (noteDuration == 0) {
+		errors.get(currentTrack).adjustNoteRoundingTotalOffset(deltaLength);
+
+		int dividedTimestamp = (int)((double)roundedStartTimestamp / (double)tempMidiFile.getValueOfShortestNote());
+		int dividedDuration = (int)((double)noteDuration / (double)tempMidiFile.getValueOfShortestNote()); 
+		
+		if (tempMidiFile.getNotes().get(currentTrack).get(dividedTimestamp) == null) {
+			tempMidiFile.getNotes().get(currentTrack).put(dividedTimestamp, new Stack<MidiNote>());
+		}
+
+		tempMidiFile.getNotes().get(currentTrack).get(dividedTimestamp).push(new MidiNote(note, dividedDuration));
+		
+		if (dividedDuration == 0) {
 			errors.get(currentTrack).incrementNoteLengthZeroCount();
 		}
 		if (Parameters.NOTE_VISUALISATION) {
@@ -255,9 +270,10 @@ public class MidiFileReader implements MidiFileReaderAPI, Device {
 				MidiFileManager.player.stopNote(note);
 			}
 		}
-		Log.extra(printOffset() + "[ Adding note ] " + String.format("%-3s of length %3d at channel %d at track %d", HexToNote.toString(note), 
-				noteDuration, currentChannel, currentTrack));
-
+		Log.extra(printOffset() + "[ Adding note ] " + String.format("%-3s of length %3d (timestamps: %5d[%2s] to %5d[%2s]) at channel %d at track %d", 
+				HexToNote.toString(note), dividedDuration, startTimestamp, 
+				((roundedStartTimestamp - startTimestamp) > 0 ? "+" : "") + (roundedStartTimestamp - startTimestamp), timestamp,
+				((roundedStopTimestamp  - timestamp     ) > 0 ? "+" : "") + (roundedStopTimestamp  - timestamp      ), currentChannel, currentTrack));
 		offset += 2;
 	}
 
@@ -270,12 +286,6 @@ public class MidiFileReader implements MidiFileReaderAPI, Device {
 		if (delta > valueOfTheSmallestNote / 2) {
 			delta -= valueOfTheSmallestNote;
 		}
-		if (Math.abs(delta) > Parameters.NOTE_LENGTH_CORRECTION_THRESHOLD) {
-			errors.get(currentTrack).incrementRoundingOverThresholdCount();
-			Log.warng(printOffset() + "[Note rounding] A note of length " + length 
-					+ " had to be EXCESSIVELY rounded of a value of " + delta + ".");
-		}
-		errors.get(currentTrack).adjustNoteRoundingTotalOffset(delta);
 		return length - delta;
 	}
 
@@ -352,6 +362,10 @@ public class MidiFileReader implements MidiFileReaderAPI, Device {
 			throw new MidiFileException(printOffset() + "ERROR : "+ nb32thNotesPerBeat + " 32th notes per beat is not supported.");
 		}
 		Log.infos(printOffset() + "  * Number of 32th notes per beat: " + nb32thNotesPerBeat + ".");
+		
+		setValueOfShortestNote();
+		Log.infos(printOffset() + "  * Value of shortest note set to " + tempMidiFile.getValueOfShortestNote() + ".");
+		
 		offset += 1;
 	}
 
@@ -504,6 +518,13 @@ public class MidiFileReader implements MidiFileReaderAPI, Device {
 		}
 	}
 
+	private void setValueOfShortestNote() {
+		double smallestIntegerDivisionOfBeatNoteValue = tempMidiFile.getDivisionOfABeat();
+		while ((smallestIntegerDivisionOfBeatNoteValue / 2 == (int) smallestIntegerDivisionOfBeatNoteValue / 2)) {
+			smallestIntegerDivisionOfBeatNoteValue /= 2;
+		}
+		tempMidiFile.setValueOfShortestNote((int)smallestIntegerDivisionOfBeatNoteValue);
+	}
 
 	//////////////////////////////
 	//          RESET           //
@@ -526,7 +547,7 @@ public class MidiFileReader implements MidiFileReaderAPI, Device {
 	//////////////////////////////
 	//         GETTERS          //
 	//////////////////////////////
-	
+
 	public MidiFile getMidiFile(String filePath) {
 		return midiFiles.get(filePath);
 	}

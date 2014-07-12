@@ -4,15 +4,13 @@ public class RythmicSignature {
 	
 	private Meter meter;
 	private Grouping noteGrouping;
-	private int midiBeatNoteValue;
-	private int valueOfShortestNote;
+	private int quarterNoteTimeunitLength;
 	
 
-	public RythmicSignature(Meter meter, Grouping noteGrouping, int midiBeatNoteValue, int valueOfShortestNote) {
+	public RythmicSignature(Meter meter, Grouping noteGrouping, int quarterNoteTimeunitLength) {
 		this.meter = meter;
 		this.noteGrouping = noteGrouping;
-		this.midiBeatNoteValue = midiBeatNoteValue;
-		this.valueOfShortestNote = valueOfShortestNote;
+		this.quarterNoteTimeunitLength = quarterNoteTimeunitLength;
 	}
 	
 	public Meter getMeter() {
@@ -23,11 +21,11 @@ public class RythmicSignature {
 		return noteGrouping;
 	}
 	
-	public int getMidiBeatNoteValue() {
-		return midiBeatNoteValue;
+	public int getQuarterNoteTimeunitLength() {
+		return quarterNoteTimeunitLength;
 	}
 	
-	public int getValueOfShortestNote() {
-		return valueOfShortestNote;
+	public int getMeasureTimeunitLength() {
+		return quarterNoteTimeunitLength * meter.getNumerator();
 	}
 }

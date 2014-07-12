@@ -1,18 +1,23 @@
 package atompacman.lereza.common.solfege;
 
+import atompacman.lereza.common.solfege.quality.ThirdQuality;
+
 public class Key {
-	private NoteName noteName;
-	private Mode mode;
 	
-	public Key() {
-		this.noteName = null;
-		this.mode = null;
+	private Tone tone;
+	private ThirdQuality quality;
+	
+	
+	public Key(Tone tone, ThirdQuality quality) {
+		this.tone = tone;
+		this.quality = quality;
 	}
 	
-	public NoteName getNoteName() {
-		return noteName;
+	public Tone getTone() {
+		return tone;
 	}
-	public Mode getMode() {
-		return mode;
+	
+	public ThirdQuality getQuality() {
+		return quality;
 	}
 }

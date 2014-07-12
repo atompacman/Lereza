@@ -1,8 +1,9 @@
 package atompacman.lereza.midi.test;
 
 import atompacman.leraza.midi.MidiFileManager;
+import atompacman.lereza.common.test.CommonTestSetup;
 
-public class TestReader extends TestSetup {
+public class TestReader extends CommonTestSetup {
 
 	private static final int NB_ARGS = 2;
 	

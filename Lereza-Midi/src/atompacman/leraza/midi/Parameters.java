@@ -15,6 +15,7 @@ public class Parameters {
 	public static final int		MAX_NB_CHORDS_WITHOUT_HOMOPHONIC = 2;
 	
 	// MIDIFilePlayer
-	public static final double  PLAYBACK_SPEED_CORRECTION = 4;
-	public static final int		CONSECUTIVE_NOTE_CORRECTION = 0; // in milliseconds
+	public static final double  TRACK_PLAYBACK_SPEED_CORRECTION = 50000;
+	public static final double  NOTE_PLAYBACK_SPEED_CORRECTION = 4;
+	public static final double	CONSECUTIVE_NOTE_CORRECTION = 0.3; // in milliseconds
 }

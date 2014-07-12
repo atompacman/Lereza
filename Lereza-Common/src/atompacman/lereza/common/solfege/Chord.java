@@ -1,11 +1,21 @@
 package atompacman.lereza.common.solfege;
 
-import java.util.List;
-
 public class Chord {
-	private List<Interval> intervals;
+
+	private Tone tone;
+	private ChordType chord;
 	
-	public List<Interval> getIntervals(){
-		return intervals;
+	
+	public Chord(Tone tone, ChordType chord) {
+		this.tone = tone;
+		this.chord = chord;
+	}
+	
+	public Tone getTone() {
+		return tone;
+	}
+	
+	public ChordType getChord() {
+		return chord;
 	}
 }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import atompacman.atomLog.Log;
 import atompacman.leraza.midi.MidiFileManager;
-import atompacman.lereza.common.architecture.Device;
 import atompacman.lereza.common.formatting.Formatting;
 import atompacman.lereza.common.solfege.Genre.Subgenre;
 import atompacman.lereza.song.SongManager;
@@ -13,7 +12,7 @@ import atompacman.lereza.song.api.SongbookAPI;
 import atompacman.lereza.song.container.Composition;
 import atompacman.lereza.song.container.Set;
 
-public class Songbook implements SongbookAPI, Device {
+public class Songbook implements SongbookAPI {
 
 	private List<Set> compositionSets;
 
