@@ -14,11 +14,17 @@ public class TestPipeline extends PipelineTestSetup {
 		if (!validArgs(args, NB_ARGS)) {
 			return;
 		}
-		for (String path : args) {
-			Log.setVerbose(Verbose.INFOS);
+		
+		String path = args[1];
+		
+//		for (String path : args) {
+			Log.setVerbose(Verbose.EXTRA);
 			Wizard.midiFileManager.reader.read(path);
-			Wizard.midiFileManager.player.setInstrument(MidiInstrument.Acoustic_Guitar_nylon, 0);
+			Wizard.midiFileManager.player.setInstrumentToAllChannels(MidiInstrument.Celesta);
 			Wizard.songManager.builder.build(path);
-		}
+//		}
+		
+		
+		
 	}
 }

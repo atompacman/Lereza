@@ -20,7 +20,6 @@ public class MidiFile {
 	private int tempo;
 	private int finalTimestamp;
 	private List<String> infos;
-	private List<Integer> timeBeforeFirstTrackNote;
 	private List<MidiInstrument> trackInstruments;
 	private List<Map<Integer, Stack<MidiNote>>> notes;
 	private String filePath;
@@ -32,7 +31,6 @@ public class MidiFile {
 	
 	public MidiFile(String filePath){
 		this.infos = new ArrayList<String>();
-		this.timeBeforeFirstTrackNote = new ArrayList<Integer>();
 		this.trackInstruments = new ArrayList<MidiInstrument>();
 		this.notes = new ArrayList<Map<Integer, Stack<MidiNote>>>();
 		this.filePath = filePath;
@@ -100,10 +98,6 @@ public class MidiFile {
 		this.infos.add(info);
 	}
 
-	public void setTimeBeforeFirstNote(int timeBeforeFirstNote, int trackNo) {
-		this.timeBeforeFirstTrackNote.set(trackNo, timeBeforeFirstNote);
-	}
-
 	public void setTrackInstrument(int index, MidiInstrument instr) {
 		while (trackInstruments.size() <= index) {
 			trackInstruments.add(null);
@@ -114,7 +108,6 @@ public class MidiFile {
 	public void setNbTracks(int nbTracks) {
 		for (int i = 0; i < nbTracks; ++i) {
 			notes.add(new HashMap<Integer, Stack<MidiNote>>());
-			timeBeforeFirstTrackNote.add(null);
 		}
 	}
 	
@@ -173,10 +166,6 @@ public class MidiFile {
 	
 	public int getNbTracks() {
 		return notes.size();
-	}
-
-	public int getTimeBeforeFirstNote(int trackNb) {
-		return timeBeforeFirstTrackNote.get(trackNb);
 	}
 	
 	public List<String> getInfos() {

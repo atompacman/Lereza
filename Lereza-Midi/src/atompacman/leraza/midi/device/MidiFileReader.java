@@ -46,26 +46,23 @@ public class MidiFileReader implements MidiFileReaderAPI {
 
 		reset();
 
-		try {
-			this.tempMidiFile = new MidiFile(filePath);
-			this.rawData = loadBinaryFile(filePath);
+		this.tempMidiFile = new MidiFile(filePath);
+		this.rawData = loadBinaryFile(filePath);
 
-			if (this.rawData.length > Parameters.MAX_FILE_SIZE) {
-				throw new MidiFileException ("Size of selected file exceeds " + Parameters.MAX_FILE_SIZE / 1000 + " KB.");
-			}
-			Log.infos("File at \"" + filePath + "\" loaded in memory (" + this.rawData.length / 1000 + " KB).");
-
-			readBinaryFile();
-		} catch (MidiFileException e){
-			e.printStackTrace();
+		if (this.rawData.length > Parameters.MAX_FILE_SIZE) {
+			throw new MidiFileException ("Size of selected file exceeds " + Parameters.MAX_FILE_SIZE / 1000 + " KB.");
 		}
+		Log.infos("File at \"" + filePath + "\" loaded in memory (" + this.rawData.length / 1000 + " KB).");
+
+		readBinaryFile();
+
 		printErrorSummary();
 		Log.infos(Formatting.lineSeparation(1));
 
 		midiFiles.put(filePath, tempMidiFile);
 	}
 
-	private byte[] loadBinaryFile(String filePath) throws MidiFileException {
+	private byte[] loadBinaryFile(String filePath) {
 		File file = new File(filePath);
 		byte[] rawFile = new byte[(int)file.length()];
 
@@ -81,7 +78,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		return rawFile;
 	}
 
-	private void readBinaryFile() throws MidiFileException {
+	private void readBinaryFile() {
 		readFileHeader();
 
 		while (!endOfFile()) {
@@ -94,7 +91,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		}
 	}
 
-	private void readFileHeader() throws MidiFileException {
+	private void readFileHeader() {
 		Log.infos(printOffset() + "Reading header.");
 
 		if (readInt() != 0x4d546864) {
@@ -124,7 +121,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		offset += 2;
 	}
 
-	private void readTrack() throws MidiFileException {
+	private void readTrack() {
 		Log.infos(Formatting.lineSeparation("Reading track " + currentTrack, 1));
 		errors.put(currentTrack, new MidiFileErrorSummary());	
 
@@ -140,7 +137,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		offset += 3;
 	}
 
-	private void readTrackHeader() throws MidiFileException {
+	private void readTrackHeader() {
 		if (readInt() != 0x4d54726b) {
 			throw new MidiFileException(printOffset() + "ERROR : Error in the track header.");
 		}
@@ -152,7 +149,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 	//      EVENT HANDLING      //
 	//////////////////////////////
 
-	private void handleEvent(int deltaTime) throws MidiFileException {
+	private void handleEvent(int deltaTime) {
 		if (isAMetaEvent()) {
 			offset += 1;
 			handleMetaEvent();
@@ -171,7 +168,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		}
 	}
 
-	private void handleMetaEvent() throws MidiFileException {
+	private void handleMetaEvent() {
 		switch(readByte()) {
 		case 0x01: case 0x02: case 0x03: case 0x04: case 0x05: case 0x06: case 0x07: handleTextEvent(); return;
 		case 0x21: handleMIDIportEvent(); return;
@@ -182,7 +179,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		}
 	}
 
-	private void handleMIDIEvent(int deltaTime) throws MidiFileException {
+	private void handleMIDIEvent(int deltaTime) {
 		switch(firstHexDigit()) {
 		case 0x80:
 			verifyChannel();
@@ -201,7 +198,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		}
 	}
 
-	private void handleNoteOnEvent(int deltaTime) throws MidiFileException {
+	private void handleNoteOnEvent(int deltaTime) {
 		if (timestamp == 0) {
 			if (Parameters.NOTE_VISUALISATION) {
 				sleep((int)(deltaTime * Parameters.VISUALISATION_SPEED_CORRECTION));
@@ -225,7 +222,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		offset += 2;
 	}
 
-	private void handleNoteOffEvent(int deltaTime) throws MidiFileException {
+	private void handleNoteOffEvent(int deltaTime) {
 		if (Parameters.NOTE_VISUALISATION) {
 			sleep((int)(deltaTime * Parameters.VISUALISATION_SPEED_CORRECTION));
 		}
@@ -259,7 +256,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		if (tempMidiFile.getNotes().get(currentTrack).get(dividedTimestamp) == null) {
 			tempMidiFile.getNotes().get(currentTrack).put(dividedTimestamp, new Stack<MidiNote>());
 		}
-
+		
 		tempMidiFile.getNotes().get(currentTrack).get(dividedTimestamp).push(new MidiNote(note, dividedDuration));
 		
 		if (dividedDuration == 0) {
@@ -277,7 +274,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		offset += 2;
 	}
 
-	private int roundLength(int length) throws MidiFileException {
+	private int roundLength(int length) {
 		int valueOfTheSmallestNote = tempMidiFile.getDivisionOfABeat() / tempMidiFile.getNb32thNotesPerBeat() / 2;
 		int delta = length % valueOfTheSmallestNote;
 		if (delta == 0){
@@ -327,7 +324,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		offset += 3;
 	}
 
-	private void handleSetTempoMetaEvent() throws MidiFileException {
+	private void handleSetTempoMetaEvent() {
 		Log.infos(printOffset() + "Processing tempo event.");
 
 		offset += 2;
@@ -337,7 +334,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		offset += 3;
 	}
 
-	private void handleTimeSignatureMetaEvent() throws MidiFileException {
+	private void handleTimeSignatureMetaEvent() {
 		Log.infos(printOffset() + "Processing time signature event.");
 
 		offset += 2;
@@ -369,7 +366,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		offset += 1;
 	}
 
-	private void handleKeySignatureMetaEvent() throws MidiFileException {
+	private void handleKeySignatureMetaEvent() {
 		Log.infos(printOffset() + "Processing key signature event.");
 		offset += 2;
 
@@ -509,7 +506,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		}
 	}
 
-	private void verifyChannel() throws MidiFileException {
+	private void verifyChannel() {
 		if (currentChannel == -1) {
 			currentChannel = readByte() % 0x10;
 		} else if (currentChannel != readByte() % 0x10) {

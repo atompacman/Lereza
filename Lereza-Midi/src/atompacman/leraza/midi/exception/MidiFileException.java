@@ -1,6 +1,6 @@
 package atompacman.leraza.midi.exception;
 
-public class MidiFileException extends Exception {
+public class MidiFileException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -23,6 +23,5 @@ public class MidiFileException extends Exception {
 	
 	public void printStackTrace() {
 		super.printStackTrace();
-		System.exit(1);
 	}
 }

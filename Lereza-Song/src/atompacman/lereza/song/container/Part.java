@@ -1,7 +1,6 @@
 package atompacman.lereza.song.container;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -11,12 +10,13 @@ import atompacman.leraza.midi.container.MidiNote;
 import atompacman.lereza.common.solfege.RythmicSignature;
 import atompacman.lereza.common.solfege.Value;
 import atompacman.lereza.song.Parameters;
+import atompacman.lereza.song.exception.BuilderException;
 
 public class Part {
 
 	private List<Measure> measures;
 	private RythmicSignature rythmicSignature;
-
+	
 
 	//////////////////////////////
 	//       CONSTRUCTORS       //
@@ -37,10 +37,12 @@ public class Part {
 	//////////////////////////////
 
 	public void addNotes(Stack<MidiNote> notes, int timestamp) {
-		int measure = (int) ((double) timestamp / (double) rythmicSignature.getMeasureTimeunitLength());
+		int originalMeasure = (int) ((double) timestamp / (double) rythmicSignature.getMeasureTimeunitLength());
+		int originalTimeunit = timestamp % rythmicSignature.getMeasureTimeunitLength();
 		
 		for (MidiNote note : notes) {
-			int timeunit = timestamp % rythmicSignature.getMeasureTimeunitLength();
+			int measure = originalMeasure;
+			int timeunit = originalTimeunit;
 			boolean realNotePlaced = false;
 			
 			List<Value> values = Value.splitIntoValues(note.getLength());
@@ -50,40 +52,37 @@ public class Part {
 				if (endTimeunit <= rythmicSignature.getMeasureTimeunitLength()) {
 					measures.get(measure).addNote(note, value, timeunit, realNotePlaced);
 				} else {
-					List<Value> splitValue = Value.splitInTwoAt(value, endTimeunit - rythmicSignature.getMeasureTimeunitLength());
+					List<Value> splitValue = Value.splitInTwoAt(value, rythmicSignature.getMeasureTimeunitLength() - timeunit);
+					if (splitValue == null || splitValue.get(0) == null || splitValue.get(1) == null) {
+						throw new BuilderException("Value " + value + "(" + value.toTimeunit() + " timeunits) cannot be split in two at " + (endTimeunit - rythmicSignature.getMeasureTimeunitLength()) + ".");
+					}
 					measures.get(measure).addNote(note, splitValue.get(0), timeunit, realNotePlaced);
 					int timeunitOnOtherMeasure = (timeunit + splitValue.get(0).toTimeunit()) % rythmicSignature.getMeasureTimeunitLength();
-					measures.get(measure + 1).addNote(note, splitValue.get(1), timeunitOnOtherMeasure, realNotePlaced);
+					measures.get(measure + 1).addNote(note, splitValue.get(1), timeunitOnOtherMeasure, true);
 				}
 				timeunit += value.toTimeunit();
 				if (timeunit >= rythmicSignature.getMeasureTimeunitLength()) {
 					++measure;
+					timeunit -= rythmicSignature.getMeasureTimeunitLength();
 				}
 				realNotePlaced = true;
 			}
-
+		}
+		if (Parameters.NOTE_ADDING_AUDIO) {
+			MidiFileManager.player.playNoteStack(notes, 0, Parameters.NOTE_ADDING_AUDIO_TEMPO);
 		}
 		if (Parameters.NOTE_ADDING_VISUALISATION) {
-			if (measure != 0) {
-				printMeasures(Arrays.asList(measures.get(measure - 1).toStringList(), measures.get(measure).toStringList()));
+			List<List<String>> measuresToPrint = new ArrayList<List<String>>();
+			measuresToPrint.add(measures.get(originalMeasure).toStringList(false));
+			
+			if (originalMeasure > 0) {
+				measuresToPrint.add(0, measures.get(originalMeasure - 1).toStringList(true));
 			}
-		}
-		if (notes.size() == 1) {
-			if (Parameters.NOTE_ADDING_AUDIO) {
-				MidiFileManager.player.playNote(notes.get(0).getNote(), notes.get(0).getLength(), Parameters.NOTE_ADDING_AUDIO_TEMPO);
+			if (originalMeasure > 1) {
+				measuresToPrint.add(0, measures.get(originalMeasure - 2).toStringList(true));
 			}
-		} else {
-			Log.error("Polyphony not yet implemented.");
+			printMeasures(measuresToPrint);
 		}
-	}
-
-
-	//////////////////////////////
-	//          OTHERS          //
-	//////////////////////////////
-
-	public void fillWithRests() {
-		//TODO
 	}
 
 
@@ -92,7 +91,7 @@ public class Part {
 	//////////////////////////////
 
 	public void printMeasures(List<List<String>> measures) {
-		if (measures == null || measures.size() < 2) {
+		if (measures == null) {
 			return;
 		}
 
@@ -115,7 +114,7 @@ public class Part {
 				builder.append(measure.get(line));
 				builder.append(getHoriBarIfNeeded(line));
 			}
-			Log.infos(builder.toString());
+			Log.vital(builder.toString());
 		}
 	}
 

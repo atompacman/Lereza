@@ -15,7 +15,7 @@ public enum Value {
 	public static Value timeunitToValue(int length) {
 		double exponent = Math.log10(length) / Math.log10(2);
 		if ((exponent - (int) exponent) != 0) {
-			return null;
+			throw new IllegalArgumentException("Length \"" + length + "\" cannot be converted to a simple value.");
 		}
 		return Value.values()[(int)exponent];
 	}
@@ -27,6 +27,11 @@ public enum Value {
 		
 		while ((exponent - (int) exponent) != 0) {
 			int biggestLength = (int) Math.pow(2, (int) exponent);
+			while (biggestLength > WHOLE.toTimeunit()) {
+				values.add(WHOLE);
+				biggestLength -= WHOLE.toTimeunit();
+				length -= WHOLE.toTimeunit();
+			}
 			values.add(timeunitToValue(biggestLength));
 			length -= biggestLength;
 			exponent = Math.log10(length) / Math.log10(2);
@@ -40,12 +45,12 @@ public enum Value {
 		int valueTimeunitLength = value.toTimeunit();
 		
 		if (valueTimeunitLength <= timeunit || timeunit == 0) {
-			return null;
+			throw new IllegalArgumentException("Value " + value + "(" + value.toTimeunit() + " timeunits) cannot be split in two at " + timeunit + ".");
 		}
 		List<Value> halves = new ArrayList<Value>();
 		halves.add(timeunitToValue(timeunit));
 		halves.add(timeunitToValue(valueTimeunitLength - timeunit));
-		
+
 		return halves;
 	}
 	

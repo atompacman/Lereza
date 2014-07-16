@@ -17,7 +17,7 @@ public class Measure {
 	private List<Set<Note>> notes;
 	private RythmicSignature rythmicSignature;
 	
-	private int number;;
+	private int number;
 	private boolean isEmpty;
 			
 	
@@ -54,15 +54,7 @@ public class Measure {
 		Note firstNote = new Note(note.getNote(), value, noteIsTied ? NoteStatus.TIED_NOTE_START : NoteStatus.NOTE_START);
 
 		notes.get(timeunit).add(firstNote);
-		//TODO extra
-		Log.infos(String.format("Adding note %4s of length %2d at timeunit %4d of measure no.%d", firstNote.toString(), firstNote.getValue().toTimeunit(), timeunit, number));
-
-		//TODO remove
-		if (timeunit == 1) {
-			timeunit += 0;
-		}
-		//TODO remove
-		
+		Log.extra(String.format("Adding note %4s of length %2d at timeunit %4d of measure no.%d", firstNote.toString(), firstNote.getValue().toTimeunit(), timeunit, number));		
 		
 		for (int i = timeunit + 1; i < finalTimeunit; ++i) {
 			Note newNote = new Note(note.getNote(), value, noteIsTied ? NoteStatus.TIED_NOTE_CONTINUATION : NoteStatus.NOTE_CONTINUATION);
@@ -84,12 +76,16 @@ public class Measure {
 		return notes;
 	}
 
+	public boolean isEmpty() {
+		return isEmpty;
+	}
+	
 	
 	//////////////////////////////
 	//          PRINT           //
 	//////////////////////////////
 	
-	public List<String> toStringList() {
+	public List<String> toStringList(boolean completedMeasure) {
 		List<String> partition = createEmptyPartition();
 		int linesForRests[] = {Parameters.TOP_SECTION_HEIGHT + 2, Parameters.TOP_SECTION_HEIGHT + 6, Parameters.TOP_SECTION_HEIGHT + 
 				Parameters.MIDDLE_SECTION_HEIGHT + 11, Parameters.TOP_SECTION_HEIGHT + Parameters.MIDDLE_SECTION_HEIGHT + 15};
@@ -104,7 +100,7 @@ public class Measure {
 					partition.set(heightOnPartition, addNoteToLine(aNote, i, partition.get(heightOnPartition)));
 				}
 			}
-			if (Parameters.SHOW_RESTS && areOtherNotesToPlaceFrom(i) && timeunitNotes.isEmpty() && !isEmpty) {
+			if (Parameters.SHOW_RESTS && timeunitNotes.isEmpty() && (areOtherNotesToPlaceFrom(i) || completedMeasure)) {
 				for (int j = 0; j < linesForRests.length; ++j) {
 					int height = linesForRests[j];
 					String line = partition.get(height);
@@ -170,7 +166,7 @@ public class Measure {
 	}
 	
 	private String createEmptyLine() {
-		int lineLength = rythmicSignature.getMeasureTimeunitLength() * Parameters.LENGTH_PER_TIMEUNIT /* + Parameters.BORDER_LENGTH */;
+		int lineLength = rythmicSignature.getMeasureTimeunitLength() * Parameters.LENGTH_PER_TIMEUNIT  + Parameters.BORDER_LENGTH;
 		StringBuilder builder = new StringBuilder();
 		
 		for (int j = 0; j < lineLength; ++j) {
@@ -180,7 +176,7 @@ public class Measure {
 	}
 	
 	private String createLine() {
-		int lineLength = rythmicSignature.getMeasureTimeunitLength() * Parameters.LENGTH_PER_TIMEUNIT /* + Parameters.BORDER_LENGTH */;
+		int lineLength = rythmicSignature.getMeasureTimeunitLength() * Parameters.LENGTH_PER_TIMEUNIT  + Parameters.BORDER_LENGTH;
 		StringBuilder builder = new StringBuilder();
 		
 		for (int j = 0; j < lineLength; ++j) {

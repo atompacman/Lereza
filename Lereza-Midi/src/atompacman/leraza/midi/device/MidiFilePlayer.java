@@ -137,7 +137,7 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 		stopNote(note, 0);
 	}
 
-	public void playNote(int note, int length, double tempo, int channel) {
+	private void playNote(int note, int length, double tempo, int channel) {
 		Log.extra("Playing the note " + HexToNote.toString(note) + " (length: " + length + ") (channel: " + channel + ")");
 		channels[channel].noteOn(note, 600);
 		try {
@@ -153,7 +153,35 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 	}
 
 	public void playNote(Pitch pitch, Value value, double tempo) {
-		playNote(pitch.getSemitoneRank() + 12, (int) Math.pow(2, value.ordinal()), tempo, 0);
+		playNote(pitch.getSemitoneRank() + 12, value.toTimeunit(), tempo, 0);
+	}
+	
+	
+	//////////////////////////////
+	//           REST           //
+	//////////////////////////////
+	
+	public void rest(int length, double tempo) {
+		Log.extra("Resting for " + length + ".");
+		try {
+			Thread.sleep((int)(((double) length - Parameters.CONSECUTIVE_NOTE_CORRECTION) * Parameters.NOTE_PLAYBACK_SPEED_CORRECTION * tempo));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	//////////////////////////////
+	//     PLAY NOTE STACK      //
+	//////////////////////////////
+	
+	public void playNoteStack(Stack<MidiNote> noteStack, int channel, double tempo) {
+		if (noteStack != null) {
+			for (MidiNote note : noteStack) {
+				Thread notePlayer = new Thread(new NotePlayer(note, channel, tempo));
+				notePlayer.start();
+			}
+		}
 	}
 	
 	
@@ -167,16 +195,11 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 		setInstrument(instrument, track);
 		try {
 			MidiFile midiFile = MidiFileManager.reader.getMidiFile(filePath);
-			Map<Integer,Stack<MidiNote>> notes = midiFile .getNotes().get(track);
+			Map<Integer,Stack<MidiNote>> notes = midiFile.getNotes().get(track);
 			
 			for (int j = 0; j <= midiFile.getFinalTimestamp(); ++j) {
 				Stack<MidiNote> noteStack = notes.get(j);
-				if (noteStack != null) {
-					for (MidiNote note : noteStack) {
-						Thread notePlayer = new Thread(new NotePlayer(note, track, tempo));
-						notePlayer.start();
-					}
-				}
+				playNoteStack(noteStack, track, tempo);
 				Thread.sleep((int)(Parameters.NOTE_PLAYBACK_SPEED_CORRECTION * tempo));
 			}
 		} catch (InterruptedException e) {
@@ -194,22 +217,19 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 	//////////////////////////////
 	
 	public void playFile(String filePath) {
-		playFile(filePath, (MidiFileManager.reader.getMidiFile(filePath)).getInstruments(), false);
-	}
-	
-	public void playFile(String filePath, List<MidiInstrument> instruments) {
-		playFile(filePath, instruments, true);
+		playFile(filePath, false);
 	}
 	
 	public void playFileAndWait(String filePath) {
-		playFile(filePath, (MidiFileManager.reader.getMidiFile(filePath)).getInstruments(), true);
+		playFile(filePath, true);
 	}
 	
-	private void playFile(String filePath, List<MidiInstrument> instruments, boolean waitForSongCompletion) {
+	private void playFile(String filePath, boolean waitForSongCompletion) {
 		Log.infos(Formatting.lineSeparation("MIDI Player", 0));
 		Log.infos(Formatting.lineSeparation("Now playing: " + filePath, 1));
 		try {
 			MidiFile midiFile = MidiFileManager.reader.getMidiFile(filePath);
+			List<MidiInstrument> instruments = (MidiFileManager.reader.getMidiFile(filePath)).getInstruments();
 			List<Thread> threads = new ArrayList<Thread>();
 			
 			for (int i = 0; i < midiFile.getNbTracks(); ++i) {
@@ -239,5 +259,12 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 	public void setInstrument(MidiInstrument instr, int channel) {
 		Log.infos("Setting channel no." + channel + " to the instrument \"" + instr.name() + "\".");
 		channels[channel].programChange(instr.ordinal());
+	}
+	
+	public void setInstrumentToAllChannels(MidiInstrument instr) {
+		Log.infos("Setting all channels to the instrument \"" + instr.name() + "\".");
+		for (MidiChannel channel : channels) {
+			channel.programChange(instr.ordinal());
+		}
 	}
 }

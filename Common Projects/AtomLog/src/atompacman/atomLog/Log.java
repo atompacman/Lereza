@@ -60,7 +60,7 @@ public class Log {
 	
 	private static String timestamp(){
 		Date timestamp = new Date();
-		SimpleDateFormat timeFormat = new SimpleDateFormat("[dd/MM/yyyy][HH:mm:ss:SSS]");
+		SimpleDateFormat timeFormat = new SimpleDateFormat("[HH:mm:ss:SSS]");
 		return timeFormat.format(timestamp);
 	}
 
@@ -75,6 +75,6 @@ public class Log {
 			stringBuilder.append(CLASSNAME_FILLER);
 		}
 		
-		return String.format("%-30s", stringBuilder.toString());
+		return stringBuilder.toString();
 	}
 }

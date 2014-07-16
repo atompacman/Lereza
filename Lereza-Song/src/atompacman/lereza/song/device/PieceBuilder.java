@@ -16,19 +16,21 @@ import atompacman.lereza.common.solfege.Grouping;
 import atompacman.lereza.common.solfege.Meter;
 import atompacman.lereza.common.solfege.RythmicSignature;
 import atompacman.lereza.common.solfege.Value;
+import atompacman.lereza.song.Parameters;
 import atompacman.lereza.song.api.PieceBuilderAPI;
 import atompacman.lereza.song.container.Part;
 import atompacman.lereza.song.container.Piece;
 import atompacman.lereza.song.exception.BuilderException;
+import atompacman.lereza.song.qa.TimestampsChecker;
 
 public class PieceBuilder implements PieceBuilderAPI {
 
 	private Map<String, Piece> builtPieces;
-	
+
 	private Piece tempPiece;
 	private MidiFile tempMidiFile;
 
-	
+
 	//////////////////////////////
 	//       CONSTRUCTOR        //
 	//////////////////////////////
@@ -37,7 +39,7 @@ public class PieceBuilder implements PieceBuilderAPI {
 		this.builtPieces = new HashMap<String, Piece>();
 	}
 
-	
+
 	//////////////////////////////
 	//          BUILD           //
 	//////////////////////////////
@@ -45,31 +47,28 @@ public class PieceBuilder implements PieceBuilderAPI {
 	public void build(String filePath) {
 		Log.infos(Formatting.lineSeparation("PieceBuilder", 0));
 		Log.infos("Building midi file at " + filePath + ".");
-		
+
 		tempMidiFile = MidiFileManager.reader.getMidiFile(filePath);
 		tempPiece = new Piece();
-		
+
 		setRythmicSignature();
-		
-		try {
-			for (int i = 0; i < tempMidiFile.getNbTracks(); ++i) {
-				buildPart(i);
-			}
-		} catch (BuilderException e) {
-			e.printStackTrace();
+
+		for (int i = 0; i < tempMidiFile.getNbTracks(); ++i) {
+			buildPart(i);
 		}
+
 		builtPieces.put(filePath, tempPiece);
 	}
 
 	private void setRythmicSignature() {
 		Log.infos("Rythmic signature : ");
-		
+
 		Meter meter = new Meter(tempMidiFile.getBeatPerMeasure(), tempMidiFile.getValueOfTheBeatNote());
 		Log.infos(String.format(" - %-22s : %s", "Meter", meter.toString()));
-		
+
 		int midiBeatNoteValue = tempMidiFile.getDivisionOfABeat();
 		Log.infos(String.format(" - %-22s : %s", "Midi beat note value", midiBeatNoteValue));
-		
+
 		int valueOfShortestNote = tempMidiFile.getValueOfShortestNote();
 		Log.infos(String.format(" - %-22s : %s", "Value of shortest note", valueOfShortestNote));
 
@@ -91,32 +90,84 @@ public class PieceBuilder implements PieceBuilderAPI {
 
 	private void buildPart(int partNo) throws BuilderException {
 		Log.infos(Formatting.lineSeparation("Part " + partNo, 1));
-		
+
 		Map<Integer, Stack<MidiNote>> trackNotes = tempMidiFile.getNotes().get(partNo);
-		
+
 		if (trackNotes.isEmpty()) {
 			Log.infos("Discarded a track with no notes (track " + partNo + ") : no part will be created.");
 			return;
 		}
-		Part part = new Part(tempPiece.getRythmicSignature(), tempMidiFile.getFinalTimestamp());
+		List<Integer> timestamps = new ArrayList<Integer>(trackNotes.keySet());
+		Collections.sort(timestamps);
 
-		List<Integer> timeUnits = new ArrayList<Integer>(trackNotes.keySet());
-		Collections.sort(timeUnits);
-		
-		for (Integer timeUnit : timeUnits) {
-			Log.extra("Midi time unit : " + timeUnit + " || Adding notes " + trackNotes.get(timeUnit).toString() + " to part.");
-			part.addNotes(trackNotes.get(timeUnit), timeUnit);
+		Map<Integer, Integer> timestampsOffsetCorrectionMap = TimestampsChecker.createTimestampOffsetCorrectionMap(timestamps);
+
+		int finalTimeunit = 0;
+		for (int i = timestamps.size() - 1; i > timestamps.size() - 10; --i) {
+			int timestamp = timestampsOffsetCorrectionMap.get(timestamps.get(i));
+			int longuestLength = stackLonguestLength(trackNotes.get(timestamps.get(i)));
+			if (timestamp + longuestLength > finalTimeunit) {
+				finalTimeunit = timestamp + longuestLength;
+			}
 		}
 		
-		part.fillWithRests();
+		Part part = new Part(tempPiece.getRythmicSignature(), finalTimeunit);
+		
+		for (int i = 0; i < timestamps.size(); ++i) {
+			int timestamp = timestamps.get(i);
+			int correctedTimestamp = timestampsOffsetCorrectionMap.get(timestamp);
+			Stack<MidiNote> noteStack = trackNotes.get(timestamp);
+
+			printNoteAddingMessage(noteStack, timestamp, correctedTimestamp);
+
+			//TODO remove
+			if (correctedTimestamp == 2696) {
+				correctedTimestamp += 0;
+			}
+			//TODO
+
+			if (i < timestamps.size() - 1) {
+				int nextCorrectedTimestamp = timestampsOffsetCorrectionMap.get(timestamps.get(i + 1));
+				TimestampsChecker.fusionOddNotesWithTinyRests(noteStack, correctedTimestamp, nextCorrectedTimestamp);
+			}
+
+			part.addNotes(noteStack, correctedTimestamp);
+
+			if (Parameters.NOTE_ADDING_AUDIO) {
+				if (i < timestamps.size() - 1) {
+					int delta = timestampsOffsetCorrectionMap.get(timestamps.get(i + 1)) - correctedTimestamp;
+					MidiFileManager.player.rest(delta, Parameters.NOTE_ADDING_AUDIO_TEMPO);
+				}
+			}
+		}
 		tempPiece.addPart(part);
+	}
+
+	private void printNoteAddingMessage(Stack<MidiNote> noteStack, int timestamp, int correctedTimestamp) {
+		if (timestamp == correctedTimestamp) {
+			Log.extra("Midi time unit : " + correctedTimestamp + "     || Adding notes " + noteStack.toString() + " to part.");
+		} else {
+			String delta = (correctedTimestamp - timestamp > 0) ? "+" + (correctedTimestamp - timestamp) : Integer.toString(correctedTimestamp - timestamp);
+			Log.extra("Midi time unit : " + correctedTimestamp + " (" + timestamp + delta + ") || Adding notes " + noteStack.toString() + " to part.");
+		}
+	}
+
+	private int stackLonguestLength(Stack<MidiNote> noteStack) {
+		int longuestLength = 0;
+		
+		for (MidiNote note : noteStack) {
+			if (note.getLength() > longuestLength) {
+				longuestLength = note.getLength();
+			}
+		}
+		return longuestLength;
 	}
 	
 	
 	//////////////////////////////
 	//          GETTERS         //
 	//////////////////////////////
-	
+
 	public Piece getPiece(String filePath) {
 		return builtPieces.get(filePath);
 	}
