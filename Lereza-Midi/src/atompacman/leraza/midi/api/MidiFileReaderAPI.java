@@ -1,8 +1,6 @@
 package atompacman.leraza.midi.api;
 
-import atompacman.lereza.common.architecture.DeviceAPI;
-
-public interface MidiFileReaderAPI extends DeviceAPI {
+public interface MidiFileReaderAPI {
 
 	void read(String filePath);
 }

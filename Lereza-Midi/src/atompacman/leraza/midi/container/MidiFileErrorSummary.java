@@ -1,6 +1,7 @@
 package atompacman.leraza.midi.container;
 
-import atompacman.atomLog.Log;
+import com.atompacman.atomLog.Log;
+
 import atompacman.leraza.midi.Parameters;
 
 public class MidiFileErrorSummary {
@@ -66,15 +67,15 @@ public class MidiFileErrorSummary {
 	
 	public void print() {
 		if (roundingOverThresholdCount != 0) {
-			Log.infos("· Excessive note rounding    : " + roundingOverThresholdCount);
+			if (Log.infos() && Log.print("· Excessive note rounding    : " + roundingOverThresholdCount));
 		}
 		if (noteLengthZeroCount != 0) {
-			Log.infos("· Notes rounded length zero  : " + noteLengthZeroCount);
+			if (Log.infos() && Log.print("· Notes rounded length zero  : " + noteLengthZeroCount));
 		}
 		if (Math.abs(noteRoundingTotalOffset) <= Parameters.TOTAL_ROUND_OFFSET_LIMIT) {
-			Log.infos("· Total rounding offset      : " + noteRoundingTotalOffset + "/" + totalTimestamp);
+			if (Log.infos() && Log.print("· Total rounding offset      : " + noteRoundingTotalOffset + "/" + totalTimestamp));
 		} else {
-			Log.warng("· TOTAL ROUNDING OFFSET      : " + noteRoundingTotalOffset + "/" + totalTimestamp + " (WARNING: THIS CAN CAUSE RYTHMN ERRORS IN THE FUTURE)");
+			if (Log.warng() && Log.print("· TOTAL ROUNDING OFFSET      : " + noteRoundingTotalOffset + "/" + totalTimestamp + " (WARNING: THIS CAN CAUSE RYTHMN ERRORS IN THE FUTURE)"));
 		}
 	}
 }

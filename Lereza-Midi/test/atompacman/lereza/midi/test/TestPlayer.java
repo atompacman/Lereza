@@ -1,20 +1,23 @@
 package atompacman.lereza.midi.test;
 
-import atompacman.leraza.midi.MidiFileManager;
-import atompacman.lereza.common.test.CommonTestSetup;
+import atompacman.leraza.midi.api.MidiFileReaderAPI;
+import atompacman.leraza.midi.io.MidiFilePlayer;
+import atompacman.leraza.midi.io.MidiFileReader;
 
-public class TestPlayer extends CommonTestSetup {
+public class TestPlayer {
 	
 	private static final int NB_ARGS = 2;
 
 	public static void main(String[] args) throws InterruptedException {
-		if (!validArgs(args, NB_ARGS)) {
-			return;
+		if (args.length != NB_ARGS) {
+			throw new IllegalArgumentException("Received " + args.length + " arguments while " + NB_ARGS + " were needed.");
 		}
-
-		//for (String path : args) {
-			MidiFileManager.reader.read(args[1]);
-			MidiFileManager.player.playFile(args[1]);
-		//}
+		
+		MidiFileReaderAPI reader = new MidiFileReader();
+		
+		for (String path : args) {
+			reader.read(path);
+			MidiFilePlayer.getPlayer().playFile(path);
+		}
 	}
 }

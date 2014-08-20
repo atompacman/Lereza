@@ -3,15 +3,26 @@ package atompacman.lereza.api;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import atompacman.atomLog.Log;
-import atompacman.lereza.api.manager.MidiFileManagerAPI;
-import atompacman.lereza.api.manager.SongManagerAPI;
-import atompacman.lereza.common.formatting.Formatting;
+import com.atompacman.atomLog.Log;
+import com.atompacman.lereza.core.composition.LibraryAPI;
+import com.atompacman.lereza.core.composition.tool.Library;
+import com.atompacman.lereza.core.piece.PieceBuilderAPI;
+import com.atompacman.lereza.core.piece.tool.PieceBuilder;
+import com.atompacman.lereza.core.profile.ProfileManager;
+import com.atompacman.lereza.core.profile.ProfileManagerAPI;
+
+import atompacman.leraza.midi.api.MidiFilePlayerAPI;
+import atompacman.leraza.midi.api.MidiFileReaderAPI;
+import atompacman.leraza.midi.io.MidiFilePlayer;
+import atompacman.leraza.midi.io.MidiFileReader;
 
 public class Wizard {
 
-	public static MidiFileManagerAPI midiFileManager;
-	public static SongManagerAPI	 songManager;
+	public static MidiFileReaderAPI midiFileReader;
+	public static MidiFilePlayerAPI	midiFilePlayer;
+	public static PieceBuilderAPI	pieceBuilder;
+	public static LibraryAPI		library;
+	public static ProfileManagerAPI profileManager;
 	
 	private static Date wizardInitializationTime;
 
@@ -21,16 +32,23 @@ public class Wizard {
 	//////////////////////////////
 
 	public static void initialize() {
-		Log.infos(Formatting.lineSeparation("Lereza Wizard", 0));
+		if (Log.infos() && Log.title("Lereza Wizard", 0));
 		getInitializationTime();
-		midiFileManager = new MidiFileManagerAPI();
-		songManager = new SongManagerAPI();
+		initializeModuleAPIs();
 	}
 
 	private static void getInitializationTime() {
 		wizardInitializationTime = new Date();
 		SimpleDateFormat date = new SimpleDateFormat("dd/MM/yyyy");
 		SimpleDateFormat timestamp  = new SimpleDateFormat("HH:mm:ss");
-		Log.infos("Lereza Wizard initialized on " + date.format(wizardInitializationTime) + " at " + timestamp.format(wizardInitializationTime) + ".");
+		if (Log.infos() && Log.print("Lereza Wizard initialized on " + date.format(wizardInitializationTime) + " at " + timestamp.format(wizardInitializationTime) + "."));
+	}
+	
+	private static void initializeModuleAPIs() {
+		midiFileReader = new MidiFileReader();
+		midiFilePlayer = MidiFilePlayer.getPlayer();
+		pieceBuilder = new PieceBuilder();
+		library = new Library();
+		profileManager = new ProfileManager();
 	}
 }

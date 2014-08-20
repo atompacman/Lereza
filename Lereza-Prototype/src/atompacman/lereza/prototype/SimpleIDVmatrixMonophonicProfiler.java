@@ -3,10 +3,10 @@ package atompacman.lereza.prototype;
 import java.util.ArrayList;
 import java.util.List;
 
-import atompacman.atomLog.Log;
-import atompacman.atomLog.Log.Verbose;
-import atompacman.leraza.midi.MidiFileManager;
-import atompacman.lereza.common.formatting.Formatting;
+import com.atompacman.atomLog.Log;
+import com.atompacman.atomLog.Log.Verbose;
+
+import atompacman.leraza.midi.io.MidiFilePlayer;
 import atompacman.lereza.common.solfege.Interval;
 import atompacman.lereza.common.solfege.Pitch;
 import atompacman.lereza.common.solfege.ScaleDegree;
@@ -31,13 +31,25 @@ public class SimpleIDVmatrixMonophonicProfiler {
 	private static final int FINAL_LENGTH = 16;
 	private static final int MAX_NB_ATTEMPTS = 500;
 	
-	private static Prob3Dmatrix<Interval, ScaleDegree, Value> idvMatrix;
+	private static Prob3Dmatrix<SimpleInterval, ScaleDegree, Value> idvMatrix;
 	private static ProbVector<Pitch> pitchProbVector;
 	private static ProbVector<Value> valueProbVector;
 		
 	private static List<NoteInput> notes;
 	private static double totalLength;
 	
+	
+	private enum SimpleInterval {
+		DESC_PERFECT_FOURTH,
+		DESC_MAJOR_THIRD,
+		DESC_MAJOR_SECOND,
+		DESC_MINOR_SECOND,
+		UNISON,
+		MAJOR_SECOND,
+		MINOR_SECOND,
+		MAJOR_THIRD,
+		PERFECT_FOURTH;
+	}
 	
 	private static class NoteInput {
 		
@@ -81,41 +93,40 @@ public class SimpleIDVmatrixMonophonicProfiler {
 				if (keepTheInput(newInput)) {
 					notes.add(newInput);
 					updateTotalLength();
-					Log.infos("Note \"" + newInput.toString() + "\" added to composition. Progress : " + notes.size() + "/" + FINAL_LENGTH);
+					if (Log.infos() && Log.print("Note \"" + newInput.toString() + "\" added to composition. Progress : " + notes.size() + "/" + FINAL_LENGTH));
 					attempt = 0;
 				}
 			}
 			if (attempt == MAX_NB_ATTEMPTS) {
-				Log.infos("Generator dead-end. Current try: " + tries);
-				Log.infos(Formatting.lineSeparation(1));
+				if (Log.infos() && Log.print("Generator dead-end. Current try: " + tries));
+				if (Log.infos() && Log.title(1));
 			}
 		} while (totalLength != FINAL_LENGTH);
 
 		for (NoteInput input : notes) {
-			Log.vital(input.toString());
-			//MidiFileManager.player.playNote(input.pitch.getTone().getNote().ordinal() + Pitch.C3.ordinal() - 4, (int) Math.pow(2, input.value.ordinal()), 8d);
-			MidiFileManager.player.playNote(input.pitch, input.value, 8d);
+			if (Log.vital() && Log.print(input.toString()));
+			MidiFilePlayer.getPlayer().playNote(input.pitch.getSemitoneRank(), input.value.toTimeunit(), 8d);
 		}
 	}
 	
 	private static void buildIDVmatrix() {
-		Prob3DmatrixBuilder<Interval, ScaleDegree, Value> builder = new Prob3DmatrixBuilder<Interval, ScaleDegree, Value>();
+		Prob3DmatrixBuilder<SimpleInterval, ScaleDegree, Value> builder = new Prob3DmatrixBuilder<SimpleInterval, ScaleDegree, Value>();
 		
-		builder.increment(Interval.DESC_PERFECT_FOURTH, ScaleDegree.V,   Value.QUARTER);
-		builder.increment(Interval.DESC_MAJOR_THIRD, 	ScaleDegree.I,   Value.QUARTER);
-		builder.increment(Interval.DESC_MAJOR_THIRD, 	ScaleDegree.I,   Value.QUARTER);
-		builder.increment(Interval.DESC_MINOR_SECOND, 	ScaleDegree.III, Value.EIGHTH );
-		builder.increment(Interval.DESC_MAJOR_SECOND, 	ScaleDegree.IV,  Value.EIGHTH );
-		builder.increment(Interval.DESC_MAJOR_SECOND, 	ScaleDegree.V,   Value.EIGHTH );
-		builder.increment(Interval.UNISON, 		  		ScaleDegree.I,   Value.QUARTER);
-		builder.increment(Interval.UNISON, 		  		ScaleDegree.V,   Value.HALF   );
-		builder.increment(Interval.MAJOR_SECOND,		ScaleDegree.II,  Value.QUARTER);
-		builder.increment(Interval.MAJOR_SECOND, 		ScaleDegree.III, Value.QUARTER);
-		builder.increment(Interval.MINOR_SECOND, 		ScaleDegree.IV,  Value.QUARTER);
-		builder.increment(Interval.MAJOR_SECOND, 		ScaleDegree.V,   Value.QUARTER);
-		builder.increment(Interval.MAJOR_SECOND, 		ScaleDegree.VI,  Value.EIGHTH );
-		builder.increment(Interval.MAJOR_THIRD,   		ScaleDegree.III, Value.QUARTER);
-		builder.increment(Interval.PERFECT_FOURTH, 		ScaleDegree.I,   Value.QUARTER);
+		builder.increment(SimpleInterval.DESC_PERFECT_FOURTH, ScaleDegree.V,   Value.QUARTER);
+		builder.increment(SimpleInterval.DESC_MAJOR_THIRD, 	ScaleDegree.I,   Value.QUARTER);
+		builder.increment(SimpleInterval.DESC_MAJOR_THIRD, 	ScaleDegree.I,   Value.QUARTER);
+		builder.increment(SimpleInterval.DESC_MINOR_SECOND, 	ScaleDegree.III, Value.EIGHTH );
+		builder.increment(SimpleInterval.DESC_MAJOR_SECOND, 	ScaleDegree.IV,  Value.EIGHTH );
+		builder.increment(SimpleInterval.DESC_MAJOR_SECOND, 	ScaleDegree.V,   Value.EIGHTH );
+		builder.increment(SimpleInterval.UNISON, 		  		ScaleDegree.I,   Value.QUARTER);
+		builder.increment(SimpleInterval.UNISON, 		  		ScaleDegree.V,   Value.HALF   );
+		builder.increment(SimpleInterval.MAJOR_SECOND,		ScaleDegree.II,  Value.QUARTER);
+		builder.increment(SimpleInterval.MAJOR_SECOND, 		ScaleDegree.III, Value.QUARTER);
+		builder.increment(SimpleInterval.MINOR_SECOND, 		ScaleDegree.IV,  Value.QUARTER);
+		builder.increment(SimpleInterval.MAJOR_SECOND, 		ScaleDegree.V,   Value.QUARTER);
+		builder.increment(SimpleInterval.MAJOR_SECOND, 		ScaleDegree.VI,  Value.EIGHTH );
+		builder.increment(SimpleInterval.MAJOR_THIRD,   		ScaleDegree.III, Value.QUARTER);
+		builder.increment(SimpleInterval.PERFECT_FOURTH, 		ScaleDegree.I,   Value.QUARTER);
 		
 		idvMatrix = builder.createProb3Dmatrix();
 	}
@@ -206,7 +217,7 @@ public class SimpleIDVmatrixMonophonicProfiler {
 		case QUARTER: return 1;   
 		case HALF:	  return 2;
 		default:      
-			Log.error("INVALID VALUE");
+			if (Log.error() && Log.print("INVALID VALUE"));
 			return 0;
 		}
 	}

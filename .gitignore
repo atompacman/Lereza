@@ -3,6 +3,7 @@
 .metadata/
 .bin/
 .Data/
+.Documents/
 *.jar
 *.war
 *.ear
