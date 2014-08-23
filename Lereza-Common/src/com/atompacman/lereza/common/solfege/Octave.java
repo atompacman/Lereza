@@ -19,7 +19,7 @@ public enum Octave {
 	//------------ SEMITONE VALUE ------------\\
 
 	public int semitoneValue() {
-		return ordinal() * Tone.NB_SEMITONES_IN_OCTAVE;
+		return ordinal() * Semitones.IN_OCTAVE;
 	}
 	
 	

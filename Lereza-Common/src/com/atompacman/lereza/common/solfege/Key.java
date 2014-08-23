@@ -2,9 +2,12 @@ package com.atompacman.lereza.common.solfege;
 
 import java.util.List;
 
+import com.atompacman.lereza.common.helper.EnumRepresConstructor;
 import com.atompacman.lereza.common.solfege.quality.Quality;
 
 public class Key {
+	
+	private static EnumRepresConstructor<Key> enumRepresConstructor = new EnumRepresConstructor<Key>(Key.class);
 	
 	private Tone tone;
 	private Quality quality;
@@ -12,6 +15,11 @@ public class Key {
 	
 	//------------ CONSTRUCTORS ------------\\
 
+	public Key(NoteLetter letter, Accidental accidental, Quality quality) {
+		this.tone = new Tone(letter, accidental);
+		this.quality = quality;
+	}
+	
 	public Key(Tone tone, Quality quality) {
 		this.tone = tone;
 		this.quality = quality;
@@ -19,6 +27,13 @@ public class Key {
 	
 	public Key(Tone tone) {
 		this(tone, Quality.MAJOR);
+	}
+	
+	
+	//------------ STATIC CONSTRUCTORS ------------\\
+
+	public static Key valueOf(String repres) {
+		return enumRepresConstructor.newInstance(repres);
 	}
 	
 	
@@ -36,24 +51,24 @@ public class Key {
 	//------------ CORRESPONDING SCALE ------------\\
 	
 	public Scale correspondingScale() {
-		return new Scale(tone, ScaleType.valueOf(quality.name()));
+		return new Scale(tone, ScaleType.fromQuality(quality));
 	}
 	
 	
 	//------------ CONTAINS ------------\\
-//TODO
-//	public boolean contains(Tone tone) {
-//		return correspondingScale().tones().contains(tone);
-//	}
-//	
-//	public boolean contains(List<Tone> tones) {
-//		for (Tone tone : tones) {
-//			if (!correspondingScale().tones().contains(tone)) {
-//				return false;
-//			}
-//		}
-//		return true;
-//	}
+
+	public boolean contains(Tone tone) {
+		return correspondingScale().contains(tone);
+	}
+	
+	public boolean contains(List<Tone> tones) {
+		for (Tone tone : tones) {
+			if (!correspondingScale().contains(tone)) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	
 	//------------ ARMOR ------------\\
@@ -94,7 +109,6 @@ public class Key {
 	}
 
 
-	
 	//------------ EQUALITIES ------------\\
 
 	public int hashCode() {

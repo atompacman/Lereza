@@ -1,5 +1,8 @@
 package com.atompacman.lereza.common.solfege;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.atompacman.lereza.common.solfege.quality.AdvancedQuality;
 import com.atompacman.lereza.common.solfege.quality.IntervalQuality;
 import com.atompacman.lereza.common.solfege.quality.Quality;
@@ -40,74 +43,100 @@ public class Interval {
 
 	//------------ STATIC CONSTRUCTORS ------------\\
 
-	public static Interval fromSemitoneValue(int semitones) {
-		Direction direction;
-		if (semitones < 0) {
-			direction = Direction.DESCENDING;
-			semitones = -semitones;
-		} else if (semitones > 0) {
-			direction = Direction.ASCENDING;
-		} else {
-			return new Interval(IntervalRange.UNISON);
+	public static List<Interval> fromSemitoneValue(int semitoneValue) {
+		List<Interval> possibleIntervals = new ArrayList<Interval>();
+
+		if (semitoneValue == 0) {
+			possibleIntervals.add(new Interval(IntervalRange.UNISON));
+			return possibleIntervals;
 		}
-		
-		for (int i = 1; i < IntervalRange.values().length; ++i) {
-			IntervalRange range = IntervalRange.values()[i];
-			if (range.getQualityType().equals(Quality.class)) {
-				Interval interval = new Interval(direction, Quality.MINOR, range);
-				if (Math.abs(interval.semitoneValue()) == semitones) {
-					return interval;
-				}
-				interval = new Interval(direction, Quality.MAJOR, range);
-				if (Math.abs(interval.semitoneValue()) == semitones) {
-					return interval;
-				}
-			} else {
-				Interval interval = new Interval(direction, AdvancedQuality.PERFECT, range);
-				if (Math.abs(interval.semitoneValue()) == semitones) {
-					return interval;
-				}
-				if (range.equals(IntervalRange.FIFTH) || range.equals(IntervalRange.TWELVTH)) {
-					interval = new Interval(direction, AdvancedQuality.DIMINISHED, range);
-					if (Math.abs(interval.semitoneValue()) == semitones) {
-						return interval;
-					}
-				}
+		Direction direction = semitoneValue > 0 ? Direction.ASCENDING : Direction.DESCENDING;
+		semitoneValue = Math.abs(semitoneValue);
+
+		List<IntervalRange> possibleRanges = IntervalRange.closestRangesFrom(semitoneValue);
+
+		for (IntervalRange range : possibleRanges) {
+			double semitoneDelta = semitoneValue - range.semitoneValue();
+			IntervalQuality quality = getQualityFromSemitoneDelta(semitoneDelta);
+			possibleIntervals.add(new Interval(direction, quality, range));
+		}
+
+		return possibleIntervals;
+	}
+
+	private static IntervalQuality getQualityFromSemitoneDelta(double semitoneDelta) {
+		for (Quality quality : Quality.values()) {
+			if (quality.semitoneModifier() == semitoneDelta) {
+				return quality;
 			}
 		}
-		throw new IllegalArgumentException("Cannot obtain an interval for \"" + semitones + "\" semitones.");
+		for (AdvancedQuality quality : AdvancedQuality.values()) {
+			if (quality.semitoneModifier() == semitoneDelta) {
+				return quality;
+			}
+		}
+		throw new IllegalArgumentException("No quality semitone modifier is equal to \"" + semitoneDelta + "\".");
 	}
-	
+
 
 	//------------ GETTERS ------------\\
-	
+
 	public Direction getDirection() {
 		return direction;
 	}
-	
+
 	public IntervalQuality getQuality() {
 		return quality;
 	}
-	
+
 	public IntervalRange getIntervalRange() {
 		return range;
 	}
 
-	
-	//------------ SEMITONE VALUE ------------\\
+
+	//------------ TONE /  SEMITONE ------------\\
 
 	public int semitoneValue() {
 		return (int) (direction.semitoneMultiplier() * (range.semitoneValue() + quality.semitoneModifier()));
 	}
 
-	
-	//------------ GET SIMPLE INTERVAL ------------\\
-
-	public static Interval getSimpleInterval(Pitch a, Pitch b) {
-		return fromSemitoneValue(b.semitoneValue() - a.semitoneValue());
+	public int diatonicToneValue() {
+		return (int) (direction.semitoneMultiplier() * range.diatonicTonesValue());
 	}
 
-	
+
+	//------------ BETWEEN ------------\\
+
+	public static Interval between(Pitch a, Pitch b) {
+		try {
+			return between(Semitones.between(a, b), DiatonicTones.between(a, b));
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Could not measure the interval between \"" 
+					+ a.toString() + "\" and \"" + b.toString() + "\": ", e);
+		}
+	}
+
+	public static Interval between(Tone a, Tone b) {
+		try {
+			return between(Semitones.between(a, b), DiatonicTones.between(a, b));
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Could not measure the interval between \"" 
+					+ a.toString() + "\" and \"" + b.toString() + "\": ", e);
+		}
+	}
+
+	public static Interval between(int semitoneDelta, int diatonicToneDelta) {
+		List<Interval> possibleIntervals = fromSemitoneValue(semitoneDelta);
+
+		for (Interval possibleInterval : possibleIntervals) {
+			if (possibleInterval.diatonicToneValue() == diatonicToneDelta) {
+				return possibleInterval;
+			}
+		}
+		throw new IllegalArgumentException("Unkown error.");
+	}
+
+
 	//------------ STRING ------------\\
 
 	public String toString() {
@@ -117,8 +146,8 @@ public class Interval {
 			return direction.toString() + " " + quality.fullName() + " " + range.toString();
 		}
 	}
-	
-	
+
+
 	//------------ EQUALITIES ------------\\
 
 	public int hashCode() {

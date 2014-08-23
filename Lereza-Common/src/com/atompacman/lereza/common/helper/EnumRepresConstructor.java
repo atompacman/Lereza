@@ -47,15 +47,14 @@ public class EnumRepresConstructor<A> {
 		for (Constructor<A> constructor : constructors) {
 			String copy = repres;
 			Object[] args = new Object[constructor.getParameterTypes().length];
-			for (int i = 0; i <  constructor.getParameterTypes().length; ++i) {
+			for (int i = 0; i < constructor.getParameterTypes().length; ++i) {
 				Class<?> enumClass = constructor.getParameterTypes()[i];
-				for (Object cnst : enumClass.getEnumConstants()) {
-					String cnstRepres = cnst.toString();
-					if (copy.indexOf(cnstRepres) == 0) {
-						args[i] = cnst;
-						copy = copy.substring(cnstRepres.length());
-						break;
-					}
+				Object enumCnst = findWhichEnumCnstIsMatching(enumClass, copy);
+				if (enumCnst == null) {
+					break;
+				} else {
+					args[i] = enumCnst;
+					copy = copy.substring(enumCnst.toString().length());
 				}
 			}
 			if (copy.isEmpty()) {
@@ -68,5 +67,19 @@ public class EnumRepresConstructor<A> {
 		}
 		throw new IllegalArgumentException("\"" + repres + "\" is not a valid representation of a \""
 				+ clazz.getSimpleName() + "\" object.");
+	}
+	
+	private static Object findWhichEnumCnstIsMatching(Class<?> enumClass, String repres) {
+		Object betterMatch = null;
+		
+		for (Object cnst : enumClass.getEnumConstants()) {
+			String cnstRepres = cnst.toString();
+			if (repres.indexOf(cnstRepres) == 0) {
+				if (betterMatch == null || cnstRepres.length() > betterMatch.toString().length()) {
+					betterMatch = cnst;
+				}
+			}
+		}
+		return betterMatch;
 	}
 }

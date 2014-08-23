@@ -7,8 +7,8 @@ import com.atompacman.lereza.common.solfege.quality.Quality;
 
 public class CircleOfFifths {
 
-	private static final Tone firstTone = Tone.valueOf("Cb");
-	private static final Tone lastTone = Tone.valueOf("C#");
+	private static final Tone firstTone = Tone.valueOf("Fb");
+	private static final Tone lastTone = Tone.valueOf("G#");
 
 	
 	private static List<Tone> tones;
@@ -20,7 +20,7 @@ public class CircleOfFifths {
 		while (!tone.equals(lastTone)) {
 			tones.add(tone);
 			tone = tone.afterInterval(new Interval(IntervalRange.FIFTH));
-			if (tones.size() < Tone.NB_SEMITONES_IN_OCTAVE) {
+			if (tones.size() < Semitones.IN_OCTAVE) {
 				tone.switchToAlteration(Accidental.FLAT);
 			} else {
 				tone.switchToAlteration(Accidental.SHARP);
@@ -47,6 +47,13 @@ public class CircleOfFifths {
 	public static int nbAccidentalsOfKey(Key key) {
 		Tone toneKey = switchToMajorKeyTone(key);
 		return Math.abs(middleOfCircle() - tones.indexOf(toneKey));
+	}
+	
+	
+	//------------ DISTANCE TO MIDDLE OF CIRCLE ------------\\
+
+	public static int distanceToMiddleOfCircle(Tone tone) {
+		return tones.indexOf(tone);
 	}
 	
 	

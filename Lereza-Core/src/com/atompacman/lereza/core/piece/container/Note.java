@@ -32,7 +32,7 @@ public class Note {
 	}
 	
 	public Note(int hexValue, Value value, NoteStatus status) {
-		this(new Pitch(Tone.fromSemitoneValue(hexValue), Octave.fromHex(hexValue)), value, status);
+		this(new Pitch(Tone.thatIsMoreCommonForSemitoneValue(hexValue), Octave.fromHex(hexValue)), value, status);
 	}
 
 	

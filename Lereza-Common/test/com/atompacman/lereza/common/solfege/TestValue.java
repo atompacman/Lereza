@@ -1,4 +1,4 @@
-package atompacman.lereza.common.solfege;
+package com.atompacman.lereza.common.solfege;
 
 import static org.junit.Assert.assertTrue;
 

@@ -14,6 +14,20 @@ public class Degree {
 	}
 	
 	
+	//------------ STATIC CONSTRUCTORS ------------\\
+
+	public static Degree valueOf(String repres) {
+		int indexOfI = repres.lastIndexOf('I');
+		int indexOfV = repres.lastIndexOf('V');
+		int maxIndex = Math.max(indexOfI, indexOfV);
+		
+		ScaleDegree degree = ScaleDegree.valueOf(repres.substring(0, maxIndex));
+		ChordType chord = ChordType.valueOf(repres.substring(maxIndex));
+		
+		return new Degree(degree, chord);
+	}
+	
+	
 	//------------ GETTERS ------------\\
 
 	public ScaleDegree getDegreeOnScale() {
@@ -44,7 +58,10 @@ public class Degree {
 		if (getClass() != obj.getClass())
 			return false;
 		Degree other = (Degree) obj;
-		if (chord != other.chord)
+		if (chord == null) {
+			if (other.chord != null)
+				return false;
+		} else if (!chord.equals(other.chord))
 			return false;
 		if (degreeOnScale != other.degreeOnScale)
 			return false;

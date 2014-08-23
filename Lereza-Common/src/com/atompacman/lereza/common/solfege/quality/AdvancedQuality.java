@@ -35,6 +35,10 @@ public enum AdvancedQuality implements IntervalQuality {
 		return semitoneModifier;
 	}
 	
+	public static double semitoneRadius() {
+		return 1.0;
+	}
+	
 	
 	//------------ STRING ------------\\
 

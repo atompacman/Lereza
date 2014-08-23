@@ -1,12 +1,14 @@
 package com.atompacman.lereza.common.solfege;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.atompacman.lereza.common.helper.EnumRepresConstructor;
 
 public class Tone {
 
-	public static final int NB_SEMITONES_IN_OCTAVE = 12;
-	public static final int NB_TONES_IN_OCTAVE = 8;
-	
+	private static EnumRepresConstructor<Tone> enumRepresConstructor = new EnumRepresConstructor<Tone>(Tone.class);
+
 	private NoteLetter note;
 	private Accidental alteration;
 
@@ -16,45 +18,71 @@ public class Tone {
 	public Tone(NoteLetter note) {
 		this(note, Accidental.NONE);
 	}
-	
+
 	public Tone(NoteLetter note, Accidental alteration) {
 		this.note = note;
 		this.alteration = alteration;
 	}
 
-	
+
 	//------------ STATIC CONSTRUCTORS ------------\\
 
 	public static Tone valueOf(String repres) {
-		return (new EnumRepresConstructor<Tone>(Tone.class)).newInstance(repres);
+		return enumRepresConstructor.newInstance(repres);
 	}
-	
-	public static Tone fromSemitoneValue(int semitoneValue) {
-		int hexTone = semitoneValue % 12;
-		switch(hexTone) {
-		case 0 :  return new Tone(NoteLetter.C, Accidental.NONE);
-		case 1 :  return new Tone(NoteLetter.C, Accidental.SHARP);
-		case 2 :  return new Tone(NoteLetter.D, Accidental.NONE);
-		case 3 :  return new Tone(NoteLetter.E, Accidental.FLAT);
-		case 4 :  return new Tone(NoteLetter.E, Accidental.NONE);
-		case 5 :  return new Tone(NoteLetter.F, Accidental.NONE);
-		case 6 :  return new Tone(NoteLetter.F, Accidental.SHARP);
-		case 7 :  return new Tone(NoteLetter.G, Accidental.NONE);
-		case 8 :  return new Tone(NoteLetter.A, Accidental.FLAT);
-		case 9 :  return new Tone(NoteLetter.A, Accidental.NONE);
-		case 10 : return new Tone(NoteLetter.B, Accidental.FLAT);
-		case 11 : return new Tone(NoteLetter.B, Accidental.NONE);
-		default : return null;
+
+	public static Tone thatIsMoreCommonForSemitoneValue(int semitoneValue) {
+		List<Tone> possibleTones = fromSemitoneValue(semitoneValue);
+		if (possibleTones.size() == 1) {
+			return possibleTones.get(0);
+		}
+		Tone a = possibleTones.get(0);
+		Tone b = possibleTones.get(1);
+		int distanceA = CircleOfFifths.distanceToMiddleOfCircle(a);
+		int distanceB = CircleOfFifths.distanceToMiddleOfCircle(b);
+
+		if (Math.abs(distanceA) == Math.abs(distanceB)) {
+			if (distanceA < distanceB) {
+				return a;
+			} else {
+				return b;
+			}
+		} else if (Math.abs(distanceA) < Math.abs(distanceB)) {
+			return a;
+		} else {
+			return b;
 		}
 	}
-	
-	public static Tone fromSemitonesValue(int semitoneValue, Accidental accidental) {
-		Tone tone = fromSemitoneValue(semitoneValue);
-		tone.switchToAlteration(accidental);
-		return tone;
+
+	public static List<Tone> fromSemitoneValue(int semitoneValue) {
+		semitoneValue = Semitones.normalize(semitoneValue);
+
+		List<Tone> possibleTones = new ArrayList<Tone>();
+		List<NoteLetter> possibleNotes = NoteLetter.fromSemitoneValue(semitoneValue);
+		
+		for (NoteLetter possibleNote : possibleNotes) {
+			int semitoneAlteration = semitoneValue - possibleNote.basicSemitoneValue();
+			Accidental accidental = Accidental.fromSemitoneAlteration(semitoneAlteration);
+			possibleTones.add(new Tone(possibleNote, accidental));
+		}
+		return possibleTones;
 	}
 	
-	
+	public static Tone fromSemitoneValue(int semitoneValue, int diatonicToneValue) {
+		semitoneValue = Semitones.normalize(semitoneValue);
+		diatonicToneValue = DiatonicTones.normalize(diatonicToneValue);
+		
+		NoteLetter note = NoteLetter.fromDiatonicToneValue(diatonicToneValue);
+		if (note.canBeAssignedFrom(semitoneValue)) {
+			int semitoneAlteration = semitoneValue - note.basicSemitoneValue();
+			Accidental accidental = Accidental.fromSemitoneAlteration(semitoneAlteration);
+			return new Tone(note, accidental);
+		}
+		throw new IllegalArgumentException("Note tone can be assigned from semitone value \"" 
+				+ semitoneValue + "\" and diatonic tone value \"" + diatonicToneValue + "\".");
+	}
+
+
 	//------------ GETTERS ------------\\
 
 	public NoteLetter getNote() {
@@ -65,7 +93,7 @@ public class Tone {
 		return alteration;
 	}
 
-	
+
 	//------------ SWITCH ALTERATION ------------\\
 
 	public void switchAlteration() {
@@ -83,33 +111,39 @@ public class Tone {
 	}
 
 	public void switchToAlteration(Accidental accidental) {
-		if (alteration != accidental && accidental != Accidental.NONE) {
+		if (alteration != accidental) {
 			switchAlteration();
 		}
 	}
-	
-	
+
+
 	//------------ AFTER INTERVAL ------------\\
 
 	public Tone afterInterval(Interval interval) {
-		return fromSemitonesValue(semitoneValue() + interval.semitoneValue(), alteration);
+		int semitoneDelta = semitoneValue() + interval.semitoneValue();
+		int diatonicToneDelta = diatonicToneValue() + interval.diatonicToneValue();
+		return fromSemitoneValue(semitoneDelta, diatonicToneDelta);
+	}
+
+
+	//------------ TONE / SEMITONE ------------\\
+
+	public int diatonicToneValue() {
+		return note.ordinal();
 	}
 	
-	
-	//------------ SEMITONE VALUE ------------\\
-
 	public int semitoneValue() {
 		return note.basicSemitoneValue() + alteration.semitoneAlteration();
 	}
 
-	
+
 	//------------ STRING ------------\\
 
 	public String toString() {
 		return note.name() + alteration.toString();
 	}
 
-	
+
 	//------------ EQUALITIES ------------\\
 
 	public int hashCode() {

@@ -28,6 +28,15 @@ public enum Accidental {
 		throw new IllegalArgumentException("\"" + string + "\" is not a valid string representation of an accidental.");
 	}
 	
+	public static Accidental fromSemitoneAlteration(int semitoneAlteration) {
+		for (Accidental accidental : values()) {
+			if (accidental.semitoneAlteration == semitoneAlteration) {
+				return accidental;
+			}
+		}
+		throw new IllegalArgumentException("No accidental has a semitone alteration of " + semitoneAlteration + ".");
+	}
+	
 	
 	//------------ GETTERS ------------\\
 

@@ -1,4 +1,4 @@
-package atompacman.lereza.common.solfege;
+package com.atompacman.lereza.common.solfege;
 
 import static org.junit.Assert.assertTrue;
 
@@ -20,7 +20,7 @@ public class TestPitch {
 	}
 	
 	@Test
-	public void testGetSemitoneRank() {
+	public void testSemitoneValue() {
 		Pitch a = new Pitch(new Tone(NoteLetter.C, Accidental.SHARP), Octave.TWO);
 		assertTrue(a.semitoneValue() == 25);
 	}

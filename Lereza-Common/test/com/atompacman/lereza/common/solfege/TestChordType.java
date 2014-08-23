@@ -1,4 +1,4 @@
-package atompacman.lereza.common.solfege;
+package com.atompacman.lereza.common.solfege;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,7 +21,7 @@ public class TestChordType {
 		intervals.add(new Interval(				  IntervalRange.UNISON));
 		intervals.add(new Interval(Quality.MINOR, IntervalRange.THIRD));
 		intervals.add(new Interval(				  IntervalRange.FIFTH));
-		ChordType a = ChordType.fromUnorderedIntervals(intervals);
+		ChordType a = ChordType.fromIntervals(intervals);
 		
 		assertTrue(a.getIntervals().equals(intervals));
 		assertTrue(a.getIntervalForRange(IntervalRange.FIFTH).equals(new Interval(IntervalRange.FIFTH)));

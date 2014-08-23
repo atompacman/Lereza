@@ -1,4 +1,4 @@
-package atompacman.lereza.common.helper;
+package com.atompacman.lereza.common.helper;
 
 import static org.junit.Assert.assertTrue;
 
@@ -10,30 +10,30 @@ import com.atompacman.lereza.common.solfege.Octave;
 
 public class TestEnumRepresentationConstructor {
 
-	public static class Tone {
+	public static class DummyTone {
 		public NoteLetter letter;
 		public Octave octave;
 
 		
-		public Tone(NoteLetter letter, Octave octave) {
+		public DummyTone(NoteLetter letter, Octave octave) {
 			this.letter = letter;
 			this.octave = octave;
 		}
 		
-		public static Tone valueOf(String repres) {
-			EnumRepresConstructor<Tone> a = new EnumRepresConstructor<Tone>(Tone.class);
+		public static DummyTone valueOf(String repres) {
+			EnumRepresConstructor<DummyTone> a = new EnumRepresConstructor<DummyTone>(DummyTone.class);
 			return a.newInstance(repres);
 		}
 		
 		public boolean equals(Object o) {
-			return letter == ((Tone)o).letter && octave == ((Tone)o).octave;
+			return letter == ((DummyTone)o).letter && octave == ((DummyTone)o).octave;
 		}
 	}
 
 	@Test
 	public void testERC() {
-		Tone a = Tone.valueOf("A5");
-		Tone b = new Tone(NoteLetter.A, Octave.FIVE);
+		DummyTone a = DummyTone.valueOf("A5");
+		DummyTone b = new DummyTone(NoteLetter.A, Octave.FIVE);
 		assertTrue(a.equals(b));
 	}
 }

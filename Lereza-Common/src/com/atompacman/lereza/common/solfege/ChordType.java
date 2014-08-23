@@ -25,7 +25,7 @@ public class ChordType {
 	
 	//------------ STATIC CONSTRUCTORS ------------\\
 
-	public static ChordType fromUnorderedIntervals(List<Interval> intervals) {
+	public static ChordType fromIntervals(List<Interval> intervals) {
 		Map<IntervalRange, Interval> chordIntervals = new HashMap<IntervalRange, Interval>();
 		for (Interval interval : intervals) {
 			chordIntervals.put(interval.getIntervalRange(), interval);

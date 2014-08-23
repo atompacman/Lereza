@@ -3,6 +3,8 @@ package com.atompacman.lereza.common.solfege;
 import com.atompacman.lereza.common.helper.EnumRepresConstructor;
 
 public class Pitch {
+	
+	private static EnumRepresConstructor<Pitch> enumRepresConstructor = new EnumRepresConstructor<Pitch>(Pitch.class);
 
 	private Tone tone;
 	private Octave octave;
@@ -24,7 +26,7 @@ public class Pitch {
 	//------------ STATIC CONSTRUCTORS ------------\\
 
 	public static Pitch valueOf(String repres) {
-		return (new EnumRepresConstructor<Pitch>(Pitch.class)).newInstance(repres);
+		return enumRepresConstructor.newInstance(repres);
 	}
 
 	
@@ -39,13 +41,13 @@ public class Pitch {
 	}
 
 	
-	//------------ SEMITONE VALUE ------------\\
+	//------------ TONE /  SEMITONE ------------\\
 
 	public int semitoneValue() {
 		return octave.semitoneValue() + tone.semitoneValue();
 	}
 	
-
+	
 	//------------ HEIGHT FOR PARTITION ------------\\
 
 	public int heightForPartition() {
@@ -56,7 +58,7 @@ public class Pitch {
 	//------------ STRING ------------\\
 
 	public String toString() {
-		return tone.toString() + octave.ordinal();
+		return tone.toString() + octave.toString();
 	}
 
 	
