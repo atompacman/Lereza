@@ -5,15 +5,15 @@ import com.atompacman.lereza.core.profile.tool.ProfileReportFormatter;
 
 public class ContrapunctalProfile extends PolyphonicProfile {
 
+	//------------ CONSTRUCTORS ------------\\
+
 	public ContrapunctalProfile(int nbParts) {
 		super(nbParts);
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ REPORT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return super.getReportFormatter();
 	}

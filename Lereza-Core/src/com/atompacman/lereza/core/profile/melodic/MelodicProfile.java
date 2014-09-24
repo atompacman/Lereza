@@ -11,15 +11,15 @@ public class MelodicProfile extends Profile {
 	private List<PhraseProfile> phraseProfile;
 
 	
+	//------------ GETTERS ------------\\
+
 	public List<PhraseProfile> getMotifProfiles() {
 		return phraseProfile;
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ FORMAT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;
 	}

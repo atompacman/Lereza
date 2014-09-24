@@ -11,15 +11,15 @@ public class PhraseProfile extends Profile {
 	private List<PatternProfile> patternProfile;
 
 	
+	//------------ GETTERS ------------\\
+
 	public List<PatternProfile> getMotifProfiles() {
 		return patternProfile;
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ FORMAT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;
 	}

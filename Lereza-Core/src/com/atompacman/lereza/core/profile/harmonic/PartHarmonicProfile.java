@@ -5,10 +5,8 @@ import com.atompacman.lereza.core.profile.tool.ProfileReportFormatter;
 
 public class PartHarmonicProfile extends Profile {
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ PROFILE ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;
 	}

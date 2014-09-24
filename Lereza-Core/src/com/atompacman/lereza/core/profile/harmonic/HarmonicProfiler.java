@@ -15,10 +15,8 @@ public class HarmonicProfiler extends Profiler {
 	private PieceNavigator navig;
 	
 
-	//////////////////////////////
-	//       CONSTRUCTOR        //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	public HarmonicProfiler(Piece piece, Profile profile) {
 		super(piece, profile);
 		this.profile = (HarmonicProfile) originalProfile;
@@ -26,10 +24,8 @@ public class HarmonicProfiler extends Profiler {
 	}
 	
 	
-	//////////////////////////////
-	//   VERIFY PROFILABILITY   //
-	//////////////////////////////
-	
+	//------------ VERIFY ------------\\
+
 	public void verifyProfilability() {
 		if(Log.infos() && Log.title(this.getClass().getSimpleName() + " - Verifying profitability", 0));
 		
@@ -55,10 +51,8 @@ public class HarmonicProfiler extends Profiler {
 	}
 	
 	
-	//////////////////////////////
-	//  	   PROFILE		    //
-	//////////////////////////////
-	
+	//------------ PROFILE ------------\\
+
 	public void profile() {
 		if(Log.infos() && Log.title(this.getClass().getSimpleName() + " - Profiling", 0));
 		
@@ -66,9 +60,6 @@ public class HarmonicProfiler extends Profiler {
 		
 		new KeyProfiler(piece, profile.getKeyProfile()).profile();
 	}
-	
-	
-	// ----- Basic statistics ----- \\
 	
 	private void profileBasicStatistics() {
 		if(Log.infos() && Log.title("General statistics", 1));

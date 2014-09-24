@@ -7,7 +7,8 @@ import com.atompacman.lereza.common.helper.EnumRepresConstructor;
 
 public class Tone {
 
-	private static EnumRepresConstructor<Tone> enumRepresConstructor = new EnumRepresConstructor<Tone>(Tone.class);
+	private static EnumRepresConstructor<Tone> enumRepresConstructor = 
+			new EnumRepresConstructor<Tone>(Tone.class);
 
 	private NoteLetter note;
 	private Accidental alteration;
@@ -58,18 +59,18 @@ public class Tone {
 		semitoneValue = Semitones.normalize(semitoneValue);
 		List<Tone> possibleTones = new ArrayList<Tone>();
 		List<NoteLetter> possibleNotes = NoteLetter.fromSemitoneValue(semitoneValue);
-		
+
 		for (NoteLetter possibleNote : possibleNotes) {
 			possibleTones.add(fromNoteAndSemitoneValue(possibleNote, semitoneValue));
 		}
 		return possibleTones;
 	}
-	
+
 	public static Tone fromSemitoneValue(int semitoneValue, int diatonicToneValue) {
 		semitoneValue = Semitones.normalize(semitoneValue);
 		diatonicToneValue = DiatonicTones.normalize(diatonicToneValue);
 		NoteLetter note = NoteLetter.fromDiatonicToneValue(diatonicToneValue);
-		
+
 		return fromNoteAndSemitoneValue(note, semitoneValue);
 	}
 
@@ -78,15 +79,17 @@ public class Tone {
 			int semitoneAlteration = semitoneValue - note.basicSemitoneValue();
 			if (semitoneAlteration == Semitones.IN_OCTAVE - 1) {
 				semitoneAlteration -= Semitones.IN_OCTAVE;
+			} else if (semitoneAlteration == - (Semitones.IN_OCTAVE - 1)) {
+				semitoneAlteration += Semitones.IN_OCTAVE;
 			}
 			Accidental accidental = Accidental.fromSemitoneAlteration(semitoneAlteration);
 			return new Tone(note, accidental);
 		}
-		throw new IllegalArgumentException("Note \"" + note + "\" can be assigned from semitone value \"" 
-				+ semitoneValue + "\".");
+		throw new IllegalArgumentException("Note \"" + note + "\" can be assigned "
+				+ "from semitone value \"" + semitoneValue + "\".");
 	}
-	
-	
+
+
 	//------------ GETTERS ------------\\
 
 	public NoteLetter getNote() {
@@ -135,7 +138,7 @@ public class Tone {
 	public int diatonicToneValue() {
 		return note.ordinal();
 	}
-	
+
 	public int semitoneValue() {
 		return note.basicSemitoneValue() + alteration.semitoneAlteration();
 	}

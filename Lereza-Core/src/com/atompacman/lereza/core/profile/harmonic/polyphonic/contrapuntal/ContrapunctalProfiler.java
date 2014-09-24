@@ -11,15 +11,23 @@ public class ContrapunctalProfiler extends Profiler {
 	private ContrapunctalProfile profile;
 	
 	
+	//------------ CONSTRUCTORS ------------\\
+
 	public ContrapunctalProfiler(Piece piece, Profile profile) {
 		super(piece, profile);
 		this.profile = (ContrapunctalProfile) originalProfile;
 	}
 
+	
+	//------------ VERIFY ------------\\
+
 	public void verifyProfilability() {
 		
 	}
 	
+	
+	//------------ PROFILE ------------\\
+
 	public void profile() {
 		if(Log.infos() && Log.title(this.getClass().getSimpleName(), 0));
 		profile = (ContrapunctalProfile) originalProfile;

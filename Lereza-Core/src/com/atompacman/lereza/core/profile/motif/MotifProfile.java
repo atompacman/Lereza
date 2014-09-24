@@ -5,10 +5,8 @@ import com.atompacman.lereza.core.profile.tool.ProfileReportFormatter;
 
 public class MotifProfile extends Profile {
 
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ FORMAT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;
 	}

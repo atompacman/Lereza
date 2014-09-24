@@ -11,19 +11,15 @@ public class Piece {
 	private RythmicSignature rythmicSignature;
 
 	
-	//////////////////////////////
-	//       CONSTRUCTORS       //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	public Piece() {
 		this.parts = new ArrayList<Part>();
 	}
 	
 	
-	//////////////////////////////
-	//         SETTERS          //
-	//////////////////////////////
-	
+	//------------ SETTERS ------------\\
+
 	public void addPart(Part part) {
 		this.parts.add(part);
 	}
@@ -33,10 +29,8 @@ public class Piece {
 	}
 	
 	
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
-	
+	//------------ GETTERS ------------\\
+
 	public Part getPartNo(int index) {
 		return parts.get(index);
 	}
@@ -45,10 +39,9 @@ public class Piece {
 		return rythmicSignature;
 	}
 	
-	//////////////////////////////
-	//        GET STATUS        //
-	//////////////////////////////
 	
+	//------------ STATUS ------------\\
+
 	public int getNbParts() {
 		return parts.size();
 	}

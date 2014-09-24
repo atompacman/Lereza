@@ -37,10 +37,8 @@ public class UnmonophonicTimeunitProblem extends Problem {
 	private int nbMeasures;
 	
 	
-	//////////////////////////////
-	//       CONSTRUCTOR        //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	public UnmonophonicTimeunitProblem(PMT pmt, Part part) {
 		this.problemName = "Un-monophonic timeunit";
 		this.pmt = pmt;
@@ -54,10 +52,8 @@ public class UnmonophonicTimeunitProblem extends Problem {
 	}
 	
 	
-	//////////////////////////////
-	//      FORMAT PROBLEM      //
-	//////////////////////////////
-	
+	//------------ FORMAT ------------\\
+
 	public String formatProblem() {
 		StringBuilder builder = new StringBuilder();
 		
@@ -76,19 +72,15 @@ public class UnmonophonicTimeunitProblem extends Problem {
 	}
 	
 	
-	//////////////////////////////
-	//        DIAGNOSTIC        //
-	//////////////////////////////
-	
+	//------------ DIAGNOSTIC ------------\\
+
 	public void diagnostic() {
 		// TODO Auto-generated method stub
 	}
 	
 	
-	//////////////////////////////
-	//           FIX            //
-	//////////////////////////////
-	
+	//------------ RECOVER ------------\\
+
 	public void recover() {
 		// TODO Auto-generated method stub
 	}

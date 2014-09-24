@@ -17,10 +17,15 @@ public class KeyProfile extends Profile {
 	private Map<Integer, Map<Integer, Key>> pieceKeys;
 	
 	
+	//------------ CONSTRUCTORS ------------\\
+
 	public KeyProfile() {
 		pieceKeys = new HashMap<Integer, Map<Integer, Key>>();
 	}
 	
+	
+	//------------ SETTERS ------------\\
+
 	public void addKeyChange(int partNo, int timestamp, Key key) {
 		if (pieceKeys.get(partNo) == null) {
 			pieceKeys.put(partNo, new HashMap<Integer, Key>());
@@ -31,6 +36,9 @@ public class KeyProfile extends Profile {
 		pieceKeys.get(partNo).put(timestamp, key);
 	}
 	
+	
+	//------------ GETTERS ------------\\
+
 	public Map<Integer, Key> getKeyMapForPart(int partNo) {
 		if (pieceKeys.get(partNo) == null) {
 			throw new IllegalArgumentException("There is no key map for part " + partNo + ".");
@@ -43,10 +51,8 @@ public class KeyProfile extends Profile {
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ FORMAT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;
 	}

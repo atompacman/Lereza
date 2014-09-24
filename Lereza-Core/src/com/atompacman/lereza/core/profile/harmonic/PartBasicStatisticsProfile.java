@@ -17,10 +17,8 @@ public class PartBasicStatisticsProfile extends Profile {
 	protected Map<Integer, Integer> stackSizeCount;
 	
 	
-	//////////////////////////////
-	//       CONSTRUCTOR        //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	public PartBasicStatisticsProfile() {
 		this.firstUnemptyMeasure = -1;
 		this.notesInMeasureCount = new HashMap<Integer, Integer>();
@@ -28,18 +26,14 @@ public class PartBasicStatisticsProfile extends Profile {
 	}
 		
 	
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
-	
+	//------------ GETTERS ------------\\
+
 	public boolean isMonophonic() {
 		return stackSizeCount.size() == 1 && stackSizeCount.get(1) != null;
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
+	//------------ PROFILE ------------\\
 
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;

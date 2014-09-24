@@ -1,12 +1,5 @@
 package com.atompacman.lereza.core.profile.key;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.atompacman.lereza.common.solfege.Key;
-import com.atompacman.lereza.common.solfege.Tone;
-import com.atompacman.lereza.common.solfege.quality.Quality;
-
 public class KeyLister {
 //	
 //	public List<Key> listPossibleKeys(List<Tone> tones) {

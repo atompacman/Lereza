@@ -26,10 +26,8 @@ public class BasicStatisticsProfile extends Profile {
 	protected boolean isPolyphonic;
 	
 	
-	//////////////////////////////
-	//       CONSTRUCTOR        //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	public BasicStatisticsProfile(int nbParts) {
 		this.partBasicStatisticsProfiles = new ArrayList<PartBasicStatisticsProfile>();
 		for (int i = 0; i < nbParts; ++i) {
@@ -42,10 +40,8 @@ public class BasicStatisticsProfile extends Profile {
 	}
 	
 	
-	//////////////////////////////
-	//         SETTERS          //
-	//////////////////////////////
-	
+	//------------ SETTERS ------------\\
+
 	public void incrementNoteCountOf(int partNo, int measureNo, int count) {
 		notesInPieceCount += count;
 		getPartProfile(partNo).notesInPartCount += count;
@@ -75,19 +71,15 @@ public class BasicStatisticsProfile extends Profile {
 	}
 	
 	
-	//////////////////////////////
-	//     GET SUB-PROFILE      //
-	//////////////////////////////
-	
+	//------------ SUBPROFILES ------------\\
+
 	public PartBasicStatisticsProfile getPartProfile(int partNo) {
 		return partBasicStatisticsProfiles.get(partNo);
 	}
 	
 	
-	//////////////////////////////
-	//        GET INFO          //
-	//////////////////////////////
-	
+	//------------ GETTERS ------------\\
+
 	public boolean pieceIsPolyphonic() {
 		for (int i = 0; i < partBasicStatisticsProfiles.size(); ++i) {
 			if (!partBasicStatisticsProfiles.get(i).isMonophonic()) {
@@ -98,9 +90,7 @@ public class BasicStatisticsProfile extends Profile {
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
+	//------------ REPORT ------------\\
 
 	public ProfileReportFormatter getReportFormatter() {
 		if (formatter.isEmpty()) {

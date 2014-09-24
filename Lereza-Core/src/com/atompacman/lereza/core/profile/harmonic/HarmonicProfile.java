@@ -17,10 +17,8 @@ public abstract class HarmonicProfile extends Profile {
 	private KeyProfile keyProfile;
 	
 	
-	//////////////////////////////
-	//       CONSTRUCTOR        //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	public HarmonicProfile (int nbParts) {
 		this.basicStatisticsProfile = new BasicStatisticsProfile(nbParts);
 		this.partProfiles = new ArrayList<PartHarmonicProfile>();
@@ -31,10 +29,8 @@ public abstract class HarmonicProfile extends Profile {
 	}
 
 	
-	//////////////////////////////
-	//       GET PROFILE        //
-	//////////////////////////////
-	
+	//------------ SUBPROFILES ------------\\
+
 	public BasicStatisticsProfile getBasicStatisticsProfile() {
 		return basicStatisticsProfile;
 	}
@@ -52,10 +48,8 @@ public abstract class HarmonicProfile extends Profile {
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ REPORT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		formatter.importChildProfile(basicStatisticsProfile.getReportFormatter());
 		return formatter;

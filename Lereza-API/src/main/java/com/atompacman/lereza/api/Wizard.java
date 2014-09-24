@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.atompacman.atomLog.Log;
+import com.atompacman.atomLog.Log.Verbose;
 import com.atompacman.lereza.core.composition.LibraryAPI;
 import com.atompacman.lereza.core.composition.tool.Library;
 import com.atompacman.lereza.core.piece.PieceBuilderAPI;
@@ -27,17 +28,20 @@ public class Wizard {
 	private static Date wizardInitializationTime;
 
 
-	//////////////////////////////
-	//     INITIALIZATION       //
-	//////////////////////////////
+	//------------ INITIALIZATION ------------\\
 
-	public static void initialize() {
-		if (Log.infos() && Log.title("Lereza Wizard", 0));
-		getInitializationTime();
-		initializeModuleAPIs();
+	public static void init() {
+		init(Verbose.INFOS);
 	}
 
-	private static void getInitializationTime() {
+	public static void init(Verbose verbose) {
+		Log.setVerbose(verbose);
+		if (Log.infos() && Log.title("Lereza Wizard", 0));
+		saveInitializationTime();
+		initEssentialModuleAPIs();
+	}
+	
+	private static void saveInitializationTime() {
 		wizardInitializationTime = new Date();
 		SimpleDateFormat date = new SimpleDateFormat("dd/MM/yyyy");
 		SimpleDateFormat timestamp  = new SimpleDateFormat("HH:mm:ss");
@@ -46,7 +50,7 @@ public class Wizard {
 				+ timestamp.format(wizardInitializationTime) + "."));
 	}
 
-	private static void initializeModuleAPIs() {
+	private static void initEssentialModuleAPIs() {
 		midiFileReader = new MidiFileReader();
 		midiFilePlayer = MidiFilePlayer.getPlayer();
 		pieceBuilder = new PieceBuilder();

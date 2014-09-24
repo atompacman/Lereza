@@ -68,9 +68,7 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 	}
 	
 	
-	//////////////////////////////
-	//      STATIC ACCESS       //
-	//////////////////////////////
+	//------------ STATIC ACCESS ------------\\
 
 	public static MidiFilePlayer getPlayer() {
 		return player;
@@ -120,9 +118,7 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 	}
 
 
-	//////////////////////////////
-	//  PLAY/STOP SIMPLE NOTE   //
-	//////////////////////////////
+	//------------ PLAY/STOP SIMPLE NOTE ------------\\
 
 	public void startNote(int note) {
 		startNote(note, 0);
@@ -157,11 +153,9 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 		playNote(note, length, tempo, 0);
 	}
 	
-	
-	//////////////////////////////
-	//           REST           //
-	//////////////////////////////
-	
+
+	//------------ REST ------------\\
+
 	public void rest(int length, double tempo) {
 		if (Log.extra() && Log.print("Resting for " + length + "."));
 		try {
@@ -171,11 +165,9 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 		}
 	}
 	
-	
-	//////////////////////////////
-	//     PLAY NOTE STACK      //
-	//////////////////////////////
-	
+
+	//------------ PLAY NOTE STACK ------------\\
+
 	public void playNoteStack(Stack<MidiNote> noteStack, int channel, double tempo) {
 		if (noteStack != null) {
 			for (MidiNote note : noteStack) {
@@ -186,10 +178,8 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 	}
 	
 	
-	//////////////////////////////
-	//     PLAY MIDI TRACK      //
-	//////////////////////////////
-	
+	//------------ PLAY MIDI TRACK ------------\\
+
 	public void playTrack(String filePath, int track, double tempo, MidiInstrument instrument) {
 		if (Log.infos() && Log.title("MIDI Player", 0));
 		if (Log.infos() && Log.title("Playing a track on channel " + track + ".", 1));
@@ -212,11 +202,9 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 		playTrack(filePath, track, tempo, MidiInstrument.Acoustic_Grand_Piano);
 	}
 	
-	
-	//////////////////////////////
-	//     PLAY MIDI FILE       //
-	//////////////////////////////
-	
+
+	//------------ PLAY MIDI FILE ------------\\
+
 	public void playFile(String filePath) {
 		playFile(filePath, false);
 	}
@@ -252,10 +240,8 @@ public class MidiFilePlayer implements MidiFilePlayerAPI {
 		}
 	}
 
-	
-	//////////////////////////////
-	//    CHANGE INSTRUMENT     //
-	//////////////////////////////
+
+	//------------ CHANGE INSTRUMENT ------------\\
 
 	public void setInstrument(MidiInstrument instr, int channel) {
 		if (Log.infos() && Log.title("MIDI Player", 0));

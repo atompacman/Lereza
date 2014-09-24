@@ -4,10 +4,8 @@ import com.atompacman.lereza.core.profile.tool.ProfileReportFormatter;
 
 public class FugalBridgeProfile extends SectionProfile {
 
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ FORMAT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;
 	}

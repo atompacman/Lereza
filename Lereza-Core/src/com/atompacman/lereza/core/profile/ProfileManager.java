@@ -1,5 +1,6 @@
 package com.atompacman.lereza.core.profile;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import com.atompacman.lereza.core.composition.container.Composition;
@@ -10,21 +11,19 @@ import com.atompacman.lereza.core.profile.tool.DataChart.Importance;
 
 public class ProfileManager implements ProfileManagerAPI {
 
-	public void profile(String compositionName, String composerName) {
-		Composition composition = Library.getComposition(compositionName, composerName);
+	//------------ PROFILE ------------\\
 
-		Profiler profiler = getAppropriateProfiler(composition);
-		profiler.profile();
-		
-		composition.setProfile(profiler.getProfile());
+	public void profile(String compositionName, String composerName) {
+		profile(Library.getComposition(compositionName, composerName));
 	}
 	
 	public void profile(String compositionName, String composerName, String compositionSetName) {
-		Composition composition = Library.getComposition(compositionName, composerName, compositionSetName);
-
+		profile(Library.getComposition(compositionName, composerName, compositionSetName));
+	}
+	
+	private void profile(Composition composition) {
 		Profiler profiler = getAppropriateProfiler(composition);
 		profiler.profile();
-		
 		composition.setProfile(profiler.getProfile());
 	}
 	
@@ -41,22 +40,35 @@ public class ProfileManager implements ProfileManagerAPI {
 			String formClassRoot = packageRoot + "." + lowerCaseFormName;
 			String profileClassName = formClassRoot + "." + profileName;
 			String profilerClassName = formClassRoot + "." + profilerName;
-			Class<? extends Profile> profileClass = (Class<? extends Profile>) Class.forName(profileClassName);
-			Class<? extends Profiler> profilerClass = (Class<? extends Profiler>) Class.forName(profilerClassName);
-			Profile profile = profileClass.getConstructor(int.class).newInstance(composition.getPiece().getNbParts());
-			profiler = profilerClass.getConstructor(Piece.class, Profile.class).newInstance(composition.getPiece(), profile);
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | 
-				InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			Class<? extends Profile> profileClass = 
+					(Class<? extends Profile>) Class.forName(profileClassName);
+			Class<? extends Profiler> profilerClass = 
+					(Class<? extends Profiler>) Class.forName(profilerClassName);
+			int nbParts = composition.getPiece().getNbParts();
+			Profile profile = profileClass.getConstructor(int.class).newInstance(nbParts);
+			Constructor<? extends Profiler> constructor = 
+					profilerClass.getConstructor(Piece.class, Profile.class);
+			profiler = constructor.newInstance(composition.getPiece(), profile);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | 
+				IllegalArgumentException | InvocationTargetException | 
+				NoSuchMethodException | SecurityException e) {
 			throw new ProfilerException(e);
 		}
 		return profiler;
 	}
 	
+	
+	//------------ PRINT REPORT ------------\\
+
 	public void printReport(String compositionName, String composerName, Importance importance) {
-		Library.getComposition(compositionName, composerName).getMainProfile().getReportFormatter().print(importance);
+		Composition composition = Library.getComposition(compositionName, composerName);
+		composition.getMainProfile().getReportFormatter().print(importance);
 	}
 	
-	public void printReport(String compositionName, String composerName, String compositionSetName, Importance importance) {
-		Library.getComposition(compositionName, composerName, compositionSetName).getMainProfile().getReportFormatter().print(importance);
+	public void printReport(String compositionName, String composerName, 
+			String compositionSetName, Importance importance) {
+		Composition composition = 
+				Library.getComposition(compositionName, composerName, compositionSetName);
+		composition.getMainProfile().getReportFormatter().print(importance);
 	}
 }

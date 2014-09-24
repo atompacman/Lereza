@@ -30,6 +30,7 @@ public class TestTone {
 		assertTrue(Tone.thatIsMoreCommonForSemitoneValue(10).equals(Tone.valueOf("Bb")));
 		assertTrue(Tone.thatIsMoreCommonForSemitoneValue(1).equals(Tone.valueOf("Db")));
 		assertTrue(Tone.thatIsMoreCommonForSemitoneValue(8).equals(Tone.valueOf("Ab")));
+		assertTrue(Tone.thatIsMoreCommonForSemitoneValue(0).equals(Tone.valueOf("C")));
 	}
 	
 	@Test

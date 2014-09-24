@@ -11,19 +11,26 @@ public class PolyphonicProfiler extends Profiler {
 	private PolyphonicProfile profile;
 	
 	
+	//------------ CONSTRUCTORS ------------\\
+
 	public PolyphonicProfiler(Piece piece, Profile profile) {
 		super(piece, profile);
 		this.profile = (PolyphonicProfile) originalProfile;
 	}
 
+	
+	//------------ VERIFY ------------\\
+
 	public void verifyProfilability() {
 		
 	}
 	
+	
+	//------------ PROFILE ------------\\
+
 	public void profile() {
 		if(Log.infos() && Log.title(this.getClass().getSimpleName(), 0));
 		
 		new HarmonicProfiler(piece, profile).profile();
 	}
-
 }

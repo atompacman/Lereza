@@ -20,6 +20,8 @@ public class ProfileReportNode {
 	protected Map<String, Integer> dataChartsIndexes;
 	
 	
+	//------------ CONSTRUCTORS ------------\\
+
 	public ProfileReportNode(Class<? extends Profile> profileClass, ProfileReportNode parentNode) {
 		this.profileClass = profileClass;
 		this.parentNode = parentNode;
@@ -29,6 +31,9 @@ public class ProfileReportNode {
 		this.dataChartsIndexes = new HashMap<String, Integer>();
 	}
 	
+	
+	//------------ FORMAT ------------\\
+
 	public List<String> format(List<String> lines, List<Integer> level, Importance importance) {
 		char chartLetter = 'A';
 		int levelNb = 1;

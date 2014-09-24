@@ -4,11 +4,9 @@ import com.atompacman.lereza.core.profile.Profile;
 import com.atompacman.lereza.core.profile.tool.ProfileReportFormatter;
 
 public class SubjectsProfile extends Profile {
-
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
 	
+	//------------ REPORT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;
 	}

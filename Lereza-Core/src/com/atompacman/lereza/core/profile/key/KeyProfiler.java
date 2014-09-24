@@ -16,14 +16,22 @@ public class KeyProfiler extends Profiler {
 	private PieceNavigator navig;
 
 
+	//------------ CONSTRUCTORS ------------\\
+
 	public KeyProfiler(Piece piece, Profile profile) {
 		super(piece, profile);
 	}
+
+	
+	//------------ VERIFY ------------\\
 
 	public void verifyProfilability() {
 		
 	}
 	
+	
+	//------------ PROFILE ------------\\
+
 	public void profile() {
 		if(Log.infos() && Log.title(this.getClass().getSimpleName(), 0));
 		profile = (KeyProfile) originalProfile;

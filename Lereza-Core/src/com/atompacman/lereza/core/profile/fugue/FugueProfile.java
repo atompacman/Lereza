@@ -17,6 +17,8 @@ public class FugueProfile extends Profile {
 	private PianoProfile pianoProfile;
 	
 	
+	//------------ CONSTRUCTORS ------------\\
+
 	public FugueProfile(int nbParts) {
 		contrapuntalProfile = new ContrapunctalProfile(nbParts);
 		rythmicProfile = new RythmicProfile();
@@ -26,6 +28,9 @@ public class FugueProfile extends Profile {
 		pianoProfile = new PianoProfile();
 	}
 	
+	
+	//------------ GETTERS ------------\\
+
 	public ContrapunctalProfile getContrapuntalProfile() {
 		return contrapuntalProfile;
 	}
@@ -51,10 +56,8 @@ public class FugueProfile extends Profile {
 	}
 
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ REPORT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		formatter.importChildProfile(contrapuntalProfile.getReportFormatter());
 		return formatter;

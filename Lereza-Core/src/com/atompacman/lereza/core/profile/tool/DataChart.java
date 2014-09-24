@@ -77,10 +77,8 @@ public class DataChart {
 	private static int cellPadding = DEFAULT_PADDING;
 
 	
-	//////////////////////////////
-	//        CONSTRUCTOR       //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	protected DataChart(String chartName, Importance importance) {
 		this.chartName = chartName;
 		this.data = new ArrayList<List<Cell>>();
@@ -95,9 +93,7 @@ public class DataChart {
 	}
 
 	
-	//////////////////////////////
-	//         SET DATA         //
-	//////////////////////////////
+	//------------ SET DATA ------------\\
 
 	protected void setDataAt(int x, int y, List<String> newData) {
 		enlargeChart(x, y);
@@ -119,9 +115,7 @@ public class DataChart {
 	}
 
 
-	//////////////////////////////
-	//        ALIGNEMENT        //
-	//////////////////////////////
+	//------------ ALIGNEMENT ------------\\
 
 	public void setChartAlignement(Alignement alignement) {
 		chartAlignement = alignement;
@@ -141,9 +135,7 @@ public class DataChart {
 	}
 
 
-	//////////////////////////////
-	//         BORDERS          //
-	//////////////////////////////
+	//------------ BORDERS ------------\\
 
 	public void setChartBorders(String horizLinePattern, String vertLinePattern) {
 		chartHorizBorders = horizLinePattern;
@@ -158,20 +150,16 @@ public class DataChart {
 		vertBorders.put(column, vertLinePattern);
 	}
 
-	
-	//////////////////////////////
-	//         PADDING          //
-	//////////////////////////////
-	
+
+	//------------ PADDING ------------\\
+
 	public void setPadding(int padding) {
 		cellPadding = padding;
 	}
 	
 
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
-	
+	//------------ GETTERS ------------\\
+
 	public Importance getImportance() {
 		return importance;
 	}
@@ -181,9 +169,7 @@ public class DataChart {
 	}
 	
 	
-	//////////////////////////////
-	//      GENERATE CHART      //
-	//////////////////////////////
+	//------------ GENERATE CHART ------------\\
 
 	protected List<String> generateChart(List<Integer> level) {
 		List<String> lines = new ArrayList<String>();

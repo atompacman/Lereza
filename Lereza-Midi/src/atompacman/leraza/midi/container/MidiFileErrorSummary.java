@@ -12,10 +12,8 @@ public class MidiFileErrorSummary {
 	private int totalTimestamp;
 	
 	
-	//////////////////////////////
-	//       CONSTRUCTOR        //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	public MidiFileErrorSummary() {
 		this.roundingOverThresholdCount = 0;
 		this.noteLengthZeroCount = 0;
@@ -23,10 +21,8 @@ public class MidiFileErrorSummary {
 	}
 
 	
-	//////////////////////////////
-	//         SETTERS          //
-	//////////////////////////////
-	
+	//------------ SETTERS ------------\\
+
 	public void incrementRoundingOverThresholdCount() {
 		++this.roundingOverThresholdCount;
 	}
@@ -44,10 +40,8 @@ public class MidiFileErrorSummary {
 	}
 
 	
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
-	
+	//------------ GETTERS ------------\\
+
 	public int getRoundingOverThresholdCount() {
 		return roundingOverThresholdCount;
 	}
@@ -61,10 +55,8 @@ public class MidiFileErrorSummary {
 	}
 	
 	
-	//////////////////////////////
-	//          PRINT           //
-	//////////////////////////////
-	
+	//------------ PRINT ------------\\
+
 	public void print() {
 		if (roundingOverThresholdCount != 0) {
 			if (Log.infos() && Log.print("· Excessive note rounding    : " + roundingOverThresholdCount));

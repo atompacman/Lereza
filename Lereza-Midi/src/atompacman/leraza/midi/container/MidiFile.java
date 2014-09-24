@@ -25,10 +25,8 @@ public class MidiFile {
 	private String filePath;
 
 	
-	//////////////////////////////
-	//       Constructor        //
-	//////////////////////////////
-	
+	//------------ CONSTRUCTORS ------------\\
+
 	public MidiFile(String filePath){
 		this.infos = new ArrayList<String>();
 		this.trackInstruments = new ArrayList<MidiInstrument>();
@@ -37,19 +35,8 @@ public class MidiFile {
 	}
 	
 	
-	//////////////////////////////
-	//        GET NOTES         //
-	//////////////////////////////
-	
-	public List<Map<Integer, Stack<MidiNote>>> getNotes() {
-		return notes;
-	}
-	
-	
-	//////////////////////////////
-	//         SETTERS          //
-	//////////////////////////////
-	
+	//------------ SETTERS ------------\\
+
 	public void setMidiType(int midiType) {
 		this.midiType = midiType;
 	}
@@ -112,10 +99,8 @@ public class MidiFile {
 	}
 	
 	
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
-	
+	//------------ GETTERS ------------\\
+
 	public int getMidiType() {
 		return midiType;
 	}
@@ -172,6 +157,10 @@ public class MidiFile {
 		return infos;
 	}
 
+	public List<Map<Integer, Stack<MidiNote>>> getNotes() {
+		return notes;
+	}
+	
 	public String getFilePath() {
 		return filePath;
 	}

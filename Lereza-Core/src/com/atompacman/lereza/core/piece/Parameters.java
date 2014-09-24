@@ -17,7 +17,7 @@ public class Parameters {
 	//       PIECEBUILDER       //
 	//////////////////////////////
 	// Note value QA
-	public static final int     OFFBEAT_TIMEUNITS_QA_RADIUS = 4;
+	public static final int     OFFBEAT_TU_RADIUS = 4;
 	public static final Value 	LONGEST_FUSIONNABLE_REST_LENGTH = Value.THIRTYSECONTH;
 	
 	

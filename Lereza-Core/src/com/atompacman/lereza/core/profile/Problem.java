@@ -14,13 +14,26 @@ public abstract class Problem {
 	protected Diagnostic diagnostic;
 	
 	
+	//------------ FORMAT ------------\\
+
+	public abstract String formatProblem();
+	
+	
+	//------------ DIAGNOSTIC ------------\\
+
+	public abstract void diagnostic();
+	
+	
+	//------------ RECOVER ------------\\
+
+	public abstract void recover();
+	
+	
+	//------------ GETTERS ------------\\
+
 	public String getName() {
 		return problemName;
 	}
-	
-	public abstract String formatProblem();
-	
-	public abstract void diagnostic();
 	
 	public String getDiagnostic() {
 		diagnostic();
@@ -30,6 +43,4 @@ public abstract class Problem {
 	public String getRecoverability() {
 		return diagnostic.recoverability().name();
 	}
-	
-	public abstract void recover();
 }

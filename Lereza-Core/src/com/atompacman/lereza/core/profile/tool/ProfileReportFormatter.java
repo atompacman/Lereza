@@ -32,10 +32,8 @@ public class ProfileReportFormatter {
 	}
 	
 	
-	//////////////////////////////
-	//           CHILD          //
-	//////////////////////////////
-	
+	//------------ CHILD ------------\\
+
 	public void selectParentProfile() {
 		if (currentProfile.parentNode == null) {
 			throw new RuntimeException("Current profile \"" + currentProfile.profileClass + "\" is root, so it has no parent profile.");
@@ -61,10 +59,8 @@ public class ProfileReportFormatter {
 	}
 	
 	
-	//////////////////////////////
-	//           CHART          //
-	//////////////////////////////
-	
+	//------------ CHART ------------\\
+
 	public void selectChart(String chartName) {
 		Integer chartIndex = currentProfile.dataChartsIndexes.get(chartName);
 		if (chartIndex == null) {
@@ -116,10 +112,8 @@ public class ProfileReportFormatter {
 	}
 	
 	
-	//////////////////////////////
-	//         PROBLEM          //
-	//////////////////////////////
-	
+	//------------ PROBLEM ------------\\
+
 	public void addProblems(List<Problem> problems) {
 		String chartName = currentProfile.profileClass.getSimpleName() + " problems";
 		addChart(chartName, Importance.VERY_HIGH);
@@ -141,10 +135,8 @@ public class ProfileReportFormatter {
 	}
 	
 	
-	//////////////////////////////
-	//        SET DATA          //
-	//////////////////////////////
-	
+	//------------ SET DATA ------------\\
+
 	public void setDataAt(int x, int y, Object... newData) {
 		List<String> data = new ArrayList<String>();
 		for (Object newDataLine : newData) {
@@ -158,19 +150,15 @@ public class ProfileReportFormatter {
 	}
 	
 
-	//////////////////////////////
-	//     CHANGE PROPERTIES    //
-	//////////////////////////////
-	
+	//------------ CHANGE PROPERTIES ------------\\
+
 	public DataChart changeChartProperties() {
 		return currentChart;
 	}
 
 
-	//////////////////////////////
-	//           CHART          //
-	//////////////////////////////
-	
+	//------------ CHART ------------\\
+
 	public void importChildProfile(ProfileReportFormatter formatter) {
 		Class<? extends Profile> newClass = formatter.rootNode.profileClass;
 		addChildProfile(newClass);
@@ -187,19 +175,15 @@ public class ProfileReportFormatter {
 	}
 	
 	
-	//////////////////////////////
-	//       GET STATUS         //
-	//////////////////////////////
-	
+	//------------ STATUS ------------\\
+
 	public boolean isEmpty() {
 		return rootNode.childNodes.isEmpty();
 	}
 	
 	
-	//////////////////////////////
-	//          FORMAT          //
-	//////////////////////////////
-	
+	//------------ FORMAT ------------\\
+
 	public void print(Importance importance) {
 		for (String line : format(importance)) {
 			if(Log.vital() && Log.print(line));

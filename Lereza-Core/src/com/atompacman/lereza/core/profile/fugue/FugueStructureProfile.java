@@ -15,6 +15,8 @@ public class FugueStructureProfile extends Profile {
 	private List<FugalBridgeProfile> fugalBridgeProfile;
 	
 	
+	//------------ GETTERS ------------\\
+
 	public List<FugalEpisodeProfile> getFugalEpisodeProfile() {
 		return fugalEpisodeProfile;
 	}
@@ -28,9 +30,7 @@ public class FugueStructureProfile extends Profile {
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
+	//------------ REPORT ------------\\
 	
 	public ProfileReportFormatter getReportFormatter() {
 		return formatter;

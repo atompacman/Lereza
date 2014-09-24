@@ -10,20 +10,28 @@ public abstract class Profile {
 	protected ProfileReportFormatter formatter;
 	
 	
+	//------------ CONSTRUCTORS ------------\\
+
 	public Profile() {
 		recordTimeOfCreation();
 		this.formatter = new ProfileReportFormatter(this.getClass());
 	}
 
-	public abstract ProfileReportFormatter getReportFormatter();
-	
 	private void recordTimeOfCreation() {
 		Date date = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		timeOfCreation = dateFormat.format(date);
 	}
+
 	
+	//------------ GETTERS ------------\\
+
 	public String getTimeOfCreation() {
 		return timeOfCreation;
 	}
+
+	
+	//------------ FORMAT ------------\\
+
+	public abstract ProfileReportFormatter getReportFormatter();
 }

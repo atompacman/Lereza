@@ -20,6 +20,8 @@ public class PieceNavigator {
 	private int noteInMeasure;
 	private int noteInPart;
 
+	
+	//------------ CONSTRUCTORS ------------\\s
 
 	public PieceNavigator(Piece piece) {
 		if (piece.getNbParts() == 0) {
@@ -36,13 +38,12 @@ public class PieceNavigator {
 	}
 
 
-	//////////////////////////////
-	//           PART           //
-	//////////////////////////////
+	//------------ PART ------------\\
 
 	public void goToNextPart() {
 		if (part == piece.getNbParts() - 1) {
-			throw new PieceNavigatorException("Cannot go to next part: current part is the last one.");
+			throw new PieceNavigatorException("Cannot go to next part: "
+					+ "current part is the last one.");
 		}
 		++part;
 		measure = 0;
@@ -53,7 +54,8 @@ public class PieceNavigator {
 
 	public void goToPreviousPart() {
 		if (part == 0) {
-			throw new PieceNavigatorException("Cannot go to previous part: current part is the first one.");
+			throw new PieceNavigatorException("Cannot go to previous part: "
+					+ "current part is the first one.");
 		}
 		--part;
 		measure = 0;
@@ -64,7 +66,8 @@ public class PieceNavigator {
 
 	public void goToPart(int partNo) {
 		if (partNo >= piece.getNbParts() || partNo < 0) {
-			throw new PieceNavigatorException("Cannot go to part \"" + partNo + "\": the current piece only has " + piece.getNbParts() + " parts.");
+			throw new PieceNavigatorException("Cannot go to part \"" + partNo + "\": "
+					+ "the current piece only has " + piece.getNbParts() + " parts.");
 		}
 		while (partNo > part) {
 			goToNextPart();
@@ -85,7 +88,8 @@ public class PieceNavigator {
 			try {
 				goToNextPart();
 			} catch (PieceNavigatorException e) {
-				throw new PieceNavigatorException("Cannot go to first unempty part: there are no unempty parts.", e);
+				throw new PieceNavigatorException("Cannot go to first unempty part: "
+						+ "there are no unempty parts.", e);
 			}
 		}
 	}
@@ -93,19 +97,18 @@ public class PieceNavigator {
 	public final Part getCurrentPart() {
 		return piece.getPartNo(part);
 	}
-	
+
 	public boolean endOfPart() {
 		return measure == getCurrentPart().getNbMeasures();
 	}
-	
 
-	//////////////////////////////
-	//         MEASURE          //
-	//////////////////////////////
+
+	//------------ MEASURE ------------\\
 
 	public void goToNextMeasure() {
 		if (endOfPart()) {
-			throw new PieceNavigatorException("Cannot go to next measure: current measure is the last one.");
+			throw new PieceNavigatorException("Cannot go to next measure: "
+					+ "current measure is the last one.");
 		}
 		noteInPart -= noteInMeasure;
 		noteInPart += countNotesInMeasure();
@@ -116,7 +119,8 @@ public class PieceNavigator {
 
 	public void goToPreviousMeasure() {
 		if (measure == 0) {
-			throw new PieceNavigatorException("Cannot go to previous measure: current measure is the first one.");
+			throw new PieceNavigatorException("Cannot go to previous measure: "
+					+ "current measure is the first one.");
 		}
 		noteInPart -= noteInMeasure;
 		--measure;
@@ -127,7 +131,8 @@ public class PieceNavigator {
 
 	public void goToMeasure(int measureNo) {
 		if (measureNo >= getCurrentPart().getNbMeasures() || measureNo < 0) {
-			throw new PieceNavigatorException("Cannot go to measure \"" + measureNo + "\": the current part only has " + getCurrentPart().getNbMeasures() + " measures.");
+			throw new PieceNavigatorException("Cannot go to measure \"" + measureNo + "\": the "
+					+ "current part only has " + getCurrentPart().getNbMeasures() + " measures.");
 		}
 		while (measureNo > measure) {
 			goToNextMeasure();
@@ -147,7 +152,8 @@ public class PieceNavigator {
 			try {
 				goToNextMeasure();
 			} catch (PieceNavigatorException e) {
-				throw new PieceNavigatorException("Cannot go to first unempty measure of part " + part + ": there are no unempty measures.", e);
+				throw new PieceNavigatorException("Cannot go to first unempty measure of part " 
+						+ part + ": there are no unempty measures.", e);
 			}
 		}
 	}
@@ -161,9 +167,7 @@ public class PieceNavigator {
 	}
 
 
-	//////////////////////////////
-	//         TIMEUNIT         //
-	//////////////////////////////
+	//------------ TIMEUNIT ------------\\
 
 	public void goToNextTimeunit() {
 		++timeunitInMeasure;
@@ -191,7 +195,8 @@ public class PieceNavigator {
 
 	public void goToTimeunitNo(int timeunitNo) {
 		if (timeunitNo >= getCurrentNoteStack().size() || timeunitNo < 0) {
-			throw new PieceNavigatorException("Cannot go to timeunit \"" + timeunitNo + "\": the current measure only has " + getCurrentNoteStack().size() + " timeunits.");
+			throw new PieceNavigatorException("Cannot go to timeunit \"" + timeunitNo + "\": the "
+					+ "current measure only has " + getCurrentNoteStack().size() + " timeunits.");
 		}
 		while (timeunitNo > timeunitInMeasure) {
 			goToNextTimeunit();
@@ -210,9 +215,7 @@ public class PieceNavigator {
 	}
 
 
-	//////////////////////////////
-	//           NOTE           //
-	//////////////////////////////
+	//------------ NOTE ------------\\
 
 	public void goToNextNote() {
 		goToNextTimeunit();
@@ -230,7 +233,8 @@ public class PieceNavigator {
 
 	public void goToNoteNo(int noteNo) {
 		if (noteNo >= countNotesInMeasure() || noteNo < 0) {
-			throw new PieceNavigatorException("Cannot go to note \"" + noteNo + "\": the current measure only has " + countNotesInMeasure() + " notes.");
+			throw new PieceNavigatorException("Cannot go to note \"" + noteNo + "\": "
+					+ "the current measure only has " + countNotesInMeasure() + " notes.");
 		}
 		while (noteNo > noteInMeasure) {
 			goToNextNote();
@@ -272,18 +276,14 @@ public class PieceNavigator {
 	}
 
 
-	//////////////////////////////
-	//          OTHER           //
-	//////////////////////////////
-	
+	//------------ PMT ------------\\
+
 	public PMT getPMT() {
 		return new PMT(part, measure, timeunitInMeasure);
 	}
-	
-	
-	//////////////////////////////
-	//          COUNT           //
-	//////////////////////////////
+
+
+	//------------ COUNT ------------\\
 
 	public int countNotesInMeasure() {
 		int notesInMeasure = 0;
@@ -313,16 +313,17 @@ public class PieceNavigator {
 		return notesInNoteSet;
 	}
 
-	//////////////////////////////
-	//          OTHER           //
-	//////////////////////////////
+
+	//------------ OTHER ------------\\
 
 	public void printLocation() {
 		if (Log.infos() && Log.print(getFullLocation()));
 	}
 
 	public String getFullLocation() {
-		return String.format("PieceNavigator - " + getPMT().toString() + " - Part %1d - Measure %3d - Timestamp %5d - Note in part %3d - Note in measure %2d - Timeunit in measure %2d", 
+		return String.format("PieceNavigator - " + getPMT().toString() + 
+				" - Part %1d - Measure %3d - Timestamp %5d - Note in part %3d - "
+				+ "Note in measure %2d - Timeunit in measure %2d", 
 				part, measure, getCurrentTimestamp(), noteInPart, noteInMeasure, timeunitInMeasure);
 	}
 }

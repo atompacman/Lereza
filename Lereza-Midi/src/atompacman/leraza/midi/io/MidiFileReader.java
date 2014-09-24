@@ -35,9 +35,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 	private Map<Integer, Integer> noteBuffer;
 
 
-	//////////////////////////////
-	//        READ FILE         //
-	//////////////////////////////
+	//------------ READ FILE ------------\\
 
 	public void read(String filePath) {
 		if (Log.infos() && Log.title("MIDIFileReader", 0));
@@ -49,7 +47,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		this.rawData = loadBinaryFile(filePath);
 
 		if (this.rawData.length > Parameters.MAX_FILE_SIZE) {
-			throw new MidiFileException ("Size of selected file exceeds " + Parameters.MAX_FILE_SIZE / 1000 + " KB.");
+			throw new MidiFileException("Size of selected file exceeds " + Parameters.MAX_FILE_SIZE / 1000 + " KB.");
 		}
 		if (Log.infos() && Log.print("File at \"" + filePath + "\" loaded in memory (" + this.rawData.length / 1000 + " KB)."));
 
@@ -109,9 +107,6 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		int nbTracks = readShort();
 		tempMidiFile.setNbTracks(nbTracks);
 		if (Log.infos() && Log.print(printOffset() + "  * Number of tracks: " + nbTracks + "."));
-		for (int i = 0; i < nbTracks; ++i) {
-			//midiFile.getNotes().add(new HashMap<Integer, Stack<MIDINote>>());
-		}
 		offset += 2;
 
 		int divisionOfABeat = readShort();
@@ -144,9 +139,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 	}
 
 
-	//////////////////////////////
-	//      EVENT HANDLING      //
-	//////////////////////////////
+	//------------ EVENT HANDLING ------------\\
 
 	private void handleEvent(int deltaTime) {
 		if (isAMetaEvent()) {
@@ -225,9 +218,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		if (Parameters.NOTE_VISUALISATION) {
 			sleep((int)(deltaTime * Parameters.VISUALISATION_SPEED_CORRECTION));
 		}
-		if (timestamp == 0) {
-			throw new MidiFileException(printOffset() + "ERROR: A noteOff event came before any noteOn event.");
-		}
+
 		timestamp += deltaTime;
 
 		int note = readByte();
@@ -387,9 +378,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 	}
 
 
-	//////////////////////////////
-	//      STATUS CHECKER      //
-	//////////////////////////////
+	//------------ STATUS ------------\\
 
 	private boolean isAMetaEvent() {
 		return readByte() == 0xff;
@@ -408,9 +397,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 	}
 
 
-	//////////////////////////////
-	//       READ BINARY        //
-	//////////////////////////////
+	//------------ READ BINARY ------------\\
 
 	private int readByte() {
 		return rawData[offset] & 0xFF;
@@ -485,9 +472,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 	}
 
 
-	//////////////////////////////
-	//         OTHERS           //
-	//////////////////////////////
+	//------------ OTHERS ------------\\
 
 	private String printOffset() {
 		return String.format("[OFFSET %4d] ", offset);
@@ -522,9 +507,8 @@ public class MidiFileReader implements MidiFileReaderAPI {
 		tempMidiFile.setValueOfShortestNote((int)smallestIntegerDivisionOfBeatNoteValue);
 	}
 
-	//////////////////////////////
-	//          RESET           //
-	//////////////////////////////
+	
+	//------------ RESET ------------\\
 
 	private void reset() {
 		this.tempMidiFile = null;
@@ -539,9 +523,7 @@ public class MidiFileReader implements MidiFileReaderAPI {
 	}
 
 
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
+	//------------ GETTERS ------------\\
 
 	public static MidiFile getMidiFile(String filePath) {
 		return midiFiles.get(filePath);

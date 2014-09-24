@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TestRoutines>
 	<SystemTests>
-		<Routine name="Tiny monophonic sequences" files="1"/>
+		<Routine id="1" name="Tiny monophonic sequences" files="1"/>
 	</SystemTests>
 </TestRoutines>

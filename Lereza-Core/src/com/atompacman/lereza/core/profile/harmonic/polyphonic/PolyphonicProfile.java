@@ -10,10 +10,8 @@ public class PolyphonicProfile extends HarmonicProfile {
 	}
 	
 	
-	//////////////////////////////
-	//   GET REPORT FORMATTER   //
-	//////////////////////////////
-	
+	//------------ REPORT ------------\\
+
 	public ProfileReportFormatter getReportFormatter() {
 		return super.getReportFormatter();
 	}

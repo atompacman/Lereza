@@ -11,15 +11,23 @@ public class FugueProfiler extends Profiler {
 	private FugueProfile profile;
 	
 	
+	//------------ CONSTRUCTORS ------------\\
+
 	public FugueProfiler(Piece piece, Profile profile) {
 		super(piece, profile);
 		this.profile = (FugueProfile) originalProfile;
 	}
 
+	
+	//------------ VERIFY ------------\\
+
 	public void verifyProfilability() {
 		
 	}
 	
+	
+	//------------ PROFILE ------------\\
+
 	public void profile() {
 		if(Log.infos() && Log.title(this.getClass().getSimpleName(), 0));
 		

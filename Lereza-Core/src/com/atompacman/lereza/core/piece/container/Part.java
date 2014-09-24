@@ -16,15 +16,14 @@ public class Part {
 
 	private List<Measure> measures;
 	private RythmicSignature rythmicSignature;
-	
 
-	//////////////////////////////
-	//       CONSTRUCTORS       //
-	//////////////////////////////
+
+	//------------ CONSTRUCTORS ------------\\
 
 	public Part(RythmicSignature rythmicSignature, int finalTimestamp) {
 		this.measures = new ArrayList<Measure>();
-		int nbMeasures = (int) ((double) finalTimestamp / ((double) rythmicSignature.getMeter().getNumerator() * (double) rythmicSignature.getQuarterNoteTimeunitLength()));
+		int measureLength = rythmicSignature.getMeasureTimeunitLength();
+		int nbMeasures = (int) ((double) finalTimestamp / (double) measureLength);
 		for (int i = 0; i < nbMeasures; ++i) {
 			measures.add(new Measure(rythmicSignature, i));
 		}
@@ -32,14 +31,13 @@ public class Part {
 	}
 
 
-	//////////////////////////////
-	//         ADD NOTE         //
-	//////////////////////////////
+	//------------ ADD ------------\\
 
 	public void addNotes(Stack<MidiNote> notes, int timestamp) {
-		int measure = (int) ((double) timestamp / (double) rythmicSignature.getMeasureTimeunitLength());
+		int measureLength = rythmicSignature.getMeasureTimeunitLength();
+		int measure = (int) ((double) timestamp / (double) measureLength);
 		int timeunit = timestamp % rythmicSignature.getMeasureTimeunitLength();
-		
+
 		for (MidiNote note : notes) {
 			addNote(note, note.getLength(), timeunit, measure, false);
 		}
@@ -49,7 +47,7 @@ public class Part {
 		if (Parameters.NOTE_ADDING_VISUALISATION) {
 			List<List<String>> measuresToPrint = new ArrayList<List<String>>();
 			measuresToPrint.add(measures.get(measure).toStringList(false));
-			
+
 			if (measure > 0) {
 				measuresToPrint.add(0, measures.get(measure - 1).toStringList(true));
 			}
@@ -60,7 +58,8 @@ public class Part {
 		}
 	}
 
-	private void addNote(MidiNote note, int length, int timeunit, int measure, boolean realNotePlaced) {
+	private void addNote(MidiNote note, int length, int timeunit, 
+			int measure, boolean realNotePlaced) {
 		List<Value> values = Value.splitIntoValues(length);
 
 		for (Value value : values) {
@@ -68,8 +67,11 @@ public class Part {
 			if (endTimeunit <= rythmicSignature.getMeasureTimeunitLength()) {
 				measures.get(measure).addNote(note, value, timeunit, realNotePlaced);
 			} else {
-				addNote(note, rythmicSignature.getMeasureTimeunitLength() - timeunit, timeunit, measure, realNotePlaced);
-				addNote(note, endTimeunit - rythmicSignature.getMeasureTimeunitLength(), 0, measure + 1, true);
+				int noteLength = rythmicSignature.getMeasureTimeunitLength() - timeunit;
+				addNote(note, noteLength, timeunit, measure, realNotePlaced);
+
+				noteLength = endTimeunit - rythmicSignature.getMeasureTimeunitLength();
+				addNote(note, noteLength, 0, measure + 1, true);
 			}
 			timeunit += value.toTimeunit();
 			if (timeunit >= rythmicSignature.getMeasureTimeunitLength()) {
@@ -79,11 +81,9 @@ public class Part {
 			realNotePlaced = true;
 		}
 	}
-	
-	
-	//////////////////////////////
-	//           PRINT          //
-	//////////////////////////////
+
+
+	//------------ PRINT ------------\\
 
 	public void printMeasures(List<List<String>> measures) {
 		if (measures == null) {
@@ -97,7 +97,8 @@ public class Part {
 				size = measure.size();
 			} else {
 				if (measure.size() != size) {
-					if (Log.error() && Log.print("Cannot fusion measure string lists as they are not of the same size."));
+					if (Log.error() && Log.print("Cannot fusion measure string "
+							+ "lists as they are not of the same size."));
 					return;
 				}
 			}
@@ -116,35 +117,33 @@ public class Part {
 	private char getHoriBarIfNeeded(int heigthOnPartition) {
 		if ((heigthOnPartition > Parameters.BOTTOM_SECTION_HEIGHT &&
 				heigthOnPartition < (Parameters.BOTTOM_SECTION_HEIGHT + 10) ||
-				(heigthOnPartition > (Parameters.BOTTOM_SECTION_HEIGHT + 9 + Parameters.MIDDLE_SECTION_HEIGHT) &&
-						heigthOnPartition < (Parameters.BOTTOM_SECTION_HEIGHT + 9 + Parameters.MIDDLE_SECTION_HEIGHT + 10)))) {
+				(heigthOnPartition > (Parameters.BOTTOM_SECTION_HEIGHT 
+						+ 9 + Parameters.MIDDLE_SECTION_HEIGHT) &&
+						heigthOnPartition < (Parameters.BOTTOM_SECTION_HEIGHT 
+								+ 9 + Parameters.MIDDLE_SECTION_HEIGHT + 10)))) {
 			return '|';
 		}
 		return ' ';
 	}
 
 
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
+	//------------ GETTERS ------------\\
 
 	public Measure getMeasureNo(int measureNo) {
 		return measures.get(measureNo);
 	}
-	
+
 	public RythmicSignature getRythmicSignature() {
 		return rythmicSignature;
 	}
-	
-	
-	//////////////////////////////
-	//       GET STATUS         //
-	//////////////////////////////
-	
+
+
+	//------------ STATUS ------------\\
+
 	public boolean isEmpty() {
 		return measures.isEmpty();
 	}
-	
+
 	public int getNbMeasures() {
 		return measures.size();
 	}

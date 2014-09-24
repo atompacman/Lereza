@@ -13,12 +13,12 @@ public class Note {
 	private Articulation articulation;
 	private NoteStatus status;
 	
-	public enum NoteStatus { NOTE_START, TIED_NOTE_START, NOTE_CONTINUATION, TIED_NOTE_CONTINUATION };
+	public enum NoteStatus { 
+		NOTE_START, TIED_NOTE_START, NOTE_CONTINUATION, TIED_NOTE_CONTINUATION 
+	};
 	
 	
-	//////////////////////////////
-	//       CONSTRUCTORS       //
-	//////////////////////////////
+	//------------ CONSTRUCTORS ------------\\
 	
 	public Note(Pitch pitch, Value value, Articulation articulation, NoteStatus status) {
 		this.pitch = pitch;
@@ -32,13 +32,12 @@ public class Note {
 	}
 	
 	public Note(int hexValue, Value value, NoteStatus status) {
-		this(new Pitch(Tone.thatIsMoreCommonForSemitoneValue(hexValue), Octave.fromHex(hexValue)), value, status);
+		this(new Pitch(Tone.thatIsMoreCommonForSemitoneValue(hexValue), 
+				Octave.fromHex(hexValue)), value, status);
 	}
 
 	
-	//////////////////////////////
-	//         GETTERS          //
-	//////////////////////////////
+	//------------ GETTERS ------------\\
 
 	public Pitch getPitch() {
 		return pitch;
@@ -60,19 +59,16 @@ public class Note {
 		return status == NoteStatus.NOTE_START || status == NoteStatus.TIED_NOTE_START;
 	}
 	
-	//////////////////////////////
-	//         SETTERS          //
-	//////////////////////////////
+	
+	//------------ SETTERS ------------\\
 
 	public void setArticulation(Articulation articulation) {
 		this.articulation = articulation;
 	}
 	
 	
-	//////////////////////////////
-	//        TO STRING         //
-	//////////////////////////////
-	
+	//------------ STRING ------------\\
+
 	public String toString() {
 		String output = pitch.toString();
 		if (articulation == Articulation.STACCATO) {
