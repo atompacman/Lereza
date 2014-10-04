@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MidiFileIndex>
+	<Tradition name="Western">
+		<Era name="Baroque">
+			<Culture name="Italian">
+				<Genre name="Concert">
+					<Subgenre name="Orchestral">
+						<Form name="Concerto">
+							<Artist name="Bach">
+								<Set name="Concerto Arrangements">
+									<Subset name="Concerto Arrangements For Harpsichord">
+										<File id="1" title="Concerto In D - I - Allegro" url="Bach\Concerto Arrangements For Harpsichord\Concerto In D, BWV 972 - I - Allegro.mid"/>
+										<File id="2" title="Concerto In D - II - Larghetto" url="Bach\Concerto Arrangements For Harpsichord\Concerto In D, BWV 972 - II - Larghetto.mid"/>
+										<File id="3" title="Concerto In D - III - Allegro" url="Bach\Concerto Arrangements For Harpsichord\Concerto In D, BWV 972 - III - Allegro.mid"/>
+									</Subset>
+								</Set>
+							</Artist>
+						</Form>
+					</Subgenre>
+				</Genre>
+			</Culture>
+			<Culture name="German">
+				<Genre name="Concert">
+					<Subgenre name="Solo">
+						<Form name="Fugue">
+							<Artist name="Bach">
+								<Set name="The Well-Tempered Clavier">
+									<Subset name="Book I">
+										<File id="4" title="Prelude &amp; Fugue No.1 In C - Fugue" url="Bach\Keyboard Works\The Well-Tempered Clavier\Book I\Prelude &amp; Fugue No.1 In C, BWV 846 - Fugue.mid"/>
+									</Subset>
+								</Set>
+							</Artist>
+						</Form>
+					</Subgenre>
+				</Genre>
+				<Genre name="Traditional">
+					<Subgenre name="Nursery Rhyme">
+						<Form name="Round">
+							<Artist name="Traditional">
+								<Set name="Traditional">
+									<Subset name="Traditional">
+										<File id="5" title="Frere Jacques" url="Test\System\Simple\MonophonicSequences\FreresJacques.mid"/>
+									</Subset>
+								</Set>
+							</Artist>
+						</Form>
+					</Subgenre>
+				</Genre>
+			</Culture>
+		</Era>
+	</Tradition>
+</MidiFileIndex>
