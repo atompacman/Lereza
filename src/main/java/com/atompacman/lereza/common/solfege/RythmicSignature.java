@@ -4,15 +4,13 @@ public class RythmicSignature {
 	
 	private Meter meter;
 	private Grouping noteGrouping;
-	private int quarterNoteTimeunitLength;
-	
+
 
 	//------------ CONSTRUCTORS ------------\\
 
-	public RythmicSignature(Meter meter, Grouping noteGrouping, int quarterNoteTimeunitLength) {
+	public RythmicSignature(Meter meter, Grouping noteGrouping) {
 		this.meter = meter;
 		this.noteGrouping = noteGrouping;
-		this.quarterNoteTimeunitLength = quarterNoteTimeunitLength;
 	}
 	
 	
@@ -26,11 +24,9 @@ public class RythmicSignature {
 		return noteGrouping;
 	}
 	
-	public int getQuarterNoteTimeunitLength() {
-		return quarterNoteTimeunitLength;
+	public int timeunitsInABar() {
+		return meter.getNumerator() * Value.QUARTER.toTimeunit();
 	}
 	
-	public int getMeasureTimeunitLength() {
-		return quarterNoteTimeunitLength * meter.getNumerator();
-	}
+	
 }

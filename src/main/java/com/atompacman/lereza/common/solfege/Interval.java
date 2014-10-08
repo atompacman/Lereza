@@ -122,7 +122,7 @@ public class Interval {
 		try {
 			return between(Semitones.between(a, b), DiatonicTones.between(a, b));
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not measure the interval between \"" 
+			throw new IllegalArgumentException("Could not bar the interval between \"" 
 					+ a.toString() + "\" and \"" + b.toString() + "\": ", e);
 		}
 	}
@@ -133,7 +133,7 @@ public class Interval {
 			int diatonicToneDelta = DiatonicTones.between(a, direction, b);
 			return between(semitoneDelta, diatonicToneDelta);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not measure the interval between \"" 
+			throw new IllegalArgumentException("Could not bar the interval between \"" 
 					+ a.toString() + "\" and \"" + b.toString() + "\": ", e);
 		}
 	}

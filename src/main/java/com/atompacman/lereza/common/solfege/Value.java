@@ -13,7 +13,8 @@ public enum Value {
 	public static Value fromTimeunit(int length) {
 		double exponent = Math.log10(length) / Math.log10(2);
 		if ((exponent - (int) exponent) != 0) {
-			throw new IllegalArgumentException("Length \"" + length + "\" cannot be converted to a simple value.");
+			throw new IllegalArgumentException("Length \"" + length + 
+					"\" cannot be converted to a simple value.");
 		}
 		return Value.values()[(int)exponent];
 	}

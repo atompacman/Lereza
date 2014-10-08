@@ -6,12 +6,12 @@ import java.util.Date;
 import com.atompacman.atomLog.Log;
 import com.atompacman.atomLog.Log.Verbose;
 import com.atompacman.lereza.common.database.Database;
-import com.atompacman.lereza.core.piece.tool.PieceBuilder;
-import com.atompacman.lereza.core.profile.ProfileManager;
 import com.atompacman.lereza.exception.DatabaseException;
 import com.atompacman.lereza.exception.LerezaWizardInitException;
 import com.atompacman.lereza.midi.MIDIFilePlayer;
 import com.atompacman.lereza.midi.MIDIFileReader;
+import com.atompacman.lereza.piece.tool.PieceBuilder;
+import com.atompacman.lereza.profile.ProfileManager;
 
 public class Wizard {
 

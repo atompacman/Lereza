@@ -368,10 +368,10 @@ public class MIDIFileReader implements MIDIFileReaderAPI {
 		if (Log.infos() && Log.print(printOffset() + "Processing time signature event."));
 
 		offset += 2;
-		int beatPerMeasure = readByte();
-		tempMidiFile.setBeatPerMeasure(beatPerMeasure);
+		int beatPerBar = readByte();
+		tempMidiFile.setBeatPerBar(beatPerBar);
 		if (Log.infos() && Log.print(printOffset() 
-				+ "  * Beats per measure: " + beatPerMeasure + "."));
+				+ "  * Beats per bar: " + beatPerBar + "."));
 		offset += 1;
 
 		int valueOfTheBeatNote = (int) Math.pow(2, readByte());

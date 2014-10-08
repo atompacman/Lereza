@@ -36,4 +36,16 @@ public class TestSemitones {
 		assertTrue(Semitones.between(a, Direction.ASCENDING, b) == 2);
 		assertTrue(Semitones.between(a, Direction.DESCENDING, b) == -10);
 	}
+	
+	
+	//------------ NORMALIZE ------------\\
+
+	@Test
+	public void testNormalize() {
+		assertTrue(Semitones.normalize(4) == 4);
+		assertTrue(Semitones.normalize(23) == 11);
+		assertTrue(Semitones.normalize(-1) == 11);
+		assertTrue(Semitones.normalize(12) == 0);
+		assertTrue(Semitones.normalize(-34) == 2);
+	}
 }

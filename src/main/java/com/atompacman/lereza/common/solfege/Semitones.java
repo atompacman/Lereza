@@ -7,7 +7,7 @@ public class Semitones {
 
 	//------------ BETWEEN ------------\\
 
-	public static int between(Tone a, Direction direction,  Tone b) {
+	public static int between(Tone a, Direction direction, Tone b) {
 		int semitoneValueA = a.semitoneValue();
 		int semitoneValueB = b.semitoneValue();
 
@@ -31,7 +31,6 @@ public class Semitones {
 		}
 	}
 
-
 	public static int between(Pitch a, Pitch b) {
 		return b.semitoneValue() - a.semitoneValue();
 	}
@@ -40,10 +39,10 @@ public class Semitones {
 	//------------ NORMALIZE ------------\\
 
 	public static int normalize(int semitoneValue) {
-		semitoneValue %= Semitones.IN_OCTAVE;
-		if (semitoneValue < 0) {
-			semitoneValue = Semitones.IN_OCTAVE - semitoneValue;
+		if (semitoneValue >= 0) {
+			return semitoneValue % Semitones.IN_OCTAVE;
+		} else {
+			return Semitones.IN_OCTAVE - (-semitoneValue % Semitones.IN_OCTAVE);
 		}
-		return semitoneValue;
 	}
 }

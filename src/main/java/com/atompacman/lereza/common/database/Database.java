@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.atompacman.lereza.common.context.ContextElements;
-import com.atompacman.lereza.core.piece.container.Piece;
-import com.atompacman.lereza.core.profile.ProfiledPiece;
 import com.atompacman.lereza.exception.ContextElementsException;
 import com.atompacman.lereza.exception.DatabaseException;
 import com.atompacman.lereza.exception.MIDIFileIndexParserException;
 import com.atompacman.lereza.midi.MIDIFileIndexParser;
 import com.atompacman.lereza.midi.container.MIDIFile;
 import com.atompacman.lereza.midi.container.MIDIFileInfo;
+import com.atompacman.lereza.piece.container.Piece;
+import com.atompacman.lereza.profile.ProfiledPiece;
 
 public class Database {
 	

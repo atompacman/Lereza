@@ -47,6 +47,9 @@ public class SystemTester {
 		}
 	}
 
+	
+	//------------ READ TEST ROUTINES ------------\\
+
 	private static List<TestRoutine> readTestRoutines() throws XMLParserException, 
 	MIDIFileIndexParserException, DatabaseException {
 		List<TestRoutine> testRoutines = new ArrayList<TestRoutine>();

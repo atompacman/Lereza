@@ -23,7 +23,7 @@ public class TestCircleOfFifth {
 		assertTrue(CircleOfFifths.accidentalOfKey(key) == Accidental.SHARP);
 		
 		key = new Key(Tone.valueOf("A"), Quality.MINOR);
-		assertTrue(CircleOfFifths.accidentalOfKey(key) == null);
+		assertTrue(CircleOfFifths.accidentalOfKey(key) == Accidental.NONE);
 	}
 	
 	@Test
@@ -39,10 +39,17 @@ public class TestCircleOfFifth {
 	}
 	
 	
-	//------------ DISTANCE TO MIDDLE OF CIRCLE ------------\\
+	//------------ POSITION IN ORDERS ------------\\
 
 	@Test
-	public void testDistanceToMiddleOfCircle() {
-		assertTrue(CircleOfFifths.distanceToMiddleOfCircle(Tone.valueOf("G#")) == 8);
+	public void testPositionInOrders() {
+		assertTrue(CircleOfFifths.positionInOrderOfSharps(Tone.valueOf("G#")) == 2);
+		assertTrue(CircleOfFifths.positionInOrderOfSharps(Tone.valueOf("B#")) == 6);
+		assertTrue(CircleOfFifths.positionInOrderOfFlats(Tone.valueOf("Eb")) == 1);
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testPositionInOrdersParamVerif() {
+		assertTrue(CircleOfFifths.positionInOrderOfSharps(Tone.valueOf("Bb")) == 2);
 	}
 }

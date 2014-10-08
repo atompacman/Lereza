@@ -4,14 +4,14 @@ import com.atompacman.lereza.midi.HexToNote;
 
 public class MIDINote {
 	
-	private int note;
+	private int hexNote;
 	private int length;
 
 	
 	//------------ CONSTRUCTORS ------------\\
 
-	public MIDINote(int noteName, int noteLength) {
-		this.note = noteName;
+	public MIDINote(int hexNote, int noteLength) {
+		this.hexNote = hexNote;
 		this.length = noteLength;
 	}
 
@@ -26,7 +26,7 @@ public class MIDINote {
 	//------------ GETTERS ------------\\
 
 	public int getNote() {
-		return note;
+		return hexNote;
 	}
 
 	public int getLength() {
@@ -37,6 +37,6 @@ public class MIDINote {
 	//------------ STRING ------------\\
 
 	public String toString() {
-		return HexToNote.toString(note) + " (" + length + ")";
+		return HexToNote.toString(hexNote) + " (" + length + ")";
 	}
 }

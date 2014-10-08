@@ -2,12 +2,12 @@ package com.atompacman.lereza.common.solfege;
 
 import java.util.List;
 
-import com.atompacman.lereza.common.helper.EnumRepresConstructor;
+import com.atompacman.lereza.common.helper.EnumRepresConstruc;
 import com.atompacman.lereza.common.solfege.quality.Quality;
 
 public class Key {
 	
-	private static EnumRepresConstructor<Key> enumRepresConstructor = new EnumRepresConstructor<Key>(Key.class);
+	private static EnumRepresConstruc<Key> enumRepresConstructor = new EnumRepresConstruc<Key>(Key.class);
 	
 	private Tone tone;
 	private Quality quality;

@@ -39,10 +39,10 @@ public class DiatonicTones {
 	//------------ NORMALIZE ------------\\
 
 	public static int normalize(int diatonicToneValue) {
-		diatonicToneValue %= DiatonicTones.IN_OCTAVE;
-		if (diatonicToneValue < 0) {
-			diatonicToneValue = DiatonicTones.IN_OCTAVE + diatonicToneValue;
+		if (diatonicToneValue >= 0) {
+			return diatonicToneValue % DiatonicTones.IN_OCTAVE;
+		} else {
+			return DiatonicTones.IN_OCTAVE - (-diatonicToneValue % DiatonicTones.IN_OCTAVE);
 		}
-		return diatonicToneValue;
 	}
 }

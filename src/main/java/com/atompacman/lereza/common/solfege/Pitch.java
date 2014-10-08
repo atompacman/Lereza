@@ -1,10 +1,11 @@
 package com.atompacman.lereza.common.solfege;
 
-import com.atompacman.lereza.common.helper.EnumRepresConstructor;
+import com.atompacman.lereza.common.helper.EnumRepresConstruc;
 
 public class Pitch {
 	
-	private static EnumRepresConstructor<Pitch> enumRepresConstructor = new EnumRepresConstructor<Pitch>(Pitch.class);
+	private static EnumRepresConstruc<Pitch> enumRepresConstructor = 
+			new EnumRepresConstruc<Pitch>(Pitch.class);
 
 	private Tone tone;
 	private Octave octave;

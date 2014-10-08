@@ -17,7 +17,7 @@ public class MIDIFile implements Storable {
 
 	private int midiType;
 	private int divisionOfABeat;
-	private int beatPerMeasure;
+	private int beatPerBar;
 	private int valueOfTheBeatNote;
 	private int clockTicksPerBeat;
 	private int nb32thNotesPerBeat;
@@ -70,8 +70,8 @@ public class MIDIFile implements Storable {
 		this.divisionOfABeat = divisionOfABeat;
 	}
 
-	public void setBeatPerMeasure(int beatPerMeasure) {
-		this.beatPerMeasure = beatPerMeasure;
+	public void setBeatPerBar(int beatPerBar) {
+		this.beatPerBar = beatPerBar;
 	}
 
 	public void setValueOfTheBeatNote(int valueOfTheBeatNote) {
@@ -137,8 +137,8 @@ public class MIDIFile implements Storable {
 		return divisionOfABeat;
 	}
 
-	public int getBeatPerMeasure() {
-		return beatPerMeasure;
+	public int getBeatPerBar() {
+		return beatPerBar;
 	}
 
 	public int getValueOfTheBeatNote() {

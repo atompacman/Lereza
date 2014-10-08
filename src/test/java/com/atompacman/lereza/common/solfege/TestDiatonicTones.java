@@ -34,4 +34,16 @@ public class TestDiatonicTones {
 		b = Pitch.valueOf("A2");
 		assertTrue(DiatonicTones.between(a, b) == 0);
 	}
+
+
+	//------------ NORMALIZE ------------\\
+
+	@Test
+	public void testNormalize() {
+		assertTrue(DiatonicTones.normalize(4) == 4);
+		assertTrue(DiatonicTones.normalize(23) == 2);
+		assertTrue(DiatonicTones.normalize(-1) == 6);
+		assertTrue(DiatonicTones.normalize(12) == 5);
+		assertTrue(DiatonicTones.normalize(-34) == 1);
+	}
 }

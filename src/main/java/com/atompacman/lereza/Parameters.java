@@ -1,6 +1,7 @@
 package com.atompacman.lereza;
 
 import java.io.File;
+import java.util.Random;
 
 import com.atompacman.lereza.common.solfege.Value;
 
@@ -18,11 +19,20 @@ public class Parameters {
 	
 	public static final String DATA_DIRECTORY 			= "data" + File.separator;
 	public static final String TEST_DIRECTORY 			= "test" + File.separator;
-	public static final String MIDI_INDEX_XML_PATH 	  	= "test\\midi\\TestMIDIFileIndex\\completeTest.xml";
+	public static final String MIDI_INDEX_XML_PATH 	  	= "test\\midi\\TestMIDIFileIndexParser\\completeTest.xml";
 	//public static final String MIDI_INDEX_XML_FILEPATH 	  = DATA_DIRECTORY + "MIDIFileIndex.xml";
-	public static final String TEST_ROUTINES_XML_PATH 	= DATA_DIRECTORY + "TestRoutines.xml";
+	public static final String TEST_ROUTINES_XML_PATH 	= TEST_DIRECTORY + "TestRoutines.xml";
 	//public static final String CONTEXT_ELEM_XML_FILEPATH  = DATA_DIRECTORY + "ContextElements.xml";
 	public static final String CONTEXT_ELEM_XML_FILE  	= "test\\common\\context\\TestContextElements\\completeTest.xml";
+	
+	
+	//**********************************************************************************************
+	//
+	//                                    GLOBAL PARAMETERS
+	//
+	//**********************************************************************************************
+
+	public static final Random rand = new Random(152351235);
 	
 	
 	//**********************************************************************************************
@@ -35,10 +45,10 @@ public class Parameters {
 
 	/** If true, activates an console animation that shows that notes that are being added during
 	 * song creation. */
-	public static final boolean NOTE_ADDING_VISUALISATION = false;
+	public static final boolean NOTE_ADDING_VISUALISATION = true;
 
 	/** Play notes when adding/visualizing notes */
-	public static final boolean NOTE_ADDING_AUDIO 		  = false;
+	public static final boolean NOTE_ADDING_AUDIO 		  = true;
 	
 	/** A tempo correction factor that changes the building speed of a song in order to play notes
 	 *  in a appreciable way.*/

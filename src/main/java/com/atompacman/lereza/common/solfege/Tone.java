@@ -3,12 +3,12 @@ package com.atompacman.lereza.common.solfege;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atompacman.lereza.common.helper.EnumRepresConstructor;
+import com.atompacman.lereza.common.helper.EnumRepresConstruc;
 
 public class Tone {
 
-	private static EnumRepresConstructor<Tone> enumRepresConstructor = 
-			new EnumRepresConstructor<Tone>(Tone.class);
+	private static EnumRepresConstruc<Tone> enumRepresConstructor = 
+			new EnumRepresConstruc<Tone>(Tone.class);
 
 	private NoteLetter note;
 	private Accidental alteration;
@@ -39,16 +39,28 @@ public class Tone {
 		}
 		Tone a = possibleTones.get(0);
 		Tone b = possibleTones.get(1);
-		int distanceA = CircleOfFifths.distanceToMiddleOfCircle(a);
-		int distanceB = CircleOfFifths.distanceToMiddleOfCircle(b);
+		
+		int posA = 0;
+		int posB = 0;;
+		
+		switch (a.alteration) {
+		case FLAT:  posA = CircleOfFifths.positionInOrderOfFlats(a);  break;
+		case SHARP: posA = CircleOfFifths.positionInOrderOfSharps(a); break;
+		case NONE:  posA = 0; 										  break;
+		}
+		switch (b.alteration) {
+		case FLAT:  posB = CircleOfFifths.positionInOrderOfFlats(b);  break;
+		case SHARP: posB = CircleOfFifths.positionInOrderOfSharps(b); break;
+		case NONE:  posB = 0; 										  break;
+		}
 
-		if (Math.abs(distanceA) == Math.abs(distanceB)) {
-			if (distanceA < distanceB) {
+		if (Math.abs(posA) == Math.abs(posB)) {
+			if (posA < posB) {
 				return a;
 			} else {
 				return b;
 			}
-		} else if (Math.abs(distanceA) < Math.abs(distanceB)) {
+		} else if (Math.abs(posA) < Math.abs(posB)) {
 			return a;
 		} else {
 			return b;
