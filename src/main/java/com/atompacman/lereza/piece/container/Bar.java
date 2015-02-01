@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.atompacman.atomLog.Log;
-import com.atompacman.lereza.common.solfege.Pitch;
-import com.atompacman.lereza.common.solfege.RythmicSignature;
-import com.atompacman.lereza.common.solfege.Value;
+import com.atompacman.atomlog.Log;
+import com.atompacman.lereza.solfege.Pitch;
+import com.atompacman.lereza.solfege.RythmicSignature;
+import com.atompacman.lereza.solfege.Value;
 
 public class Bar {
 
@@ -34,7 +34,7 @@ public class Bar {
 
 	//------------ ADD NOTE ------------\\
 
-	public void add(Pitch pitch, int timeunitPos, int timeunitLength) {
+	public void addNote(Pitch pitch, int timeunitPos, int timeunitLength) {
 		add(pitch, timeunitPos, timeunitLength, false);
 	}
 
@@ -42,32 +42,32 @@ public class Bar {
 		add(pitch, timeunitPos, timeunitLength, true);
 	}
 
-	protected void add(Pitch pitch, int timeunitPos, int timeunitLength, boolean isTiedNote) {
+	private void add(Pitch pitch, int timeunitPos, int timeunitLength, boolean isTiedNote) {
 		List<Value> values = splitIntoValues(timeunitPos, timeunitPos + timeunitLength);
 
 		Value value = values.get(0);
 		int noteStartPos = timeunitPos;
-		add(new Note(pitch, value, isTiedNote), noteStartPos, value.toTimeunit());
+		add(Note.valueOf(pitch, value, isTiedNote), noteStartPos, value.toTimeunit());
 		noteStartPos += value.toTimeunit();
 
 		for (int i = 1; i < values.size(); ++i) {
 			value = values.get(i);
-			add(new Note(pitch, value, true), noteStartPos, value.toTimeunit());
+			add(Note.valueOf(pitch, value, true), noteStartPos, value.toTimeunit());
 			noteStartPos += value.toTimeunit();
 		}
 	}
 
-	private void add(Note note, int notePos, int noteLength) {
+	private void add(Note note, int timeunitPos, int timeunitLength) {
 		int noteIndex = notes.size() + 1;
 		notes.add(note);
-		notesLayout.get(notePos).add(noteIndex);
+		notesLayout.get(timeunitPos).add(noteIndex);
 
-		for (int i = 1; i < noteLength; ++i) {
-			notesLayout.get(notePos + i).add(-noteIndex);
+		for (int i = 1; i < timeunitLength; ++i) {
+			notesLayout.get(timeunitPos + i).add(-noteIndex);
 		}
 
 		if (Log.extra() && Log.print(String.format("Adding note %4s of length %2d at timeunit "
-				+ "%4d of bar no.%d.", note.toString(), noteLength, notePos, barNo)));	
+				+ "%4d of bar no.%d.", note.toString(), timeunitLength, timeunitPos, barNo)));	
 	}
 
 
@@ -140,7 +140,15 @@ public class Bar {
 		return barNo;
 	}
 	
-	public Set<Note> getNotesAt(int timeunit) {
+	public Set<Note> getAllNotesAt(int timeunit) {
+		return getNotesAt(timeunit, false);
+	}
+	
+	public Set<Note> getNotesStartingAt(int timeunit) {
+		return getNotesAt(timeunit, true);
+	}
+	
+	private Set<Note> getNotesAt(int timeunit, boolean startingOnly) {
 		if (timeunit < 0 || timeunit > rythmicSignature.timeunitsInABar()) {
 			throw new IllegalArgumentException("Cannot access bar at timeunit \"" + timeunit 
 					+ "\": Length of bar is " + rythmicSignature.timeunitsInABar() + ".");
@@ -148,7 +156,13 @@ public class Bar {
 		Set<Note> notes = new HashSet<Note>();
 		
 		for (Integer index : notesLayout.get(timeunit)) {
-			notes.add(this.notes.get(index - 1));
+			if (index < 0) {
+				if (!startingOnly) {
+					notes.add(this.notes.get(-index - 1));
+				}
+			} else {
+				notes.add(this.notes.get(index - 1));
+			}
 		}
 		return notes;
 	}
@@ -158,5 +172,15 @@ public class Bar {
 
 	public boolean isEmpty() {
 		return notes.isEmpty();
+	}
+
+	public int getNbStartingNotes() {
+		int nb = 0;
+		for (Note note : notes) {
+			if (!note.isTied()) {
+				++nb;
+			}
+		}
+		return nb;
 	}
 }

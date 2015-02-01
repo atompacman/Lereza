@@ -1,0 +1,10 @@
+{"AppConfig": {
+	"name": "Lereza",
+	"version": "1.0.0",
+	"class": "com.atompacman.lereza.Lereza",
+	"bin": "..\bin",
+	"lib files": [
+			"lib.lereza.json"
+		]
+	}
+}

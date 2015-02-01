@@ -6,11 +6,11 @@ import com.atompacman.lereza.exception.ProfileManagerException;
 import com.atompacman.lereza.midi.container.MIDIFile;
 import com.atompacman.lereza.midi.container.MIDIFileInfo;
 import com.atompacman.lereza.piece.container.Piece;
-import com.atompacman.lereza.profile.ProfileManager;
+import com.atompacman.lereza.profile.ProfileManagerImpl;
 
 public class TestProfileManager {
 
-	private ProfileManager profileManager = new ProfileManager();
+	private ProfileManagerImpl profileManager = new ProfileManagerImpl();
 	
 	
 	@Test (expected = ProfileManagerException.class)

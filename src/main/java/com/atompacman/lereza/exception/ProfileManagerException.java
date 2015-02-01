@@ -1,22 +1,8 @@
 package com.atompacman.lereza.exception;
 
-public class ProfileManagerException extends Exception {
+import com.atompacman.toolkat.exception.AbstractException;
 
-	private static final long serialVersionUID = 1L;
+@SuppressWarnings("serial")
+public class ProfileManagerException extends AbstractException {
 
-	public ProfileManagerException() { 
-		super(); 
-	}
-
-	public ProfileManagerException(String message) {
-		super(message); 
-	}
-
-	public ProfileManagerException(String message, Throwable cause) {
-		super(message, cause); 
-	}
-
-	public ProfileManagerException(Throwable cause) { 
-		super(cause); 
-	}
 }

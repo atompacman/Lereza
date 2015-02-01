@@ -1,6 +1,6 @@
 package com.atompacman.lereza.profile.harmonic;
 
-import com.atompacman.atomLog.Log;
+import com.atompacman.atomlog.Log;
 import com.atompacman.lereza.piece.container.Part;
 import com.atompacman.lereza.piece.container.Piece;
 import com.atompacman.lereza.profile.Profile;
@@ -36,13 +36,13 @@ public class HarmonicProfiler extends Profiler {
 	private void profileBasicStatistics() {
 		if(Log.infos() && Log.title("General statistics", 1));
 
-		basicStatsProfile = new BasicStatisticsProfile(piece.getNbParts());
+		basicStatsProfile = new BasicStatisticsProfile(piece.nbParts());
 
 		basicStatsProfile.barCount = piece.getPartNo(0).getNbBars();
 		basicStatsProfile.lastTimestamp = piece.getPartNo(0).getNbBars() 
 				* piece.getRythmicSignature().getBarTimeunitLength();
 		
-		for (int i = 0; i < piece.getNbParts(); ++i) {
+		for (int i = 0; i < piece.nbParts(); ++i) {
 			currPartProfile = new PartBasicStatisticsProfile();
 			basicStatsProfile.addSubProfile(currPartProfile);
 

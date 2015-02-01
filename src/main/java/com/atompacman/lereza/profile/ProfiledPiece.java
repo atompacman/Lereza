@@ -1,7 +1,7 @@
 package com.atompacman.lereza.profile;
 
-import com.atompacman.lereza.common.database.Storable;
 import com.atompacman.lereza.piece.container.Piece;
+import com.atompacman.lereza.resources.database.Storable;
 
 public class ProfiledPiece implements Storable {
 

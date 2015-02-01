@@ -4,131 +4,101 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import com.atompacman.atomLog.Log;
 import com.atompacman.lereza.Parameters;
-import com.atompacman.lereza.common.solfege.RythmicSignature;
-import com.atompacman.lereza.common.solfege.Value;
 import com.atompacman.lereza.midi.MIDIFilePlayer;
 import com.atompacman.lereza.midi.container.MIDINote;
+import com.atompacman.lereza.solfege.Pitch;
+import com.atompacman.lereza.solfege.RythmicSignature;
 
 public class Part {
 
-	private List<OldBar> bars;
+	private List<Bar> bars;
 	private RythmicSignature rythmicSignature;
 
 
 	//------------ CONSTRUCTORS ------------\\
 
 	public Part(RythmicSignature rythmicSignature, int finalTimestamp) {
-		this.bars = new ArrayList<OldBar>();
-		int barLength = rythmicSignature.getBarTimeunitLength();
-		int nbBars = (int) ((double) finalTimestamp / (double) barLength);
-		for (int i = 0; i < nbBars; ++i) {
-			bars.add(new OldBar(rythmicSignature, i));
-		}
+		this((int) ((double) finalTimestamp / (double) rythmicSignature.timeunitsInABar()), 
+				rythmicSignature);
+	}
+	
+	public Part(int nbBars, RythmicSignature rythmicSignature) {
+		this.bars = new ArrayList<Bar>();
 		this.rythmicSignature = rythmicSignature;
+
+		for (int i = 0; i < nbBars; ++i) {
+			bars.add(new Bar(rythmicSignature, i));
+		}
 	}
 
 
 	//------------ ADD ------------\\
 
 	public void addNotes(Stack<MIDINote> notes, int timestamp) {
-		int barLength = rythmicSignature.getBarTimeunitLength();
-		int bar = (int) ((double) timestamp / (double) barLength);
- 		int timeunit = timestamp % rythmicSignature.getBarTimeunitLength();
-
-		for (MIDINote note : notes) {
-			addNote(note, note.getLength(), timeunit, bar, false);
+		for (MIDINote midiNote : notes) {
+			Pitch pitch = Pitch.thatIsMoreCommonForHexValue(midiNote.getNote());
+			addNote(pitch, midiNote.getLength(), timestamp);
 		}
 		if (Parameters.NOTE_ADDING_AUDIO) {
-			MIDIFilePlayer.getPlayer().playNoteStack(notes, 0, Parameters.NOTE_ADDING_AUDIO_TEMPO);
+			int tempo = Parameters.NOTE_ADDING_AUDIO_TEMPO;
+			MIDIFilePlayer.getInstance().playNoteStackAndWait(notes, tempo);
 		}
 		if (Parameters.NOTE_ADDING_VISUALISATION) {
-			List<List<String>> barsToPrint = new ArrayList<List<String>>();
-			barsToPrint.add(bars.get(bar).toStringList(false));
-
-			if (bar > 0) {
-				barsToPrint.add(0, bars.get(bar - 1).toStringList(true));
-			}
-			if (bar > 1) {
-				barsToPrint.add(0, bars.get(bar - 2).toStringList(true));
-			}
-			printBars(barsToPrint);
+//			List<List<String>> barsToPrint = new ArrayList<List<String>>();
+//			barsToPrint.add(bars.get(bar).toStringList(false));
+//
+//			if (bar > 0) {
+//				barsToPrint.add(0, bars.get(bar - 1).toStringList(true));
+//			}
+//			if (bar > 1) {
+//				barsToPrint.add(0, bars.get(bar - 2).toStringList(true));
+//			}
+//			printBars(barsToPrint);
 		}
 	}
 
-	private void addNote(MIDINote note, int length, int timeunit, 
-			int bar, boolean realNotePlaced) {
-		List<Value> values = Value.splitIntoValues(length);
+	private void addNote(Pitch pitch, int timeunitLength, int timestamp) {
+		int barNo = barAt(timestamp);
+		int timeunitsInBar = rythmicSignature.timeunitsInABar();
+		int timeunitPos = timestamp % timeunitsInBar;
+		int actualNoteLength = timeunitLength;
 
-		for (Value value : values) {
-			int endTimeunit = timeunit + value.toTimeunit();
-			if (endTimeunit <= rythmicSignature.getBarTimeunitLength()) {
-				bars.get(bar).addNote(note, value, timeunit, realNotePlaced);
+		if (timeunitPos + timeunitLength > timeunitsInBar) {
+			actualNoteLength = timeunitsInBar - timeunitPos;
+		}
+		bars.get(barNo).addNote(pitch, timeunitPos, actualNoteLength);
+		
+		timeunitLength -= actualNoteLength;
+		
+		while (timeunitLength != 0) {
+			++barNo;
+			timestamp += actualNoteLength;
+			if (timeunitLength > timeunitsInBar) {
+				actualNoteLength = timeunitsInBar;
 			} else {
-				int noteLength = rythmicSignature.getBarTimeunitLength() - timeunit;
-				addNote(note, noteLength, timeunit, bar, realNotePlaced);
-
-				noteLength = endTimeunit - rythmicSignature.getBarTimeunitLength();
-				addNote(note, noteLength, 0, bar + 1, true);
+				actualNoteLength = timeunitLength;
 			}
-			timeunit += value.toTimeunit();
-			if (timeunit >= rythmicSignature.getBarTimeunitLength()) {
-				++bar;
-				timeunit -= rythmicSignature.getBarTimeunitLength();
-			}
-			realNotePlaced = true;
+			bars.get(barNo).addTiedNote(pitch, 0, actualNoteLength);
+			timeunitLength -= actualNoteLength;
 		}
 	}
 
+	
+	//------------ SET ------------\\
 
-	//------------ PRINT ------------\\
-
-	public void printBars(List<List<String>> bars) {
-		if (bars == null) {
-			return;
-		}
-
-		int size = 0;
-
-		for (List<String> bar : bars) {
-			if (size == 0) {
-				size = bar.size();
-			} else {
-				if (bar.size() != size) {
-					if (Log.error() && Log.print("Cannot fusion bar string "
-							+ "lists as they are not of the same size."));
-					return;
-				}
-			}
-		}
-		for (int line = 0; line < bars.get(0).size(); ++line) {
-			StringBuilder builder = new StringBuilder();
-			builder.append(getHoriBarIfNeeded(line));
-			for (List<String> bar : bars) {
-				builder.append(bar.get(line));
-				builder.append(getHoriBarIfNeeded(line));
-			}
-			if (Log.vital() && Log.print(builder.toString()));
-		}
+	public void setBar(Bar bar, int barPos) {
+		bars.set(barPos, bar);
 	}
-
-	private char getHoriBarIfNeeded(int heigthOnPartition) {
-		if ((heigthOnPartition > Parameters.BOTTOM_SECTION_HEIGHT &&
-				heigthOnPartition < (Parameters.BOTTOM_SECTION_HEIGHT + 10) ||
-				(heigthOnPartition > (Parameters.BOTTOM_SECTION_HEIGHT 
-						+ 9 + Parameters.MIDDLE_SECTION_HEIGHT) &&
-						heigthOnPartition < (Parameters.BOTTOM_SECTION_HEIGHT 
-								+ 9 + Parameters.MIDDLE_SECTION_HEIGHT + 10)))) {
-			return '|';
-		}
-		return ' ';
-	}
-
+	
 
 	//------------ GETTERS ------------\\
 
-	public OldBar getBarNo(int barNo) {
+	public Bar getBarNo(int barNo) {
+		if (barNo < 0 || barNo >= bars.size()) {
+			throw new IllegalArgumentException("Cannot access bar no." + 
+					barNo + "\": Part has " + bars.size() + " bars.");
+		}
 		return bars.get(barNo);
 	}
 
@@ -137,7 +107,7 @@ public class Part {
 	}
 
 
-	//------------ STATUS ------------\\
+	//------------ OBSERVERS ------------\\
 
 	public boolean isEmpty() {
 		return bars.isEmpty();
@@ -145,5 +115,16 @@ public class Part {
 
 	public int getNbBars() {
 		return bars.size();
+	}
+
+	public int finalTimestamp() {
+		return bars.size() * rythmicSignature.timeunitsInABar();
+	}
+	
+
+	//------------ PRIVATE UTILS ------------\\
+
+	private int barAt(int timestamp) {
+		return (int) ((double) timestamp / (double) rythmicSignature.timeunitsInABar());
 	}
 }

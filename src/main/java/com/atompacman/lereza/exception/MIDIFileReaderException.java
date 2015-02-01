@@ -1,23 +1,8 @@
 package com.atompacman.lereza.exception;
 
-public class MIDIFileReaderException extends Exception {
+import com.atompacman.toolkat.exception.AbstractException;
 
-	private static final long serialVersionUID = 1L;
-	
-	
-	public MIDIFileReaderException() { 
-		super(); 
-	}
+@SuppressWarnings("serial")
+public class MIDIFileReaderException extends AbstractException {
 
-	public MIDIFileReaderException(String message) {
-		super(message); 
-	}
-
-	public MIDIFileReaderException(String message, Throwable cause) {
-		super(message, cause); 
-	}
-
-	public MIDIFileReaderException(Throwable cause) { 
-		super(cause); 
-	}
 }

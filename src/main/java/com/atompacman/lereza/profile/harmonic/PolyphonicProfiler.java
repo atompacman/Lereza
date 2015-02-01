@@ -1,6 +1,6 @@
 package com.atompacman.lereza.profile.harmonic;
 
-import com.atompacman.atomLog.Log;
+import com.atompacman.atomlog.Log;
 import com.atompacman.lereza.piece.container.Part;
 import com.atompacman.lereza.piece.container.Piece;
 import com.atompacman.lereza.profile.Profile;
@@ -16,14 +16,14 @@ public class PolyphonicProfiler extends Profiler {
 	public boolean verifyProfilability(Piece piece) {
 		if(Log.infos() && Log.title(getClass().getSimpleName() + " - Verifying profitability", 0));
 
-		for (int i = 0; i < piece.getNbParts(); ++i) {
+		for (int i = 0; i < piece.nbParts(); ++i) {
 			navig.goToPart(i);
 			navig.goToFirstUnemptyBar();
 			navig.goToFirstNoteOfBar();
 			while (!navig.endOfPart()) {
 				if (navig.getCurrentNoteStack().size() > 1) {
 					Part currPart = navig.getCurrentPart();
-					problems.add(new UnmonophonicTimeunitProblem(navig.getPMT(), currPart));
+					problems.add(new UnmonophonicTimeunitProblem(navig.getPBT(), currPart));
 				}
 				navig.goToNextNote();
 			}

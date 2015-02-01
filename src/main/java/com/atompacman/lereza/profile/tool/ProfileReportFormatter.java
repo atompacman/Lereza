@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.atompacman.atomLog.Log;
+import com.atompacman.atomlog.Log;
 import com.atompacman.lereza.profile.ProfilabilityProblem;
 import com.atompacman.lereza.profile.Profile;
 import com.atompacman.lereza.profile.tool.DataChart.Importance;

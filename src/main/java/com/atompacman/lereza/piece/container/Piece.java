@@ -3,9 +3,9 @@ package com.atompacman.lereza.piece.container;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atompacman.lereza.common.database.Storable;
-import com.atompacman.lereza.common.solfege.RythmicSignature;
 import com.atompacman.lereza.midi.container.MIDIFile;
+import com.atompacman.lereza.resources.database.Storable;
+import com.atompacman.lereza.solfege.RythmicSignature;
 
 public class Piece implements Storable {
 
@@ -18,7 +18,12 @@ public class Piece implements Storable {
 	//------------ CONSTRUCTORS ------------\\
 
 	public Piece(MIDIFile midiFile) {
+		this(midiFile, null);
+	}
+	
+	public Piece(MIDIFile midiFile, RythmicSignature rythmicSignature) {
 		this.parts = new ArrayList<Part>();
+		this.rythmicSignature = rythmicSignature;
 		this.midiFile = midiFile;
 	}
 	
@@ -49,9 +54,9 @@ public class Piece implements Storable {
 	}
 	
 	
-	//------------ STATUS ------------\\
+	//------------ OBSERVERS ------------\\
 
-	public int getNbParts() {
+	public int nbParts() {
 		return parts.size();
 	}
 }

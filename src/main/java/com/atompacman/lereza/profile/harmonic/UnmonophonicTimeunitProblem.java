@@ -3,12 +3,12 @@ package com.atompacman.lereza.profile.harmonic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atompacman.lereza.common.solfege.Value;
 import com.atompacman.lereza.piece.container.Note;
 import com.atompacman.lereza.piece.container.Part;
 import com.atompacman.lereza.piece.container.Note.NoteStatus;
-import com.atompacman.lereza.piece.tool.PMT;
+import com.atompacman.lereza.piece.tool.PBT;
 import com.atompacman.lereza.profile.ProfilabilityProblem;
+import com.atompacman.lereza.solfege.Value;
 
 public class UnmonophonicTimeunitProblem extends ProfilabilityProblem {
 
@@ -31,19 +31,19 @@ public class UnmonophonicTimeunitProblem extends ProfilabilityProblem {
 		}
 	}
 	
-	private PMT pmt;
+	private PBT pbt;
 	private List<NoteStatus> noteStatus;
 	private List<Value> noteValues;
 	
 	
 	//------------ CONSTRUCTORS ------------\\
 
-	public UnmonophonicTimeunitProblem(PMT pmt, Part part) {
+	public UnmonophonicTimeunitProblem(PBT pbt, Part part) {
 		this.problemName = "Un-monophonic timeunit";
-		this.pmt = pmt;
+		this.pbt = pbt;
 		this.noteStatus = new ArrayList<NoteStatus>();
 		this.noteValues = new ArrayList<Value>();
-		for (Note note : part.getBarNo(pmt.bar).getNotes().get(pmt.timeunit)) {
+		for (Note note : part.getBarNo(pbt.bar).getNotes().get(pbt.timeunit)) {
 			noteStatus.add(note.getStatus());
 			noteValues.add(note.getValue());
 		}
@@ -55,7 +55,7 @@ public class UnmonophonicTimeunitProblem extends ProfilabilityProblem {
 	public String formatProblem() {
 		StringBuilder builder = new StringBuilder();
 		
-		builder.append(pmt.toString());
+		builder.append(pbt.toString());
 		builder.append("->");
 		
 		for (int i = 0; i < noteStatus.size(); ++i) {

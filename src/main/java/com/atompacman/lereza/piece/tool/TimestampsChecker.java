@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import com.atompacman.atomLog.Log;
+import com.atompacman.atomlog.Log;
 import com.atompacman.lereza.Parameters;
-import com.atompacman.lereza.common.solfege.Value;
 import com.atompacman.lereza.exception.PieceBuilderException;
 import com.atompacman.lereza.midi.container.MIDINote;
+import com.atompacman.lereza.solfege.Value;
 
 public class TimestampsChecker {
 

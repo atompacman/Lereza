@@ -1,7 +1,7 @@
 package com.atompacman.lereza.midi.container;
 
-import com.atompacman.lereza.common.context.Context;
-import com.atompacman.lereza.common.database.Storable;
+import com.atompacman.lereza.resources.context.Context;
+import com.atompacman.lereza.resources.database.Storable;
 
 public class MIDIFileInfo implements Storable {
 

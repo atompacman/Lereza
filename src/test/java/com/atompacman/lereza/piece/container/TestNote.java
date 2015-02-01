@@ -1,36 +1,46 @@
 package com.atompacman.lereza.piece.container;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.common.solfege.Articulation;
-import com.atompacman.lereza.common.solfege.Pitch;
-import com.atompacman.lereza.common.solfege.Value;
+import com.atompacman.lereza.solfege.Articulation;
+import com.atompacman.lereza.solfege.Pitch;
+import com.atompacman.lereza.solfege.Value;
 
 public class TestNote {
 
-	//------------ TEST CONSTRUCTORS ------------\\
+	//------------ STATIC CONSTRUCTORS ------------\\
 
 	@Test
-	public void guessPitchExactness() {
-		assertTrue(Note.guessPitch(21).equals(Pitch.valueOf("A0")));
-		assertTrue(Note.guessPitch(43).equals(Pitch.valueOf("G2")));
-		assertTrue(Note.guessPitch(114).equals(Pitch.valueOf("F#8")));
+	public void staticConstructorEquivalence() {
+		Pitch pitch = Pitch.valueOf("B3");
+		Note a = Note.valueOf(59, Value.QUARTER);
+		Note b = Note.valueOf(59, Value.QUARTER, false);
+		Note c = Note.valueOf(pitch, Value.QUARTER);
+		Note d = Note.valueOf(pitch, Value.QUARTER, false);
+		Note e = Note.valueOf(pitch, Value.QUARTER, false, Articulation.NORMAL);
+
+		assertEquals(a, b);
+		assertEquals(b, c);
+		assertEquals(c, d);
+		assertEquals(d, e);
 	}
 	
-	@Test
-	public void constructorEquivalence() {
-		Pitch pitch = Pitch.valueOf("B3");
-		Note a = new Note(59, Value.QUARTER);
-		Note b = new Note(59, Value.QUARTER, false);
-		Note c = new Note(pitch, Value.QUARTER);
-		Note d = new Note(pitch, Value.QUARTER, false);
-		Note e = new Note(pitch, Value.QUARTER, false, Articulation.NORMAL);
+	//------------ SETTERS ------------\\
 
-		assertTrue(a.equals(b));
-		assertTrue(b.equals(c));
-		assertTrue(c.equals(d));
-		assertTrue(d.equals(e));
+	@Test
+	public void testSetAndConfirmPitchCorrect() {
+		Note a = Note.valueOf(68, Value.EIGHTH);
+		a.confirmPitch(Pitch.valueOf("G#4"));
+		assertTrue(a.pitchConfirmed());
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testSetAndConfirmPitchInorrect() {
+		Note a = Note.valueOf(44, Value.EIGHTH);
+		a.confirmPitch(Pitch.valueOf("Bb0"));
+		assertTrue(a.pitchConfirmed());
 	}
 }

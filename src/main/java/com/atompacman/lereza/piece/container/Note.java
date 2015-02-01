@@ -1,10 +1,8 @@
 package com.atompacman.lereza.piece.container;
 
-import com.atompacman.lereza.common.solfege.Articulation;
-import com.atompacman.lereza.common.solfege.Octave;
-import com.atompacman.lereza.common.solfege.Pitch;
-import com.atompacman.lereza.common.solfege.Tone;
-import com.atompacman.lereza.common.solfege.Value;
+import com.atompacman.lereza.solfege.Articulation;
+import com.atompacman.lereza.solfege.Pitch;
+import com.atompacman.lereza.solfege.Value;
 
 public class Note {
 	
@@ -17,25 +15,9 @@ public class Note {
 	private boolean pitchConfirmed;
 
 	
-	//------------ CONSTRUCTORS ------------\\
-	
-	public Note(int hexValue, Value value) {
-		this(guessPitch(hexValue), value, false);
-	}
-	
-	public Note(int hexValue, Value value, boolean isTied) {
-		this(guessPitch(hexValue), value, isTied);
-	}
-	
-	public Note(Pitch pitch, Value value) {
-		this(pitch, value, false, Articulation.NORMAL);
-	}
-	
-	public Note(Pitch pitch, Value value, boolean isTied) {
-		this(pitch, value, isTied, Articulation.NORMAL);
-	}
-	
-	public Note(Pitch pitch, Value value, boolean isTied, Articulation articulation) {
+	//------------ PRIVATE CONSTRUCTOR ------------\\
+
+	private Note(Pitch pitch, Value value, boolean isTied, Articulation articulation) {
 		this.pitch = pitch;
 		this.value = value;
 		this.articulation = articulation;
@@ -43,12 +25,31 @@ public class Note {
 		this.pitchConfirmed = false;
 	}
 	
-	protected static Pitch guessPitch(int hexValue) {
-		Tone tone = Tone.thatIsMoreCommonForSemitoneValue(hexValue);
-		Octave octave = Octave.fromHex(hexValue);
-		return new Pitch(tone, octave);
+	
+	//------------ STATIC CONSTRUCTORS ------------\\
+	
+	public static Note valueOf(int hexValue, Value value) {
+		Pitch pitch = Pitch.thatIsMoreCommonForHexValue(hexValue);
+		return new Note(pitch, value, false, Articulation.NORMAL);
 	}
-
+	
+	public static Note valueOf(int hexValue, Value value, boolean isTied) {
+		Pitch pitch = Pitch.thatIsMoreCommonForHexValue(hexValue);
+		return new Note(pitch, value, isTied, Articulation.NORMAL);
+	}
+	
+	public static Note valueOf(Pitch pitch, Value value) {
+		return new Note(pitch, value, false, Articulation.NORMAL);
+	}
+	
+	public static Note valueOf(Pitch pitch, Value value, boolean isTied) {
+		return new Note(pitch, value, isTied, Articulation.NORMAL);
+	}
+	
+	public static Note valueOf(Pitch pitch, Value value, boolean isTied, Articulation articul) {
+		return new Note(pitch, value, isTied, articul);
+	}
+	
 	
 	//------------ GETTERS ------------\\
 
@@ -83,6 +84,10 @@ public class Note {
 	}
 	
 	public void confirmPitch(Pitch pitch) {
+		if (pitch.semitoneValue() != this.pitch.semitoneValue()) {
+			throw new IllegalArgumentException("Cannot confirm pitch " + toString() + " with pitch "
+					+ pitch.toString() + " : Not the same semitone value.");
+		}
 		this.pitch = pitch;
 		this.pitchConfirmed = true;
 	}
@@ -101,8 +106,19 @@ public class Note {
 		return output;
 	}
 
-	
+
 	//------------ EQUALITITES ------------\\
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((articulation == null) ? 0 : articulation.hashCode());
+		result = prime * result + (isTied ? 1231 : 1237);
+		result = prime * result + ((pitch == null) ? 0 : pitch.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
 
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -124,5 +140,5 @@ public class Note {
 		if (value != other.value)
 			return false;
 		return true;
-	}
+	}	
 }

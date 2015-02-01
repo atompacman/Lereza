@@ -4,6 +4,10 @@
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Configuana"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ToolKat"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AtomLog"/>
+	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/Eclipse/Libraries/json-20140107.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/Eclipse/Libraries/mysql-connector-java-5.1.33-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

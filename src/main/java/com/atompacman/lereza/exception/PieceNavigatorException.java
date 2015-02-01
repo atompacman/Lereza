@@ -1,22 +1,8 @@
 package com.atompacman.lereza.exception;
 
-public class PieceNavigatorException extends RuntimeException {
+import com.atompacman.toolkat.exception.AbstractRuntimeException;
 
-	private static final long serialVersionUID = 1L;
-
-	public PieceNavigatorException() { 
-		super(); 
-	}
-
-	public PieceNavigatorException(String message) {
-		super(message); 
-	}
-
-	public PieceNavigatorException(String message, Throwable cause) {
-		super(message, cause); 
-	}
-
-	public PieceNavigatorException(Throwable cause) { 
-		super(cause); 
-	}
+@SuppressWarnings("serial")
+public class PieceNavigatorException extends AbstractRuntimeException {
+	
 }

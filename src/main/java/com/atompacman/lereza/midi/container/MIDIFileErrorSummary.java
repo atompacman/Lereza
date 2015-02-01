@@ -1,6 +1,6 @@
 package com.atompacman.lereza.midi.container;
 
-import com.atompacman.atomLog.Log;
+import com.atompacman.atomlog.Log;
 import com.atompacman.lereza.Parameters;
 
 public class MIDIFileErrorSummary {

@@ -10,10 +10,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.atompacman.lereza.common.solfege.Pitch;
-import com.atompacman.lereza.common.solfege.Value;
 import com.atompacman.lereza.piece.PieceTestsHelper;
 import com.atompacman.lereza.piece.PieceTestsHelper.BarInput;
+import com.atompacman.lereza.solfege.Pitch;
+import com.atompacman.lereza.solfege.Value;
 
 public class TestBar {
 
@@ -35,29 +35,53 @@ public class TestBar {
 	 * Check the exactness of the method by comparing its results with expected results.
 	 * <pre> Target: 
 	 * 	{@link Bar#add(Pitch, int, int, boolean)}
-	 * 	{@link Bar#getNotesAt(int)} </pre>
+	 * 	{@link Bar#getAllNotesAt(int)} </pre>
 	 */
 	@Test
 	public void addDeterminedNotesNote() {
 		Bar bar = PieceTestsHelper.determinedBar();
 		
-		Set<Note> notes = bar.getNotesAt(0);
-		assertTrue(notes.size() == 3);
-		assertTrue(notes.contains(new Note(Pitch.valueOf("C3"), Value.QUARTER)));
-		assertTrue(notes.contains(new Note(Pitch.valueOf("E3"), Value.QUARTER)));
-		assertTrue(notes.contains(new Note(Pitch.valueOf("G3"), Value.QUARTER)));
+		Set<Note> notes = bar.getAllNotesAt(0);
+		assertEquals(notes.size(), 3);
+		assertTrue(notes.contains(Note.valueOf(Pitch.valueOf("C3"), Value.QUARTER)));
+		assertTrue(notes.contains(Note.valueOf(Pitch.valueOf("E3"), Value.QUARTER)));
+		assertTrue(notes.contains(Note.valueOf(Pitch.valueOf("G3"), Value.QUARTER)));
 		
-		notes = bar.getNotesAt(28);
-		assertTrue(notes.size() == 1);
+		notes = bar.getAllNotesAt(28);
+		assertEquals(notes.size(), 1);
 		Note noteAt28 = notes.iterator().next();
-		assertEquals(noteAt28.getPitch(), Pitch.valueOf("C4"));
+		assertEquals(noteAt28.getPitch(), Pitch.valueOf("C2"));
 		assertEquals(noteAt28.getValue(), Value.SIXTEENTH);
 		assertTrue(!noteAt28.isTied());
 		
-		notes = bar.getNotesAt(45);
-		assertTrue(notes.size() == 2);
+		notes = bar.getAllNotesAt(47);
+		assertEquals(notes.size(), 2);
 		
-		assertTrue(bar.getNotesAt(63).isEmpty());
+		assertTrue(bar.getAllNotesAt(63).isEmpty());
+	}
+	
+	/**
+	 * <h1> Confirm difference between note getters </h1>
+	 * <i> Deterministic test </i> <p>
+	 * 
+	 * Check the difference between the two note getters.
+	 * <pre> Target: 
+	 * 	{@link Bar#getNotesStartingAt(int)}
+	 * 	{@link Bar#getAllNotesAt(int)} </pre>
+	 */
+	@Test
+	public void differentNoteGetters() {
+		Bar bar = PieceTestsHelper.determinedBar();
+		
+		Set<Note> notes = bar.getNotesStartingAt(46);
+		assertEquals(notes.size(), 1);
+		Note startingNote = notes.iterator().next();
+		
+		notes = bar.getAllNotesAt(46);
+		assertEquals(notes.size(), 2);
+		assertTrue(notes.contains(startingNote));
+		notes.remove(startingNote);
+		assertEquals(notes.iterator().next(), Note.valueOf(Pitch.valueOf("E2"), Value.SIXTEENTH));
 	}
 	
 	/**
@@ -76,12 +100,14 @@ public class TestBar {
 			
 			for (int j = 0; j < 10; ++j) {
 				BarInput input = PieceTestsHelper.nextRandBarInput();
-				bar.add(input.pitch, input.pos, input.length, input.isTied);
+				if (input.isTied) {
+					bar.addTiedNote(input.pitch, input.pos, input.length);
+				} else {
+					bar.addNote(input.pitch, input.pos, input.length);
+				}
 			}
 		}
 	}
-	
-	
 	
 	
 	//**********************************************************************************************
@@ -100,7 +126,7 @@ public class TestBar {
 	public void timeSpanSplittingAxiom1() {
 		List<Value> expectedValues = Arrays.asList(Value.WHOLE);
 		List<Value> actualValues = bar.splitIntoValues(0, 64);
-		assertTrue(actualValues.equals(expectedValues));
+		assertEquals(actualValues, expectedValues);
 	}
 	
 	/**
@@ -117,7 +143,7 @@ public class TestBar {
 		List<Value> expectedValues = Arrays.asList(Value.HALF, Value.QUARTER, Value.EIGHTH, 
 				Value.SIXTEENTH, Value.THIRTYSECONTH, Value.SIXTYFORTH);
 		List<Value> actualValues = bar.splitIntoValues(0, 63);
-		assertTrue(actualValues.equals(expectedValues));
+		assertEquals(actualValues, expectedValues);
 	}
 	
 	/**
@@ -133,6 +159,6 @@ public class TestBar {
 		List<Value> expectedValues = Arrays.asList(Value.THIRTYSECONTH, Value.SIXTEENTH, 
 				Value.EIGHTH, Value.EIGHTH, Value.SIXTEENTH, Value.THIRTYSECONTH, Value.SIXTYFORTH);
 		List<Value> actualValues = bar.splitIntoValues(34, 63);
-		assertTrue(actualValues.equals(expectedValues));
+		assertEquals(actualValues, expectedValues);
 	}
 }

@@ -21,25 +21,20 @@ public abstract class Profile {
 
 	public Profile() {
 		recordTimeOfCreation();
-		formatter = new ProfileReportFormatter(this.getClass());
+		subProfilesLists = new HashMap<Class<? extends Profile>, List<Profile>>();
+		formatter = new ProfileReportFormatter(getClass());
 	}
 	
 	public Profile(Class<? extends Profile> subProfileClass) {
-		recordTimeOfCreation();
-		subProfilesLists = new HashMap<Class<? extends Profile>, List<Profile>>();
+		this();
 		subProfilesLists.put(subProfileClass, new ArrayList<Profile>());
-		formatter = new ProfileReportFormatter(this.getClass());
 	}
 	
 	public Profile(List<Class<? extends Profile>> subProfileClasses) {
-		recordTimeOfCreation();
-		subProfilesLists = new HashMap<Class<? extends Profile>, List<Profile>>();
-
+		this();
 		for (Class<? extends Profile> subProfileClass : subProfileClasses) {
 			subProfilesLists.put(subProfileClass, new ArrayList<Profile>());
 		}
-
-		formatter = new ProfileReportFormatter(this.getClass());
 	}
 
 	private void recordTimeOfCreation() {
@@ -58,7 +53,6 @@ public abstract class Profile {
 			throw new IllegalArgumentException(profileClass.getSimpleName() + " is not a valid "
 					+ "sub-profile of " + getClass().getSimpleName() + ".");
 		}
-
 		subProfilesLists.get(profileClass).add(subProfile);
 	}
 
@@ -72,7 +66,6 @@ public abstract class Profile {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " has more than one "
 					+ "sub-profile of type \"" + profileClass.getSimpleName() + "\".");
 		}
-
 		return subProfiles.get(0);
 	}
 
@@ -84,7 +77,6 @@ public abstract class Profile {
 					+ " has less than " + (index - 1) + "sub-profile of type \"" 
 					+ profileClass.getSimpleName() + "\" (it has " + subProfiles.size() + ").");
 		}
-
 		return subProfiles.get(index);
 	}
 
@@ -93,14 +85,12 @@ public abstract class Profile {
 			throw new IllegalArgumentException(profileClass.getSimpleName() + " is not a valid "
 					+ "sub-profile type for " + getClass().getSimpleName() + ".");
 		}
-
 		List<Profile> subProfiles = subProfilesLists.get(profileClass);
 
 		if (subProfiles.isEmpty()) {
 			throw new IllegalArgumentException("No " + profileClass.getSimpleName() + " sub-profile"
 					+ " was set to " + getClass().getSimpleName() + ".");
 		}
-
 		return subProfiles;
 	}
 
