@@ -12,8 +12,8 @@ import com.atompacman.lereza.api.PieceBuilder;
 import com.atompacman.lereza.exception.DatabaseException;
 import com.atompacman.lereza.exception.PieceBuilderException;
 import com.atompacman.lereza.midi.MIDIFilePlayer;
+import com.atompacman.lereza.midi.MIDINote;
 import com.atompacman.lereza.midi.container.MIDIFile;
-import com.atompacman.lereza.midi.container.MIDINote;
 import com.atompacman.lereza.piece.container.Part;
 import com.atompacman.lereza.piece.container.Piece;
 import com.atompacman.lereza.resources.database.Database;
@@ -80,7 +80,7 @@ public class PieceBuilderImpl implements PieceBuilder {
 		int index = Value.QUARTER.ordinal() - roundedExp + 1;
 		printInfo("Value of shortest note", Value.values()[index]);
 
-		if(meter.getDenominator() != 4) {
+		if(meter.denominator() != 4) {
 			if (Log.error() && Log.print("The time signature of the piece can not "
 					+ "be used to determine the grouping of the notes."));
 		}
@@ -91,7 +91,7 @@ public class PieceBuilderImpl implements PieceBuilder {
 		double totalNbBeats = (double) tempMidiFile.getFinalTimestamp() / correctedLength;
 		printInfo("Total nb of beats", (int) totalNbBeats + " (without counting the last note)");
 
-		int totalNbBars = (int) (totalNbBeats / meter.getNumerator());
+		int totalNbBars = (int) (totalNbBeats / meter.numerator());
 		printInfo("Total nb of bars", totalNbBars + " (without counting the last note)");
 
 		RythmicSignature sign = new RythmicSignature(meter, noteGrouping);

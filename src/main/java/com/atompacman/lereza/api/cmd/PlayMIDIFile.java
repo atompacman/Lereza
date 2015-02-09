@@ -2,7 +2,6 @@ package com.atompacman.lereza.api.cmd;
 
 import java.util.List;
 
-import com.atompacman.configuana.App;
 import com.atompacman.configuana.Cmd;
 import com.atompacman.configuana.CmdArgs;
 import com.atompacman.configuana.CmdInfo;
@@ -14,7 +13,9 @@ import com.atompacman.lereza.exception.InvalidArgumentException;
 import com.atompacman.lereza.midi.MIDIManager;
 import com.atompacman.toolkat.exception.Throw;
 
-public class PlayMIDIFile implements Cmd<CmdFlag> {
+public class PlayMIDIFile implements Cmd<Wizard, CmdFlag> {
+
+	//===================================== INNER TYPES ==========================================\\
 
 	public enum CmdFlag implements Flag {
 		TRACKS { public FlagInfo info() { return new FlagInfo(
@@ -31,11 +32,13 @@ public class PlayMIDIFile implements Cmd<CmdFlag> {
 		}};
 	}
 
-	public CmdInfo info() {
-		return new CmdInfo("play", "Play MIDI file", 1, "Play a MIDI file on disk");
-	}
+	
 
-	public void execute(App app, CmdArgs<CmdFlag> args) {
+	//======================================= METHODS ============================================\\
+
+	//--------------------------------------- EXECUTE --------------------------------------------\\
+
+	public void execute(Wizard app, CmdArgs<CmdFlag> args) {
 		MIDIManager manager = Wizard.initDevice(MIDIManager.class);
 		manager.loadSequence(args.getMainArgs().get(0));
 
@@ -45,11 +48,18 @@ public class PlayMIDIFile implements Cmd<CmdFlag> {
 		boolean loopPlayback = args.hasFlag(CmdFlag.LOOP);
 
 		manager.startPlayback(enablTracks, playbackPos, bpm, loopPlayback);
+		try {
+			synchronized (this) {
+				wait();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private int[] enabledTracks(List<String> paramValues) {
 		int[] enablTracks;
-		if (paramValues == null) {
+		if (paramValues.isEmpty()) {
 			enablTracks = new int[0];
 		} else {
 			enablTracks = new int[paramValues.size()];
@@ -88,5 +98,12 @@ public class PlayMIDIFile implements Cmd<CmdFlag> {
 			Throw.aRuntime(InvalidArgumentException.class, "BPM tempo must be an integer");
 		}
 		return 0;
+	}
+
+
+	//--------------------------------------- GETTERS --------------------------------------------\\
+
+	public CmdInfo info() {
+		return new CmdInfo("play", "Play MIDI file", 1, "Play a MIDI file on disk");
 	}
 }

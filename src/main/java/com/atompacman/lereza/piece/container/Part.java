@@ -6,7 +6,7 @@ import java.util.Stack;
 
 import com.atompacman.lereza.Parameters;
 import com.atompacman.lereza.midi.MIDIFilePlayer;
-import com.atompacman.lereza.midi.container.MIDINote;
+import com.atompacman.lereza.midi.MIDINote;
 import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.RythmicSignature;
 

@@ -5,7 +5,7 @@ import java.util.Stack;
 import org.junit.Test;
 
 import com.atompacman.lereza.Parameters;
-import com.atompacman.lereza.midi.container.MIDINote;
+import com.atompacman.lereza.midi.MIDINote;
 import com.atompacman.lereza.piece.PieceTestsHelper;
 import com.atompacman.lereza.solfege.Value;
 

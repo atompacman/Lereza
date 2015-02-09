@@ -11,14 +11,15 @@ import com.atompacman.configuana.Cmd;
 import com.atompacman.configuana.Settings;
 import com.atompacman.configuana.param.Param;
 import com.atompacman.lereza.Parameters;
-import com.atompacman.lereza.Parameters.MIDI.FilePlayer;
 import com.atompacman.lereza.api.cmd.PlayMIDIFile;
 import com.atompacman.lereza.db.DatabaseImpl;
 import com.atompacman.lereza.exception.UnimplementedFeatureException;
 import com.atompacman.lereza.exception.UninitializedDeviceException;
+import com.atompacman.lereza.midi.MIDIFileReader;
 import com.atompacman.lereza.midi.MIDIManager;
 import com.atompacman.lereza.piece.tool.PieceBuilderImpl;
 import com.atompacman.lereza.profile.ProfileManagerImpl;
+import com.atompacman.lereza.report.ReportManager;
 import com.atompacman.toolkat.exception.Throw;
 
 public class Wizard extends App {
@@ -36,11 +37,11 @@ public class Wizard extends App {
 	//------------------------------ CONFIGUANA INITIALIZATION -----------------------------------\\
 
 	public void init() {
-		init(app);
+		init(this);
 	}
 
-	public List<Class<? extends Cmd<?>>> getCmdClasses() {
-		List<Class<? extends Cmd<?>>> cmdClasses = new ArrayList<>();
+	public List<Class<? extends Cmd<?,?>>> getCmdClasses() {
+		List<Class<? extends Cmd<?,?>>> cmdClasses = new ArrayList<>();
 		cmdClasses.add(PlayMIDIFile.class);
 		return cmdClasses;
 	}
@@ -51,13 +52,22 @@ public class Wizard extends App {
 		return paramClasses;
 	}
 
+	
+	//--------------------------------- CONFIGUANA SHUTDOWN --------------------------------------\\
+
+	public void shutdown() {
+		for (Device device : devices.values()) {
+			device.shutdown();
+		}
+	}
 
 
+	
 	//==================================== STATIC METHODS ========================================\\
 
 	//------------------------------------ INITIALIZATION ----------------------------------------\\
 
-	private static void init(App app) {
+	private static void init(Wizard app) {
 		if (Wizard.app != null) {
 			return;
 		}
@@ -83,11 +93,17 @@ public class Wizard extends App {
 		else if (deviceClass == ProfileManager.class) {
 			device = (D) new ProfileManagerImpl();
 		}
+		else if (deviceClass == ReportManager.class) {
+			device = (D) ReportManager.getInstance();
+		}
 		else if (deviceClass == Database.class) {
 			device = (D) DatabaseImpl.getInstance();
 		} 
 		else if (deviceClass == MIDIManager.class) {
 			device = (D) MIDIManager.getInstance();
+		} 
+		else if (deviceClass == MIDIFileReader.class) {
+			device = (D) MIDIFileReader.getInstance();
 		} 
 		else {
 			Throw.aRuntime(UnimplementedFeatureException.class, "Unimplemented initialization of "
@@ -95,17 +111,6 @@ public class Wizard extends App {
 		}
 		devices.put(deviceClass, device);
 		return device;
-	}
-
-
-	//--------------------------------------- SHUTDOWN -------------------------------------------\\
-
-	public static void shutdown() {
-		assertInit();
-		Log.writeFinalLogs();
-		for (Device device : devices.values()) {
-			device.shutdown();
-		}
 	}
 
 

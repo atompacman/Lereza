@@ -9,7 +9,7 @@ import java.util.Stack;
 import com.atompacman.atomlog.Log;
 import com.atompacman.lereza.Parameters;
 import com.atompacman.lereza.exception.PieceBuilderException;
-import com.atompacman.lereza.midi.container.MIDINote;
+import com.atompacman.lereza.midi.MIDINote;
 import com.atompacman.lereza.solfege.Value;
 
 public class TimestampsChecker {

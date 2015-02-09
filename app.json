@@ -1,0 +1,9 @@
+{"AppConfig": {
+	"name": "Lereza",
+	"version": "1.0.0",
+	"main lib": "../../Lereza/lib.json",
+	"other lib": [
+			"../AtomLog/lib.json"
+		]
+	}
+}

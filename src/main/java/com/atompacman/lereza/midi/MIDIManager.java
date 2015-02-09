@@ -83,8 +83,13 @@ public class MIDIManager implements Device {
 				MidiDevice device = availableDevices.get(deviceID);
 
 				if (device == null) {
-					Throw.aRuntime(MIDIDeviceException.class, "No such "
-							+ "device is available in the system");
+					if (Log.warng() && Log.print("No MIDI device called \"" + deviceID + "\" was "
+							+ "found on the system. Using system's default " + type.getName()+"."));
+					device = type.getDefaultDevice();
+					if (device == null) {
+						Throw.aRuntime(MIDIDeviceException.class, "No default MIDI "
+								+ "" + type.getName() + " defined by the system");
+					}
 				}
 
 				Class<? extends MidiDevice> representedInterface = type.getInterface();
@@ -133,8 +138,8 @@ public class MIDIManager implements Device {
 		try {
 			for (Info info : MidiSystem.getMidiDeviceInfo()) {
 				deviceID = info.getName();
-				if (Log.infos() && Log.print(deviceID + " detected."));
 				availableDevices.put(deviceID(info), MidiSystem.getMidiDevice(info));
+				if (Log.infos() && Log.print(deviceID(info) + " detected."));
 			}
 		} catch (MidiUnavailableException e) {
 			Throw.aRuntime(MIDIDeviceException.class, "Could not "
@@ -146,6 +151,7 @@ public class MIDIManager implements Device {
 		if (Log.infos() && Log.title("Device connection", 1));
 		connectDevices(MIDIDeviceType.KEYBOARD, MIDIDeviceType.SYNTHESIZER);
 		connectDevices(MIDIDeviceType.KEYBOARD, MIDIDeviceType.SEQUENCER);
+		connectDevices(MIDIDeviceType.SEQUENCER, MIDIDeviceType.SYNTHESIZER);
 	}
 
 	private void connectDevices(MIDIDeviceType from, MIDIDeviceType to) {
@@ -208,7 +214,9 @@ public class MIDIManager implements Device {
 		if (bpm != DEFAULT_TEMPO) {
 			sequencer.setTempoInBPM(bpm);
 		}
-		sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
+		if (loop) {
+			sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
+		}
 		startPlayback();
 	}
 

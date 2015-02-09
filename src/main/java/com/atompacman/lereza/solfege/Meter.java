@@ -2,8 +2,8 @@ package com.atompacman.lereza.solfege;
 
 public class Meter {
 	
-	private int numerator;
-	private int denominator;
+	private final int numerator;
+	private final int denominator;
 	
 		
 	//------------ CONSTRUCTOR ------------\\
@@ -16,11 +16,11 @@ public class Meter {
 	
 	//------------ GETTERS ------------\\
 
-	public int getNumerator() {
+	public int numerator() {
 		return numerator;
 	}
 	
-	public int getDenominator() {
+	public int denominator() {
 		return denominator;
 	}
 	

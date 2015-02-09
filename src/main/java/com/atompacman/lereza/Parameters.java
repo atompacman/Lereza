@@ -9,7 +9,8 @@ import com.atompacman.lereza.solfege.Value;
 public enum Parameters implements StrictParam {;
 		
 	public static class Paths {
-		public static final String LEREZA_PACKAGE = "com.atompacman.lereza";
+		public static final String LEREZA_PACKAGE 			= "com.atompacman.lereza";
+		public static final String APP_CONFIG_FILE_PATH		= "../../Lereza/app.json";
 
 		public static class Dirs {
 			public static final String RESOURCES_ROOT_DIR = "resources" + File.separator;

@@ -25,6 +25,6 @@ public class RythmicSignature {
 	}
 	
 	public int timeunitsInABar() {
-		return meter.getNumerator() * Value.QUARTER.toTimeunit();
+		return meter.numerator() * Value.QUARTER.toTimeunit();
 	}
 }
