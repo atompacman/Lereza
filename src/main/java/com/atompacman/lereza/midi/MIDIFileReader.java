@@ -1,6 +1,5 @@
 package com.atompacman.lereza.midi;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -235,7 +234,7 @@ public class MIDIFileReader implements Device {
 		Sequence midiSequence = null;
 
 		try {
-			midiSequence = MidiSystem.getSequence(IO.buildFile(midiFilePath));
+			midiSequence = MidiSystem.getSequence(IO.getFile(midiFilePath));
 		} catch (InvalidMidiDataException | IOException e) {
 			Throw.a(MIDIFileReaderException.class, "Could not load "
 					+ "MIDI sequence at \"" + midiFilePath + "\"", e);

@@ -1,6 +1,5 @@
 package com.atompacman.lereza.midi;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.EnumMap;
@@ -22,6 +21,7 @@ import com.atompacman.lereza.api.Device;
 import com.atompacman.lereza.api.Wizard;
 import com.atompacman.lereza.exception.MIDIDeviceException;
 import com.atompacman.toolkat.exception.Throw;
+import com.atompacman.toolkat.io.IO;
 
 public class MIDIManager implements Device {
 
@@ -186,7 +186,7 @@ public class MIDIManager implements Device {
 
 	public void loadSequence(String filePath) {
 		try {
-			setCurrentSequence(MidiSystem.getSequence(new File(filePath)));
+			setCurrentSequence(MidiSystem.getSequence(IO.getFile(filePath)));
 		} catch (InvalidMidiDataException | IOException e) {
 			Throw.aRuntime(MIDIDeviceException.class, "Could not load "
 					+ "MIDI sequence at \"" + filePath + "\"", e);

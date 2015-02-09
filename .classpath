@@ -7,7 +7,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/Configuana"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ToolKat"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AtomLog"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/Eclipse/Libraries/mysql-connector-java-5.1.33-bin.jar"/>
 	<classpathentry kind="lib" path="C:/Users/jeremie_coulombe/.m2/repository/org/json/json/20140107/json-20140107.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jeremie_coulombe/.m2/repository/mysql/mysql-connector-java-5.1.33-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
