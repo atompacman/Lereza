@@ -2,8 +2,10 @@ package com.atompacman.lereza.midi;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -17,13 +19,14 @@ import javax.sound.midi.Sequencer.SyncMode;
 import javax.sound.midi.Synthesizer;
 
 import com.atompacman.atomlog.Log;
-import com.atompacman.lereza.api.Device;
+import com.atompacman.lereza.api.Module;
 import com.atompacman.lereza.api.Wizard;
 import com.atompacman.lereza.exception.MIDIDeviceException;
+import com.atompacman.lereza.report.ReportManager;
 import com.atompacman.toolkat.exception.Throw;
 import com.atompacman.toolkat.io.IO;
 
-public class MIDIManager implements Device {
+public class MIDIManager extends Module {
 
 	//====================================== SINGLETON ===========================================\\
 
@@ -60,12 +63,11 @@ public class MIDIManager implements Device {
 	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
 
 	private MIDIManager() {
-		if (Log.infos() && Log.title("MIDI Device Manager initialization", 0));
 		autoSelectDevices();
 		this.isRecording = false;
-		this.isPlaying = false;
+		this.isPlaying = false;	
 	}
-
+	
 
 	//------------------------------------ SELECT DEVICES ----------------------------------------\\
 
@@ -272,6 +274,15 @@ public class MIDIManager implements Device {
 	}
 
 
+	//----------------------------------- REQUIRED MODULES ---------------------------------------\\	
+
+	public List<Class<? extends Module>> getRequiredModule() {
+		List<Class<? extends Module>> rm = new ArrayList<>();
+		rm.add(ReportManager.class);
+		return rm;
+	}
+	
+	
 	//---------------------------------------- GETTERS -------------------------------------------\\
 
 	private MidiDevice getDevice(MIDIDeviceType type) {

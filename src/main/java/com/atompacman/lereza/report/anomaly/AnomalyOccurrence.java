@@ -4,6 +4,12 @@ import java.util.Date;
 
 public class AnomalyOccurrence {
 
+	//====================================== CONSTANTS ===========================================\\
+
+	private static final int STACK_TRACE_LVL_MODIFIER = 4;
+	
+	
+	
 	//======================================= FIELDS =============================================\\
 
 	private final StackTraceElement[] 	stack;
@@ -18,9 +24,9 @@ public class AnomalyOccurrence {
 
 	AnomalyOccurrence(String details) {
 		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-		int stackLen = stackTrace.length;
-		this.stack = new StackTraceElement[stackLen - 1];
-		System.arraycopy(stackTrace, 1, stack, 0, stackLen - 1);
+		int stackLen = stackTrace.length - STACK_TRACE_LVL_MODIFIER;
+		this.stack = new StackTraceElement[stackLen];
+		System.arraycopy(stackTrace, STACK_TRACE_LVL_MODIFIER, stack, 0, stackLen);
 		this.timestamp = new Date();
 		this.details = details;
 	}

@@ -3,9 +3,9 @@ package com.atompacman.lereza.report;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.atompacman.lereza.api.Device;
+import com.atompacman.lereza.api.Module;
 
-public class ReportManager implements Device {
+public class ReportManager extends Module {
 
 	//====================================== SINGLETON ===========================================\\
 
@@ -21,7 +21,7 @@ public class ReportManager implements Device {
 	
 	//======================================= FIELDS =============================================\\
 
-	private Map<Class<? extends Device>, ActivityReports> actReports;
+	private Map<Class<? extends Module>, ActivityReports> actReports;
 	
 	
 	
@@ -33,10 +33,10 @@ public class ReportManager implements Device {
 		actReports = new HashMap<>();
 	}
 	
-		
+	
 	//--------------------------------------- GETTERS --------------------------------------------\\
 
-	public ActivityReports getActivityReports(Class<? extends Device> clazz) {
+	public ActivityReports getActivityReports(Class<? extends Module> clazz) {
 		ActivityReports ar = actReports.get(clazz);
 		if (ar == null) {
 			ar = new ActivityReports(clazz);
@@ -45,7 +45,7 @@ public class ReportManager implements Device {
 		return ar;
 	}
 	
-	public <T extends Report> T getReport(Class<? extends Device> devClazz, Class<T> reportClazz) {
+	public <T extends Report> T getReport(Class<? extends Module> devClazz, Class<T> reportClazz) {
 		return getActivityReports(devClazz).getReport(reportClazz);
 	}
 
@@ -55,4 +55,6 @@ public class ReportManager implements Device {
 	public void shutdown() {
 		
 	}
+
+
 }

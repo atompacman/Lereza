@@ -5,22 +5,21 @@ import java.sql.SQLException;
 
 import com.atompacman.lereza.Parameters;
 import com.atompacman.lereza.Parameters.Paths.Assets;
-import com.atompacman.lereza.api.ConfigManager;
-import com.atompacman.lereza.api.Database;
+import com.atompacman.lereza.api.Module;
 import com.atompacman.lereza.api.Wizard;
 import com.atompacman.lereza.exception.DatabaseException;
 import com.atompacman.lereza.gui.LoginDialog;
 import com.atompacman.toolkat.exception.Throw;
 
-public class DatabaseImpl implements Database {
+public class Database extends Module {
 	
 	//====================================== SINGLETON ===========================================\\
 
 	private static class InstanceHolder {
-		private static final DatabaseImpl instance = new DatabaseImpl();
+		private static final Database instance = new Database();
 	}
 	
-	public static DatabaseImpl getInstance() {
+	public static Database getInstance() {
 		return InstanceHolder.instance;
 	}
 	
@@ -36,12 +35,10 @@ public class DatabaseImpl implements Database {
 	
 	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
 
-	private DatabaseImpl() {
-		ConfigManager config = Wizard.getDevice(ConfigManager.class);
-		
-		String iconPath 			  = (String) Assets.LOGIN_ICON.value();
-		String serverAdress 		  = config.getString(Parameters.Database.FULL_SERVER_ADRESS);
-		String dbConnectorDriverClass = config.getString(Parameters.Database.DB_CONNECTOR_CLASS);
+	private Database() {		
+		String iconPath 			  = Assets.LOGIN_ICON;
+		String serverAdress 		  = Wizard.getString(Parameters.Database.FULL_SERVER_ADRESS);
+		String dbConnectorDriverClass = Wizard.getString(Parameters.Database.DB_CONNECTOR_CLASS);
 		
 		Login login = LoginDialog.askForLogin("MySQL Database login", iconPath);
 
@@ -71,13 +68,13 @@ public class DatabaseImpl implements Database {
 	}
 	
 	
-	//----------------------------------------- CLOSE --------------------------------------------\\
-
-	public void close() {
+	//-------------------------------------- SHUTDOWN --------------------------------------------\\	
+	
+	public void shutdown() {
 		dbConnection.close();
 	}
 	
-	
+
 	//----------------------------------- THROW EXCEPTIONS ---------------------------------------\\
 
 	public static void throwDBExcep(String msg, Exception e) {

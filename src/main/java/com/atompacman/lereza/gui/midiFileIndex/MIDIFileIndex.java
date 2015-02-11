@@ -31,7 +31,7 @@ import com.atompacman.lereza.Parameters.Paths.SQL;
 import com.atompacman.lereza.api.ConfigManager;
 import com.atompacman.lereza.api.Database;
 import com.atompacman.lereza.api.Wizard;
-import com.atompacman.lereza.db.DatabaseImpl;
+import com.atompacman.lereza.db.Database;
 import com.atompacman.lereza.resources.context.ContextElementType;
 import com.atompacman.toolkat.io.TextFileReader;
 
@@ -131,7 +131,7 @@ public class MIDIFileIndex {
 				tableModel.addRow(rowValues);
 			}
 		} catch (SQLException e) {
-			DatabaseImpl.throwDBExcep("Could not iterate through query results", e);
+			Database.throwDBExcep("Could not iterate through query results", e);
 		}
 
 		return new JScrollPane(table);
@@ -158,7 +158,7 @@ public class MIDIFileIndex {
 					updatableQueryResult.updateString(updateCol, value);
 					updatableQueryResult.updateRow();
 				} catch (SQLException e) {
-					DatabaseImpl.throwDBExcep("Could not modify value in database", e);
+					Database.throwDBExcep("Could not modify value in database", e);
 				} 
 			} 
 		};
@@ -191,7 +191,7 @@ public class MIDIFileIndex {
 		button.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent event) {
-				ConfigManager config = Wizard.getDevice(ConfigManager.class);
+				ConfigManager config = Wizard.getModule(ConfigManager.class);
 				String midiDir = config.getString(Parameters.Paths.Dirs.MIDI_ROOT_DIR);
 				JFileChooser chooser = new JFileChooser(midiDir);
 				chooser.setFileFilter(new FileNameExtensionFilter("MIDI files (.mid)", "mid"));
@@ -313,7 +313,7 @@ public class MIDIFileIndex {
 
 					tableModel.addRow(newRowValues);
 				} catch (SQLException e) {
-					DatabaseImpl.throwDBExcep("Could not add new MIDI file to index", e);
+					Database.throwDBExcep("Could not add new MIDI file to index", e);
 				}
 			}
 		});
@@ -331,7 +331,7 @@ public class MIDIFileIndex {
 					updatableQueryResult.absolute(table.getSelectedRow());
 					updatableQueryResult.deleteRow();
 				} catch (SQLException e) {
-					DatabaseImpl.throwDBExcep("Could not remove row from database", e);
+					Database.throwDBExcep("Could not remove row from database", e);
 				}
 			}
 		});
@@ -343,8 +343,8 @@ public class MIDIFileIndex {
 	//------------------------------------ PRIVATE UTILS -----------------------------------------\\
 
 	private static ResultSet queryDB(SQL.MIDIFileIndex param, boolean storeQuery, String...jokers) {
-		ConfigManager config = Wizard.getDevice(ConfigManager.class);
-		Database db = Wizard.getDevice(Database.class);
+		ConfigManager config = Wizard.getModule(ConfigManager.class);
+		Database db = Wizard.getModule(Database.class);
 		
 		String sqlFilePath = config.getString(param);
 		String query;

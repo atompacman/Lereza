@@ -8,21 +8,19 @@ import java.util.Stack;
 
 import com.atompacman.atomlog.Log;
 import com.atompacman.lereza.Parameters;
-import com.atompacman.lereza.api.PieceBuilder;
+import com.atompacman.lereza.api.Module;
+import com.atompacman.lereza.db.Database;
 import com.atompacman.lereza.exception.DatabaseException;
 import com.atompacman.lereza.exception.PieceBuilderException;
-import com.atompacman.lereza.midi.MIDIFilePlayer;
 import com.atompacman.lereza.midi.MIDINote;
-import com.atompacman.lereza.midi.container.MIDIFile;
 import com.atompacman.lereza.piece.container.Part;
 import com.atompacman.lereza.piece.container.Piece;
-import com.atompacman.lereza.resources.database.Database;
 import com.atompacman.lereza.solfege.Grouping;
 import com.atompacman.lereza.solfege.Meter;
 import com.atompacman.lereza.solfege.RythmicSignature;
 import com.atompacman.lereza.solfege.Value;
 
-public class PieceBuilderImpl implements PieceBuilder {
+public class PieceBuilderImpl extends Module {
 
 	private Piece tempPiece;
 	private MIDIFile tempMidiFile;
@@ -33,7 +31,7 @@ public class PieceBuilderImpl implements PieceBuilder {
 	public void build(int caseID) throws DatabaseException {
 		if (Log.infos() && Log.title("PieceBuilder", 0));
 		
-		tempMidiFile = DatabaseImpl.getMIDIFile(caseID);
+		tempMidiFile = Database.getMIDIFile(caseID);
 		String filePath = tempMidiFile.getFileInfos().getFilePath();
 		
 		if (Log.infos() && Log.print("Building midi file at " + filePath + "."));
@@ -46,7 +44,7 @@ public class PieceBuilderImpl implements PieceBuilder {
 			buildPart(i);
 		}
 
-		DatabaseImpl.setPiece(caseID, tempPiece);
+		Database.setPiece(caseID, tempPiece);
 		
 		if (Log.infos() && Log.print("Piece built successfully."));
 	}

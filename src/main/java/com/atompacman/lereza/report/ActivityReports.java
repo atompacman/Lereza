@@ -3,14 +3,14 @@ package com.atompacman.lereza.report;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.atompacman.lereza.api.Device;
+import com.atompacman.lereza.api.Module;
 
 public class ActivityReports {
 
 	//======================================= FIELDS =============================================\\
 
 	private final Map<Class<? extends Report>, Report> 	reports;
-	private final Class<? extends Device> 				coveredDevice;
+	private final Class<? extends Module> 				assocModule;
 
 
 
@@ -18,9 +18,9 @@ public class ActivityReports {
 
 	//---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-	ActivityReports(Class<? extends Device> relatedDevice) {
+	ActivityReports(Class<? extends Module> assocModule) {
 		this.reports = new HashMap<>();
-		this.coveredDevice = relatedDevice;
+		this.assocModule = assocModule;
 	}
 
 
@@ -40,8 +40,8 @@ public class ActivityReports {
 		return report;
 	}
 
-	public Class<? extends Device> getRelatedDevice() {
-		return coveredDevice;
+	public Class<? extends Module> getAssociatedModule() {
+		return assocModule;
 	}
 	
 	

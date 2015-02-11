@@ -39,7 +39,7 @@ public class PlayMIDIFile implements Cmd<Wizard, CmdFlag> {
 	//--------------------------------------- EXECUTE --------------------------------------------\\
 
 	public void execute(Wizard app, CmdArgs<CmdFlag> args) {
-		MIDIManager manager = Wizard.initDevice(MIDIManager.class);
+		MIDIManager manager = Wizard.getModule(MIDIManager.class);
 		manager.loadSequence(args.getMainArgs().get(0));
 
 		int[] enablTracks = enabledTracks(args.getValues(CmdFlag.TRACKS));

@@ -13,11 +13,8 @@ import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
 import com.atompacman.atomlog.Log;
-import com.atompacman.lereza.api.Device;
-import com.atompacman.lereza.api.Wizard;
+import com.atompacman.lereza.api.Module;
 import com.atompacman.lereza.exception.MIDIFileReaderException;
-import com.atompacman.lereza.report.ActivityReports;
-import com.atompacman.lereza.report.ReportManager;
 import com.atompacman.lereza.report.anomaly.Anomaly;
 import com.atompacman.lereza.report.anomaly.AnomalyInfo;
 import com.atompacman.lereza.report.anomaly.AnomalyInfo.Impact;
@@ -31,7 +28,7 @@ import com.atompacman.lereza.solfege.quality.Quality;
 import com.atompacman.toolkat.exception.Throw;
 import com.atompacman.toolkat.io.IO;
 
-public class MIDIFileReader implements Device {
+public class MIDIFileReader extends Module {
 
 	//====================================== SINGLETON ===========================================\\
 
@@ -219,11 +216,9 @@ public class MIDIFileReader implements Device {
 	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
 
 	private MIDIFileReader() {
-		if (Log.infos() && Log.title("MIDI File Reader", 1));
-		ActivityReports ar = Wizard.getDevice(ReportManager.class).getActivityReports(getClass());
-		this.anomalies = ar.getReport(AnomalyReport.class);
+		this.anomalies = reports.getReport(AnomalyReport.class);	
 	}
-
+	
 
 	//---------------------------------------- READ ----------------------------------------------\\
 
@@ -370,13 +365,14 @@ public class MIDIFileReader implements Device {
 		anomalies.record(MIDIFileAnomaly.IGNORED_MIDI_EVENT, message, true);
 	}
 
-
+	
 	//--------------------------------------- SHUTDOWN -------------------------------------------\\
 
 	public void shutdown() {
 
 	}
 
+	
 
 	//==================================== STATIC METHODS ========================================\\
 

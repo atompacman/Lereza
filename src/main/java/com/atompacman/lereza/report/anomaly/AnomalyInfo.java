@@ -1,6 +1,6 @@
 package com.atompacman.lereza.report.anomaly;
 
-import com.atompacman.lereza.api.Device;
+import com.atompacman.lereza.api.Module;
 
 public class AnomalyInfo {
 
@@ -25,7 +25,7 @@ public class AnomalyInfo {
 	private final Impact 			impact;
 	private final Recoverability 	recoverability;
 	
-	private final Class<? extends Device> relatedDevice;
+	private final Class<? extends Module> assocModule;
 
 
 	
@@ -34,7 +34,7 @@ public class AnomalyInfo {
 	//---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
 	public AnomalyInfo(String name, String description, String consequences, Impact impact,
-			Recoverability recoverability, Class<? extends Device> relatedDevice) {
+			Recoverability recoverability, Class<? extends Module> assocModule) {
 		
 		this.name = name;
 		this.description = description;
@@ -43,7 +43,7 @@ public class AnomalyInfo {
 		this.impact = impact;
 		this.recoverability = recoverability;
 		
-		this.relatedDevice = relatedDevice;
+		this.assocModule = assocModule;
 	}
 	
 	
@@ -69,7 +69,7 @@ public class AnomalyInfo {
 		return recoverability;
 	}
 
-	public Class<? extends Device> getRelatedDevice() {
-		return relatedDevice;
+	public Class<? extends Module> getAssociatedModule() {
+		return assocModule;
 	}
 }

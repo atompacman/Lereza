@@ -1,5 +1,6 @@
 package com.atompacman.lereza.api;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,25 +13,19 @@ import com.atompacman.configuana.Settings;
 import com.atompacman.configuana.param.Param;
 import com.atompacman.lereza.Parameters;
 import com.atompacman.lereza.api.cmd.PlayMIDIFile;
-import com.atompacman.lereza.db.DatabaseImpl;
 import com.atompacman.lereza.exception.UnimplementedFeatureException;
-import com.atompacman.lereza.exception.UninitializedDeviceException;
-import com.atompacman.lereza.midi.MIDIFileReader;
-import com.atompacman.lereza.midi.MIDIManager;
-import com.atompacman.lereza.piece.tool.PieceBuilderImpl;
-import com.atompacman.lereza.profile.ProfileManagerImpl;
-import com.atompacman.lereza.report.ReportManager;
 import com.atompacman.toolkat.exception.Throw;
+import com.atompacman.toolkat.misc.StringHelper;
 
 public class Wizard extends App {
 
 	//==================================== STATIC FIELDS =========================================\\
 
 	private static App 									app;
-	private static Map<Class<? extends Device>, Device> devices;
+	private static Map<Class<? extends Module>, Module> modules;
 	private static Settings 							currSettings;
 
-
+	
 
 	//======================================= METHODS ============================================\\
 
@@ -56,8 +51,8 @@ public class Wizard extends App {
 	//--------------------------------- CONFIGUANA SHUTDOWN --------------------------------------\\
 
 	public void shutdown() {
-		for (Device device : devices.values()) {
-			device.shutdown();
+		for (Module module : modules.values()) {
+			module.shutdown();
 		}
 	}
 
@@ -73,61 +68,39 @@ public class Wizard extends App {
 		}
 		if (Log.vital() && Log.title("Lereza Wizard initialization"));
 		Wizard.app = app;
-		Wizard.devices = new HashMap<Class<? extends Device>, Device>();
+		Wizard.modules = new HashMap<Class<? extends Module>, Module>();
 		Wizard.currSettings = app.getDefaultProfile();
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <D extends Device> D initDevice(Class<D> deviceClass) {
-		assertInit();
-		if (devices.containsKey(deviceClass)) {
-			throw new RuntimeException(deviceClass.getSimpleName() 
-					+ " can only be initialized once");
-		}
-
-		D device = null;
-
-		if (deviceClass == PieceBuilder.class) {
-			device = (D) new PieceBuilderImpl();
-		}
-		else if (deviceClass == ProfileManager.class) {
-			device = (D) new ProfileManagerImpl();
-		}
-		else if (deviceClass == ReportManager.class) {
-			device = (D) ReportManager.getInstance();
-		}
-		else if (deviceClass == Database.class) {
-			device = (D) DatabaseImpl.getInstance();
-		} 
-		else if (deviceClass == MIDIManager.class) {
-			device = (D) MIDIManager.getInstance();
-		} 
-		else if (deviceClass == MIDIFileReader.class) {
-			device = (D) MIDIFileReader.getInstance();
-		} 
-		else {
-			Throw.aRuntime(UnimplementedFeatureException.class, "Unimplemented initialization of "
-					+ "a device of class \"" + deviceClass.getSimpleName() + "\"");	
-		}
-		devices.put(deviceClass, device);
-		return device;
 	}
 
 
 	//-------------------------------------- GET DEVICE ------------------------------------------\\
 
 	@SuppressWarnings("unchecked")
-	public static <D extends Device> D getDevice(Class<D> deviceClass) {
+	public static <T extends Module> T getModule(Class<T> moduleClass) {
 		assertInit();
-		D device = (D) devices.get(deviceClass);
-		if (device == null) {
-			Throw.aRuntime(UninitializedDeviceException.class, deviceClass.getSimpleName() 
-					+ " was not initialized");
+		T module = (T) modules.get(moduleClass);
+		
+		if (module == null) {
+			if (Log.infos()) {
+				String splitClassName = StringHelper.splitCamelCase(moduleClass.getSimpleName());
+				Log.title(splitClassName + " initialization", 0);
+			}
+			
+			try {
+				Method instanceGetter = moduleClass.getMethod("getInstance", (Class<?>[]) null);
+				module = (T) instanceGetter.invoke(null, (Object[]) null);
+			} catch (Exception e) {
+				Throw.aRuntime(UnimplementedFeatureException.class, "Could not initialize "
+						+ "module \"" + moduleClass.getSimpleName() + "\"", e);	
+			}
+			
+			modules.put(moduleClass, module);
 		}
-		return device;
+		
+		return module;
 	}
-
-
+	
+	
 	//-------------------------------------- PARAMETERS ------------------------------------------\\
 
 	public static <P extends Param> Object get(P param) {

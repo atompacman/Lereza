@@ -29,7 +29,7 @@ public class DatabaseConnection {
 		try {
 			Class.forName(dbConnectorDriverClassName);
 		} catch (Exception e) {
-			DatabaseImpl.throwDBExcep("Invalid database connector driver class "
+			Database.throwDBExcep("Invalid database connector driver class "
 					+ "\"" + dbConnectorDriverClassName + "\"", e);
 		}
 
@@ -44,7 +44,7 @@ public class DatabaseConnection {
 			connection = DriverManager.getConnection(serverAdress, 
 					login.username(), login.password());
 		} catch (SQLException e) {
-			DatabaseImpl.throwDBExcep("Could not connect to Lereza database", e);
+			Database.throwDBExcep("Could not connect to Lereza database", e);
 		}
 		storedStatements = new ArrayList<Statement>();
 	}
@@ -57,7 +57,7 @@ public class DatabaseConnection {
 			return connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, 
 					ResultSet.CONCUR_UPDATABLE);
 		} catch (SQLException e) {
-			DatabaseImpl.throwDBExcep("Could not create statement", e);
+			Database.throwDBExcep("Could not create statement", e);
 		}
 		return null;
 	}
@@ -82,7 +82,7 @@ public class DatabaseConnection {
 		try {
 			connection.close();
 		} catch (SQLException e) {
-			DatabaseImpl.throwDBExcep("Could not close connection to database", e);
+			Database.throwDBExcep("Could not close connection to database", e);
 		}
 	}
 
@@ -96,7 +96,7 @@ public class DatabaseConnection {
 		try {
 			return statement.executeQuery(sqlSelectQuery);
 		} catch (SQLException e) {
-			DatabaseImpl.throwDBExcep("Could not execute query on database", e);
+			Database.throwDBExcep("Could not execute query on database", e);
 		}
 		return null;
 	}

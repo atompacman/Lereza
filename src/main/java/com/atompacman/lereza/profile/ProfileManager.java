@@ -2,22 +2,37 @@ package com.atompacman.lereza.profile;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.atompacman.lereza.api.ProfileManager;
+import com.atompacman.lereza.api.Module;
+import com.atompacman.lereza.api.Wizard;
+import com.atompacman.lereza.db.Database;
 import com.atompacman.lereza.exception.DatabaseException;
 import com.atompacman.lereza.exception.ProfileManagerException;
 import com.atompacman.lereza.piece.container.Piece;
 import com.atompacman.lereza.resources.context.Context;
 import com.atompacman.lereza.resources.context.ContextElementType;
-import com.atompacman.lereza.resources.database.Database;
 
-public class ProfileManagerImpl implements ProfileManager {
+public class ProfileManager extends Module {
 
-	//------------ PROFILE ------------\\
+	//====================================== SINGLETON ===========================================\\
+
+	private static class InstanceHolder {
+		private static final ProfileManager instance = new ProfileManager();
+	}
+
+	public static ProfileManager getInstance() {
+		return InstanceHolder.instance;
+	}
+
+
+	
+	//======================================= METHODS ============================================\\
+
+	//--------------------------------------- PROFILE --------------------------------------------\\
 
 	public void profile(int caseID) throws DatabaseException, ProfileManagerException {
-		Piece piece = DatabaseImpl.getPiece(caseID);
+		Piece piece = Wizard.getModule(Database.class).getPiece(caseID);
 		ProfiledPiece profiledPiece = profile(piece);
-		DatabaseImpl.setProfiledPiece(caseID, profiledPiece);
+		Database.setProfiledPiece(caseID, profiledPiece);
 	}
 
 	protected ProfiledPiece profile(Piece piece) throws ProfileManagerException {
@@ -49,5 +64,12 @@ public class ProfileManagerImpl implements ProfileManager {
 		}
 		
 		return profiler;
+	}
+	
+	
+	//-------------------------------------- SHUTDOWN --------------------------------------------\\	
+	
+	public void shutdown() {
+		
 	}
 }

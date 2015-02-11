@@ -10,9 +10,9 @@ import com.atompacman.lereza.resources.database.Database;
 public class ProfilerTestHelper {
 
 	public static Piece loadPiece(int caseID) throws DatabaseException, MIDIFileReaderException {
-		DatabaseImpl.initialize();
+		Database.initialize();
 		new MIDIFileReader().read(caseID);
 		new PieceBuilderImpl().build(caseID);
-		return DatabaseImpl.getPiece(caseID);
+		return Database.getPiece(caseID);
 	}
 }

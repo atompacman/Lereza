@@ -19,7 +19,7 @@ import com.atompacman.lereza.Parameters.Paths.SQL;
 import com.atompacman.lereza.api.ConfigManager;
 import com.atompacman.lereza.api.Database;
 import com.atompacman.lereza.api.Wizard;
-import com.atompacman.lereza.db.DatabaseImpl;
+import com.atompacman.lereza.db.Database;
 import com.atompacman.lereza.resources.context.ContextElementType;
 import com.atompacman.lereza.resources.context.ContextElementType.DatabaseStatus;
 import com.atompacman.toolkat.io.TextFileReader;
@@ -47,7 +47,7 @@ public class ComboBoxElement extends IndexElement {
 	//--------------------------------- STATIC INITIALIZATION ------------------------------------\\
 
 	static {
-		ConfigManager config = Wizard.getDevice(ConfigManager.class);
+		ConfigManager config = Wizard.getModule(ConfigManager.class);
 		
 		try {
 			NO_PARENT_CONTEXT_ELEM_QUERY_TEMPL = TextFileReader.readAsSingleLine(
@@ -98,7 +98,7 @@ public class ComboBoxElement extends IndexElement {
 	}
 
 	private void assignQueryResultsToBox(String selectQuery, String... jokers) {
-		Database db = Wizard.getDevice(Database.class);
+		Database db = Wizard.getModule(Database.class);
 		ResultSet queryResult = db.executeQuery(selectQuery, jokers);
 
 		List<String> values = new ArrayList<String>();
@@ -107,7 +107,7 @@ public class ComboBoxElement extends IndexElement {
 				values.add(queryResult.getString(1));
 			}
 		} catch (SQLException e) {
-			DatabaseImpl.throwDBExcep("Could retrieve query results", e);
+			Database.throwDBExcep("Could retrieve query results", e);
 		}
 		
 		Collections.sort(values);
