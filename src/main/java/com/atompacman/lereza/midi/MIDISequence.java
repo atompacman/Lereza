@@ -16,7 +16,7 @@ public class MIDISequence {
 
 	//====================================== CONSTANTS ===========================================\\
 
-	private static final int				DEFAULT_NUM_32TH_NOTES_PER_BEAT = 8;
+	static final int						DEFAULT_NUM_32TH_NOTES_PER_BEAT = 8;
 	private static final Key 				DEFAULT_KEY = Key.valueOf(Tone.valueOf(NoteLetter.C));
 	private static final RythmicSignature 	DEFAULT_RYTHMIC_SIGNATURE = 
 			new RythmicSignature(new Meter(4, 4), Grouping.DUPLETS);
@@ -93,7 +93,7 @@ public class MIDISequence {
 	
 	//--------------------------------------- GETTERS --------------------------------------------\\
 	
-	public MIDITrack getTrack(int num) {
+	public MIDITrack geTrack(int num) {
 		return tracks.get(num);
 	}
 

@@ -1,13 +1,13 @@
 package com.atompacman.lereza.api;
 
-import com.atompacman.lereza.report.ActivityReports;
+import com.atompacman.lereza.report.Report;
 import com.atompacman.lereza.report.ReportManager;
 
 public abstract class Module {
 	
 	//======================================= FIELDS =============================================\\
 
-	protected ActivityReports reports;
+	protected Report report;
 	
 	
 	
@@ -17,7 +17,7 @@ public abstract class Module {
 
 	public Module() {
 		if (!(getClass().equals(ReportManager.class))) {
-			reports = Wizard.getModule(ReportManager.class).getActivityReports(getClass());
+			report = Wizard.getModule(ReportManager.class).getReport(getClass());
 		}
 	}
 	

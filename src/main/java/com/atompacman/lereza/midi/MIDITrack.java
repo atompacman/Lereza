@@ -9,22 +9,29 @@ public class MIDITrack {
 
 	//======================================= FIELDS =============================================\\
 
+	// Notes
 	private Map<Long, MIDINote> notes;
-	private MIDINote[]			noteBuffer;
 
+	// Names
 	private String name;
 	private String instrumentName;
 	
+	// Instrument changes
 	private Map<Long, MIDIInstrument> instrChanges;
 	
+	// Channel / Port
 	private Integer	channelNumber;
 	private Integer	midiPort;
 	
+	// Text info
 	private List<String> textContent;
 	private List<String> lyrics;
 	private List<String> markers;
 	private List<String> cuePoints;
 	
+	// Temporary field
+	private MIDINote[] noteBuffer;
+
 	
 	
 	//======================================= METHODS ============================================\\

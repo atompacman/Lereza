@@ -1,6 +1,7 @@
 package com.atompacman.lereza.midi;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
@@ -13,13 +14,13 @@ import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
 import com.atompacman.atomlog.Log;
+import com.atompacman.atomlog.Log.Verbose;
 import com.atompacman.lereza.api.Module;
 import com.atompacman.lereza.exception.MIDIFileReaderException;
-import com.atompacman.lereza.report.anomaly.Anomaly;
-import com.atompacman.lereza.report.anomaly.AnomalyInfo;
-import com.atompacman.lereza.report.anomaly.AnomalyInfo.Impact;
-import com.atompacman.lereza.report.anomaly.AnomalyInfo.Recoverability;
-import com.atompacman.lereza.report.anomaly.AnomalyReport;
+import com.atompacman.lereza.report.Anomaly;
+import com.atompacman.lereza.report.Anomaly.Info.Impact;
+import com.atompacman.lereza.report.Anomaly.Info.Recoverability;
+import com.atompacman.lereza.report.Checkpoint;
 import com.atompacman.lereza.solfege.CircleOfFifths;
 import com.atompacman.lereza.solfege.Key;
 import com.atompacman.lereza.solfege.Meter;
@@ -186,17 +187,34 @@ public class MIDIFileReader extends Module {
 		}
 	}
 
-	private enum MIDIFileAnomaly implements Anomaly {
+	private enum AN implements Anomaly {
 
-		IGNORED_MIDI_EVENT { public AnomalyInfo getInfo() { return new AnomalyInfo(
+		IGNORED_MIDI_EVENT { public Info info() { return new Info(
 				"Ignored MIDI event", 
 				"Processing for some MIDI event is not implemented", 
 				"May contain useful information", 
 				Impact.MINIMAL, 
 				Recoverability.NORMAL,
 				MIDIFileReader.class);
-		}
-		}
+		}}
+	}
+	
+	private enum CP implements Checkpoint {
+		
+		LOAD_MIDI_FILE_FROM_DISK { public Info info() { return new Info(
+				"Loading MIDI file from disk", 
+				true);
+		}},
+			
+		PROCESS_MIDI_EVENTS { public Info info() { return new Info(
+				"Processing MIDI events", 
+				true);
+		}},
+		
+		ADJUST_NOTES_TIMESTAMPS { public Info info() { return new Info(
+				"Adjusting note timestamps", 
+				true);
+		}},
 	}
 
 
@@ -204,62 +222,82 @@ public class MIDIFileReader extends Module {
 	//======================================= FIELDS =============================================\\
 
 	// Temporary fields
-	private MIDISequence 	seq;
-	private MIDITrack		track;
-	private MidiEvent		event;
-	private AnomalyReport	anomalies;
+	private MIDISequence seq;
+	private MIDITrack	 track;
+	private MidiEvent	 event;
 
 
 
 	//======================================= METHODS ============================================\\
 
-	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
-
-	private MIDIFileReader() {
-		this.anomalies = reports.getReport(AnomalyReport.class);	
-	}
-	
-
 	//---------------------------------------- READ ----------------------------------------------\\
 
 	public MIDISequence read(String midiFilePath) throws MIDIFileReaderException {
-		if (Log.infos() && Log.print("Loading MIDI file \"" + midiFilePath + "\""));
+		initTempFields(midiFilePath);
 
+		report.start(CP.LOAD_MIDI_FILE_FROM_DISK);		
+		Sequence midiSeq = loadSequenceFromDisk(midiFilePath);
+
+		report.stop().start(CP.PROCESS_MIDI_EVENTS);
+		processMIDIEvents(midiSeq);
+
+		report.stop().start(CP.ADJUST_NOTES_TIMESTAMPS);
+		adjustNotesTimestamps(midiSeq.getDivisionType(), midiSeq.getResolution());
+		
+		report.stop();
+		
+		return seq;
+	}
+	
+	//- - - - - - - - - - - - - - - - - - INIT TEMP FIELDS - - - - - - - - - - - - - - - - - - - -\\
+
+	private void initTempFields(String midiFilePath) {
 		seq = new MIDISequence(midiFilePath);
-		Sequence midiSequence = null;
+		track = null;
+		event = null;
+		report.setVerbose(Verbose.EXTRA);
+	}
+	
+	// - - - - - - - - - - - - - - - - - LOAD FILE FROM DISK - - - - - - - - - - - - - - - - - - -\\
 
+	private Sequence loadSequenceFromDisk(String midiFilePath) throws MIDIFileReaderException {
+		report.log(Verbose.INFOS, "URL: \"" + midiFilePath + "\"");
+
+		Sequence seq = null;
+		
 		try {
-			midiSequence = MidiSystem.getSequence(IO.getFile(midiFilePath));
+			seq = MidiSystem.getSequence(IO.getFile(midiFilePath));
 		} catch (InvalidMidiDataException | IOException e) {
 			Throw.a(MIDIFileReaderException.class, "Could not load "
 					+ "MIDI sequence at \"" + midiFilePath + "\"", e);
 		}
-
-		if (Log.extra()) {
-			printSequenceInfo(midiSequence);
-		}
-
-
-		for (int i = 0; i < midiSequence.getTracks().length; ++i) {
-			if (Log.infos() && Log.title("Reading track " + (i + 1), 2));
-			readTrack(midiSequence.getTracks()[i]);
-			seq.addTrack(track);
-		}
-
+		
+		report.log("MIDI sequence infos");
+		report.log("%4s%-18s : %d", "", "Num of tracks", seq.getTracks().length);
+		report.log("%4s%-18s : %.2f%s", "", "Duration", (double) seq.getMicrosecondLength() 
+				/ 1000000.0, " sec (" + seq.getTickLength() + " ticks)");
+		report.log("%4s%-18s : %s", "", "Timing resolution", seq.getResolution() + " ticks per " +
+				(seq.getDivisionType() != Sequence.PPQ ? " " + "frame (" + seq.getDivisionType() + 
+						" frames per second) (SMPTE-based)" : "quarter note (tempo-based)"));
 		return seq;
 	}
+	
+	// - - - - - - - - - - - - - - - - - PROCESS MIDI EVENTS - - - - - - - - - - - - - - - - - - -\\
 
-	private void readTrack(Track midiTrack) {
-		track = new MIDITrack();
-		for (int i = 0; i < midiTrack.size(); ++i) {
-			event = midiTrack.get(i);
-			processEvent();
+	private void processMIDIEvents(Sequence midiSeq) {
+		for (int i = 0; i < midiSeq.getTracks().length; ++i) {
+			report.log(Verbose.INFOS, 2, "Reading track " + (i + 1));
+			track = new MIDITrack();
+			Track midiTrack = midiSeq.getTracks()[i];
+			
+			for (int j = 0; j < midiTrack.size(); ++j) {
+				event = midiTrack.get(j);
+				processEvent();
+			}
+			seq.addTrack(track);
 		}
 	}
-
-
-	//------------------------------------ PROCESS EVENT -----------------------------------------\\
-
+	
 	private void processEvent() {
 		MidiMessage msg = event.getMessage();
 		if (msg instanceof ShortMessage) {
@@ -302,37 +340,35 @@ public class MIDIFileReader extends Module {
 			ignored = true;
 			break;
 		}
+
+		String toLog = String.format("%s %-17s |  MetaMessage   | %s %s",
+				ignored ? "[ Ignored ]" : "[Processed]", type.name(), strData, toString(data));
 		
-		if (ignored || Log.extra()) {
-			String message = String.format("%s %-17s |  MetaMessage   | %s (%s)", ignored ? 
-					"[ Ignored ]" : "[Processed]", type.name(), strData, toString(data));
-			if (ignored) {
-				anomalies.record(MIDIFileAnomaly.IGNORED_MIDI_EVENT, message, true);
-			} else {
-				if (Log.extra() && Log.print(message));
-			}
+		if (ignored) {
+			report.signal(AN.IGNORED_MIDI_EVENT, toLog);
+		} else {
+			report.log(toLog);
 		}
 	}
 
 	private void processMessage(SysexMessage msg) {
 		byte[] data = msg.getData();
 		String strData = new String(data);
-		
-		String message = String.format("[ Ignored ] %-17s |  SysexMessage  | %s (%s)", 
-				msg.getStatus() == SysexMessage.SPECIAL_SYSTEM_EXCLUSIVE ? 
-						"SPECIAL SYST. EXCL." : "SYSTEM EXCLUSIVE", strData, toString(data));
-		anomalies.record(MIDIFileAnomaly.IGNORED_MIDI_EVENT, message, true);
+
+		report.signal(AN.IGNORED_MIDI_EVENT, String.format("[ Ignored ] %-17s |  SysexMessage  | "
+				+ "%s %s", msg.getStatus() == SysexMessage.SPECIAL_SYSTEM_EXCLUSIVE ? 
+						"SPECIAL SYST. EXCL." : "SYSTEM EXCLUSIVE", strData, toString(data)));
 	}
 
 	private void processMessage(ShortMessage msg) {
 		ChannelMessageCmd cmd = ChannelMessageCmd.of(msg);
 		boolean ignored = false;
-		boolean showMsg = true;
-
+		boolean logMsg = true;
+		
 		switch(cmd) {
 		case NOTE_OFF: case NOTE_ON: 	
 			track.addNote(msg.getData1(), msg.getData2(), event.getTick()); 
-			showMsg = false;															
+			logMsg = false;
 			break;
 
 		case PROGRAM_CHANGE:			
@@ -346,25 +382,55 @@ public class MIDIFileReader extends Module {
 		default: 
 			ignored = true;
 		}
-
-		if (ignored || Log.extra()) {
-			String message = String.format("%s %-17s | ChannelMessage | %3d %3d", ignored ? 
-					"[ Ignored ]" : "[Processed]", cmd.name(), msg.getData1(), msg.getData2());
-			if (ignored) {
-				anomalies.record(MIDIFileAnomaly.IGNORED_MIDI_EVENT, message, true);
-			} else {
-				if (showMsg && Log.extra() && Log.print(message));
-			}
+		
+		String toLog = String.format("%s %-17s | ChannelMessage | %3d %3d",	ignored ? 
+				"[ Ignored ]" : "[Processed]", cmd.name(), msg.getData1(), msg.getData2());
+		
+		if (ignored) {
+			report.signal(AN.IGNORED_MIDI_EVENT, toLog);
+		} else {
+			report.log(logMsg ? Verbose.EXTRA : Verbose.OFF, toLog);
 		}
 	}
 
 	private void processSystemMessage(ShortMessage msg) {
-		SystemCommonMessageType scmt = SystemCommonMessageType.of(msg);
-		String message = String.format("[ Ignored ] %-17s | System Message |", scmt.name());
-		if (Log.extra() && Log.print(message));
-		anomalies.record(MIDIFileAnomaly.IGNORED_MIDI_EVENT, message, true);
+		report.signal(AN.IGNORED_MIDI_EVENT, String.format("[ Ignored ] %-17s | System Message |", 
+				SystemCommonMessageType.of(msg).name()));
 	}
 
+	// - - - - - - - - - - - - - - - - ADJUST NOTES TIMESTAMPS - - - - - - - - - - - - - - - - - -\\
+
+	private void adjustNotesTimestamps(float divisionType, int ticksPerQuarterNote) 
+			throws MIDIFileReaderException {
+		
+		checkIfAdjustable(divisionType, ticksPerQuarterNote);
+		convertTicksToTimeUnits(ticksPerQuarterNote / 8);
+	}
+	
+	private void checkIfAdjustable(float divisionType, int ticksPerQuarterNote) 
+			throws MIDIFileReaderException{
+		
+		if (divisionType != Sequence.PPQ) {
+			Throw.a(MIDIFileReaderException.class, "SMPTE-based division type is unimplemented");
+		}
+		if (seq.getNum32thNotesPerBeat() != MIDISequence.DEFAULT_NUM_32TH_NOTES_PER_BEAT) {
+			Throw.a(MIDIFileReaderException.class, "Unimplemented timestamp adjustment "
+					+ "for sequence with num of 32th notes per beat different than "
+					+ MIDISequence.DEFAULT_NUM_32TH_NOTES_PER_BEAT);
+		}
+		if (ticksPerQuarterNote % 8 != 0) {
+			Throw.a(MIDIFileReaderException.class, "Sequence's num of "
+					+ "ticks per 32th note is not integral");
+
+		}
+	}
+	
+	private void convertTicksToTimeUnits(int ticksPer32thNote) {
+		for (int i = 0; i < seq.getNumTracks(); ++i) {
+			Map<Long, MIDINote> notes = seq.geTrack(i).getNotes();
+		}
+	}
+	
 	
 	//--------------------------------------- SHUTDOWN -------------------------------------------\\
 
@@ -372,36 +438,25 @@ public class MIDIFileReader extends Module {
 
 	}
 
-	
+
 
 	//==================================== STATIC METHODS ========================================\\
 
-	//---------------------------------------- PRINT ---------------------------------------------\\
-
-	private static void printSequenceInfo(Sequence seq) {
-		Log.print("MIDI sequence infos");
-		Log.print("%4s%-18s : %d", "", "Num of tracks", seq.getTracks().length);
-		Log.print("%4s%-18s : %.2f%s", "", "Duration", 
-				(double) seq.getMicrosecondLength() / 1000000.0, 
-				" sec (" + seq.getTickLength() + " ticks)");
-		Log.print("%4s%-18s : %s", "", "Timing resolution", seq.getResolution() + " ticks per " +
-				(seq.getDivisionType() != Sequence.PPQ ? " " + "frame (" + seq.getDivisionType() + 
-						" frames per second) (SMPTE-based)" : "quarter note (tempo-based)"));
-	}
+	//-------------------------------------- TO STRING -------------------------------------------\\
 
 	private static String toString(byte[] bytes) {
 		if (bytes.length == 0) {
 			return "";
 		}
 		if (bytes.length > 8) {
-			return "...";
+			return "(...)";
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append(bytes[0]);
+		sb.append('(').append(bytes[0]);
 		for (int i = 1; i < bytes.length; ++i) {
 			sb.append(' ');
 			sb.append(Byte.toString(bytes[i]));
 		}
-		return sb.toString();
+		return sb.append(')').toString();
 	}
 }

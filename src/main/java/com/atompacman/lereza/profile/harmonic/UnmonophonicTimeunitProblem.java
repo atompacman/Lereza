@@ -44,7 +44,7 @@ public class UnmonophonicTimeunitProblem extends ProfilabilityProblem {
 		this.noteStatus = new ArrayList<NoteStatus>();
 		this.noteValues = new ArrayList<Value>();
 		for (Note note : part.getBarNo(pbt.bar).getNotes().get(pbt.timeunit)) {
-			noteStatus.add(note.getStatus());
+			noteStatus.log(note.getStatus());
 			noteValues.add(note.getValue());
 		}
 	}

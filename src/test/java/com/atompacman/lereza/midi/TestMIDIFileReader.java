@@ -11,7 +11,8 @@ public class TestMIDIFileReader {
 
 	public static void main(String[] args) throws MIDIFileReaderException, IOException {
 		AppLauncher.createApp(Paths.APP_CONFIG_FILE_PATH);
-		Wizard.getModule(MIDIFileReader.class).read("../../Lereza/resources/midi/Bach/Concerto "
-				+ "Arrangements For Harpsichord/Concerto In D, BWV 972 - I - Allegro.mid");
+		MIDISequence seq = Wizard.getModule(MIDIFileReader.class).read(
+				"../../Lereza/resources/midi/Bach/Concerto Arrangements For Harpsichord/Concerto In D, BWV 972 - I - Allegro.mid");
+		seq.getClass();
 	}
 }

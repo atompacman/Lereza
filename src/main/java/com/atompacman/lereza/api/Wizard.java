@@ -81,11 +81,8 @@ public class Wizard extends App {
 		T module = (T) modules.get(moduleClass);
 		
 		if (module == null) {
-			if (Log.infos()) {
-				String splitClassName = StringHelper.splitCamelCase(moduleClass.getSimpleName());
-				Log.title(splitClassName + " initialization", 0);
-			}
-			
+			if (Log.infos() && Log.title(StringHelper.splitCamelCase(
+					moduleClass.getSimpleName(), false) + " initialization", 0));
 			try {
 				Method instanceGetter = moduleClass.getMethod("getInstance", (Class<?>[]) null);
 				module = (T) instanceGetter.invoke(null, (Object[]) null);

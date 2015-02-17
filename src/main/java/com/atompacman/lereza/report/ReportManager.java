@@ -21,7 +21,7 @@ public class ReportManager extends Module {
 	
 	//======================================= FIELDS =============================================\\
 
-	private Map<Class<? extends Module>, ActivityReports> actReports;
+	private Map<Class<? extends Module>, Report> modReports;
 	
 	
 	
@@ -30,31 +30,25 @@ public class ReportManager extends Module {
 	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
 
 	private ReportManager() {
-		actReports = new HashMap<>();
+		modReports = new HashMap<>();
 	}
 	
 	
 	//--------------------------------------- GETTERS --------------------------------------------\\
 
-	public ActivityReports getActivityReports(Class<? extends Module> clazz) {
-		ActivityReports ar = actReports.get(clazz);
+	public Report getReport(Class<? extends Module> clazz) {
+		Report ar = modReports.get(clazz);
 		if (ar == null) {
-			ar = new ActivityReports(clazz);
-			actReports.put(clazz, ar);
+			ar = new Report();
+			modReports.put(clazz, ar);
 		}
 		return ar;
 	}
+
 	
-	public <T extends Report> T getReport(Class<? extends Module> devClazz, Class<T> reportClazz) {
-		return getActivityReports(devClazz).getReport(reportClazz);
-	}
-
-
 	//-------------------------------------- SHUTDOWN --------------------------------------------\\
 
 	public void shutdown() {
 		
 	}
-
-
 }
