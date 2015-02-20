@@ -249,8 +249,6 @@ public class MIDIFileReader extends Module {
 		return seq;
 	}
 	
-	//- - - - - - - - - - - - - - - - - - INIT TEMP FIELDS - - - - - - - - - - - - - - - - - - - -\\
-
 	private void initTempFields(String midiFilePath) {
 		seq = new MIDISequence(midiFilePath);
 		track = null;
@@ -404,7 +402,7 @@ public class MIDIFileReader extends Module {
 			throws MIDIFileReaderException {
 		
 		checkIfAdjustable(divisionType, ticksPerQuarterNote);
-		convertTicksToTimeUnits(ticksPerQuarterNote / 8);
+		findOptimalTickOffsetForRounding(ticksPerQuarterNote / 8);
 	}
 	
 	private void checkIfAdjustable(float divisionType, int ticksPerQuarterNote) 
@@ -421,13 +419,16 @@ public class MIDIFileReader extends Module {
 		if (ticksPerQuarterNote % 8 != 0) {
 			Throw.a(MIDIFileReaderException.class, "Sequence's num of "
 					+ "ticks per 32th note is not integral");
-
 		}
 	}
 	
-	private void convertTicksToTimeUnits(int ticksPer32thNote) {
+	private void findOptimalTickOffsetForRounding(int ticksPer32thNote) {
+		for (int offset = 0; offset < ticksPer32thNote; ++offset)
 		for (int i = 0; i < seq.getNumTracks(); ++i) {
 			Map<Long, MIDINote> notes = seq.geTrack(i).getNotes();
+			if (notes.isEmpty()) {
+				
+			}
 		}
 	}
 	
