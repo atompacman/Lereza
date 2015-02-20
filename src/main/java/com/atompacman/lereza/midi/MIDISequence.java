@@ -1,5 +1,6 @@
 package com.atompacman.lereza.midi;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +28,7 @@ public class MIDISequence {
 
 	private List<MIDITrack> 	tracks;
 	
-	private String				filePath;
+	private File				file;
 	
 	private Key					key;
 	private RythmicSignature	signature;
@@ -41,9 +42,9 @@ public class MIDISequence {
 
 	//---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-	MIDISequence(String filePath) {
+	MIDISequence(File file) {
 		this.tracks = new ArrayList<>();
-		this.filePath = filePath;
+		this.file = file;
 		this.tempoChanges = new HashMap<>();
 	}
 	
@@ -97,8 +98,8 @@ public class MIDISequence {
 		return tracks.get(num);
 	}
 
-	public String getFilePath() {
-		return filePath;
+	public File getFile() {
+		return file;
 	}
 	
 	public int getNumTracks() {
@@ -109,7 +110,7 @@ public class MIDISequence {
 		return key == null ? DEFAULT_KEY : key;
 	}
 
-	public RythmicSignature getSignature() {
+	public RythmicSignature getRythmicSignature() {
 		return signature == null ? DEFAULT_RYTHMIC_SIGNATURE : signature;
 	}
 

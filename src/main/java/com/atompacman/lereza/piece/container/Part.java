@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import com.atompacman.lereza.Parameters;
-import com.atompacman.lereza.midi.MIDIFilePlayer;
+import com.atompacman.lereza.Parameters.MIDI.FileReader;
+import com.atompacman.lereza.api.Wizard;
 import com.atompacman.lereza.midi.MIDINote;
 import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.RythmicSignature;
@@ -37,29 +37,30 @@ public class Part {
 
 	public void addNotes(Stack<MIDINote> notes, int timestamp) {
 		for (MIDINote midiNote : notes) {
-			Pitch pitch = Pitch.thatIsMoreCommonForHexValue(midiNote.getNote());
+			Pitch pitch = Pitch.thatIsMoreCommonForHexValue(midiNote.getHexNote());
 			addNote(pitch, midiNote.getLength(), timestamp);
 		}
-		if (Parameters.NOTE_ADDING_AUDIO) {
-			int tempo = Parameters.NOTE_ADDING_AUDIO_TEMPO;
-			MIDIFilePlayer.getInstance().playNoteStackAndWait(notes, tempo);
+		if (Wizard.getBoolean(FileReader.NOTE_PLAY_AUDIO)) {
+			//int tempo = Wizard.getInt(FileReader.VISUALISATION_SPEED_CORRECTION);
+			//MIDIFilePlayer.getInstance().playNoteStackAndWait(notes, tempo);
 		}
-		if (Parameters.NOTE_ADDING_VISUALISATION) {
+		if (Wizard.getBoolean(FileReader.NOTE_VISUALISATION)) {
+//			int barIndex = barIndexAt(timestamp);
 //			List<List<String>> barsToPrint = new ArrayList<List<String>>();
-//			barsToPrint.add(bars.get(bar).toStringList(false));
+//			barsToPrint.add(bars.get(barIndex).toStringList(false));
 //
-//			if (bar > 0) {
-//				barsToPrint.add(0, bars.get(bar - 1).toStringList(true));
+//			if (barIndex > 0) {
+//				barsToPrint.add(0, bars.get(barIndex - 1).toStringList(true));
 //			}
-//			if (bar > 1) {
-//				barsToPrint.add(0, bars.get(bar - 2).toStringList(true));
+//			if (barIndex > 1) {
+//				barsToPrint.add(0, bars.get(barIndex - 2).toStringList(true));
 //			}
+//			Piece
 //			printBars(barsToPrint);
 		}
 	}
 
 	private void addNote(Pitch pitch, int timeunitLength, int timestamp) {
-		int barNo = barAt(timestamp);
 		int timeunitsInBar = rythmicSignature.timeunitsInABar();
 		int timeunitPos = timestamp % timeunitsInBar;
 		int actualNoteLength = timeunitLength;
@@ -67,19 +68,18 @@ public class Part {
 		if (timeunitPos + timeunitLength > timeunitsInBar) {
 			actualNoteLength = timeunitsInBar - timeunitPos;
 		}
-		bars.get(barNo).addNote(pitch, timeunitPos, actualNoteLength);
+		barAt(timestamp).addNote(pitch, timeunitPos, actualNoteLength);
 		
 		timeunitLength -= actualNoteLength;
 		
 		while (timeunitLength != 0) {
-			++barNo;
 			timestamp += actualNoteLength;
 			if (timeunitLength > timeunitsInBar) {
 				actualNoteLength = timeunitsInBar;
 			} else {
 				actualNoteLength = timeunitLength;
 			}
-			bars.get(barNo).addTiedNote(pitch, 0, actualNoteLength);
+			barAt(timestamp).addTiedNote(pitch, 0, actualNoteLength);
 			timeunitLength -= actualNoteLength;
 		}
 	}
@@ -124,7 +124,11 @@ public class Part {
 
 	//------------ PRIVATE UTILS ------------\\
 
-	private int barAt(int timestamp) {
-		return (int) ((double) timestamp / (double) rythmicSignature.timeunitsInABar());
+	private int barIndexAt(int timestamp) {
+		return (int)((double) timestamp / (double) rythmicSignature.timeunitsInABar());
+	}
+	
+	private Bar barAt(int timestamp) {
+		return bars.get(barIndexAt(timestamp));
 	}
 }

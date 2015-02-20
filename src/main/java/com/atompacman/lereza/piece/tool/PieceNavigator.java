@@ -23,7 +23,7 @@ public class PieceNavigator {
 	//------------ CONSTRUCTOR ------------\\
 
 	public PieceNavigator(Piece piece) {
-		if (piece.nbParts() == 0) {
+		if (piece.numParts() == 0) {
 			throwExcep("Cannot navigate in a piece with no parts.");
 		}
 		this.piece = piece;
@@ -38,7 +38,7 @@ public class PieceNavigator {
 	//------------ NAVIGATE IN PARTS ------------\\
 
 	public void goToNextPart() {
-		if (pbt.part == piece.nbParts()) {
+		if (pbt.part == piece.numParts()) {
 			throwExcep("Cannot go to next part: end of piece reached.");
 		}
 		++pbt.part;
@@ -62,9 +62,9 @@ public class PieceNavigator {
 	}
 
 	public void goToPart(int partNo) {
-		if (partNo >= piece.nbParts() || partNo < 0) {
+		if (partNo >= piece.numParts() || partNo < 0) {
 			throwExcep("Cannot go to part \"" + partNo + "\": Current "
-					+ "piece only has " + piece.nbParts() + " parts.");
+					+ "piece only has " + piece.numParts() + " parts.");
 		}
 		while (partNo > pbt.part) {
 			goToNextPart();
@@ -259,7 +259,7 @@ public class PieceNavigator {
 	//------------ OBSERVERS ------------\\
 
 	public boolean endOfPiece() {
-		return pbt.part == piece.nbParts();
+		return pbt.part == piece.numParts();
 	}
 
 	public boolean endOfPart() {

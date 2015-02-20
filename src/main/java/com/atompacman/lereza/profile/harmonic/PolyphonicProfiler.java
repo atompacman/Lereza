@@ -16,7 +16,7 @@ public class PolyphonicProfiler extends Profiler {
 	public boolean verifyProfilability(Piece piece) {
 		if(Log.infos() && Log.title(getClass().getSimpleName() + " - Verifying profitability", 0));
 
-		for (int i = 0; i < piece.nbParts(); ++i) {
+		for (int i = 0; i < piece.numParts(); ++i) {
 			navig.goToPart(i);
 			navig.goToFirstUnemptyBar();
 			navig.goToFirstNoteOfBar();

@@ -3,35 +3,35 @@ package com.atompacman.lereza.piece.container;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atompacman.lereza.midi.container.MIDIFile;
-import com.atompacman.lereza.resources.database.Storable;
+import com.atompacman.lereza.midi.MIDISequence;
 import com.atompacman.lereza.solfege.RythmicSignature;
 
-public class Piece implements Storable {
+public class Piece {
+
+	//======================================= FIELDS =============================================\\
 
 	private List<Part> parts;
 	private RythmicSignature rythmicSignature;
 
-	private MIDIFile midiFile;
+	private MIDISequence midiSeq;
 	
 	
-	//------------ CONSTRUCTORS ------------\\
+	
+	//======================================= METHODS ============================================\\
 
-	public Piece(MIDIFile midiFile) {
-		this(midiFile, null);
-	}
+	//---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 	
-	public Piece(MIDIFile midiFile, RythmicSignature rythmicSignature) {
+	public Piece(MIDISequence midiSeq) {
 		this.parts = new ArrayList<Part>();
-		this.rythmicSignature = rythmicSignature;
-		this.midiFile = midiFile;
+		this.rythmicSignature = midiSeq.getRythmicSignature();
+		this.midiSeq = midiSeq;
 	}
 	
 	
-	//------------ SETTERS ------------\\
+	//--------------------------------------- SETTERS --------------------------------------------\\
 
 	public void addPart(Part part) {
-		this.parts.add(part);
+		parts.add(part);
 	}
 	
 	public void setRythmicSignature(RythmicSignature rythmicSignature) {
@@ -39,7 +39,7 @@ public class Piece implements Storable {
 	}
 	
 	
-	//------------ GETTERS ------------\\
+	//--------------------------------------- GETTERS --------------------------------------------\\
 
 	public Part getPartNo(int index) {
 		return parts.get(index);
@@ -49,14 +49,14 @@ public class Piece implements Storable {
 		return rythmicSignature;
 	}
 	
-	public MIDIFile getMIDIFile() {
-		return midiFile;
+	public MIDISequence getMIDISequence() {
+		return midiSeq;
 	}
 	
 	
-	//------------ OBSERVERS ------------\\
+	//---------------------------------------- STATE ---------------------------------------------\\
 
-	public int nbParts() {
+	public int numParts() {
 		return parts.size();
 	}
 }

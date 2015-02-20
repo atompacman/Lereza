@@ -1,5 +1,6 @@
 package com.atompacman.lereza.midi;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,7 @@ import com.atompacman.atomlog.Log;
 import com.atompacman.atomlog.Log.Verbose;
 import com.atompacman.lereza.api.Module;
 import com.atompacman.lereza.exception.MIDIFileReaderException;
+import com.atompacman.lereza.piece.container.Piece;
 import com.atompacman.lereza.report.Anomaly;
 import com.atompacman.lereza.report.Anomaly.Info.Impact;
 import com.atompacman.lereza.report.Anomaly.Info.Recoverability;
@@ -30,7 +32,6 @@ import com.atompacman.lereza.solfege.Meter;
 import com.atompacman.lereza.solfege.Tone;
 import com.atompacman.lereza.solfege.quality.Quality;
 import com.atompacman.toolkat.exception.Throw;
-import com.atompacman.toolkat.io.IO;
 
 public class MIDIFileReader extends Module {
 
@@ -214,18 +215,19 @@ public class MIDIFileReader extends Module {
 	private enum CP implements Checkpoint {
 
 		LOAD_MIDI_FILE_FROM_DISK { public Info info() { return new Info(
-				"Loading MIDI file from disk", 
-				true);
+				"Loading MIDI file from disk", true);
 		}},
-
+		
 		PROCESS_MIDI_EVENTS { public Info info() { return new Info(
-				"Processing MIDI events", 
-				true);
+				"Processing MIDI events", true);
 		}},
 
 		ADJUST_NOTES_TIMESTAMPS { public Info info() { return new Info(
-				"Adjusting note timestamps", 
-				true);
+				"Adjusting note timestamps", true);
+		}},
+		
+		BUILD_PIECE { public Info info() { return new Info(
+				"Build piece", true);
 		}},
 	}
 
@@ -236,7 +238,6 @@ public class MIDIFileReader extends Module {
 	// Temporary fields
 	private MIDISequence seq;
 	private MIDITrack	 track;
-	private MidiEvent	 event;
 
 
 
@@ -244,42 +245,40 @@ public class MIDIFileReader extends Module {
 
 	//---------------------------------------- READ ----------------------------------------------\\
 
-	public MIDISequence read(String midiFilePath) throws MIDIFileReaderException {
-		initTempFields(midiFilePath);
+	public Piece read(File midiFile) throws MIDIFileReaderException {
+		initTempFields(midiFile);
 
 		report.start(CP.LOAD_MIDI_FILE_FROM_DISK);		
-		Sequence midiSeq = loadSequenceFromDisk(midiFilePath);
+		Sequence midiSeq = loadSequenceFromDisk();
 
 		report.stop().start(CP.PROCESS_MIDI_EVENTS);
 		processMIDIEvents(midiSeq);
 
 		report.stop().start(CP.ADJUST_NOTES_TIMESTAMPS);
-		adjustNotesTimestamps(midiSeq.getDivisionType(), midiSeq.getResolution());
+		int finalTU = adjustNotesTimestamps(midiSeq.getDivisionType(), midiSeq.getResolution());
 
-		report.stop();
-
-		return seq;
+		report.stop().start(CP.BUILD_PIECE);
+		return buildPiece(finalTU);
 	}
 
-	private void initTempFields(String midiFilePath) {
-		seq = new MIDISequence(midiFilePath);
+	private void initTempFields(File midiFile) {
+		seq = new MIDISequence(midiFile);
 		track = null;
-		event = null;
 		report.setVerbose(Verbose.EXTRA);
 	}
 
 	// - - - - - - - - - - - - - - - - - LOAD FILE FROM DISK - - - - - - - - - - - - - - - - - - -\\
 
-	private Sequence loadSequenceFromDisk(String midiFilePath) throws MIDIFileReaderException {
-		report.log(Verbose.INFOS, "URL: \"" + midiFilePath + "\"");
+	private Sequence loadSequenceFromDisk() throws MIDIFileReaderException {
+		report.log(Verbose.INFOS, "URL: \"" + seq.getFile().getAbsolutePath() + "\"");
 
 		Sequence seq = null;
 
 		try {
-			seq = MidiSystem.getSequence(IO.getFile(midiFilePath));
+			seq = MidiSystem.getSequence(this.seq.getFile());
 		} catch (InvalidMidiDataException | IOException e) {
-			Throw.a(MIDIFileReaderException.class, "Could not load "
-					+ "MIDI sequence at \"" + midiFilePath + "\"", e);
+			Throw.a(MIDIFileReaderException.class, "Could not load MIDI sequence "
+					+ "at \"" + this.seq.getFile().getAbsolutePath() + "\"", e);
 		}
 
 		report.log("MIDI sequence infos");
@@ -301,25 +300,24 @@ public class MIDIFileReader extends Module {
 			Track midiTrack = midiSeq.getTracks()[i];
 
 			for (int j = 0; j < midiTrack.size(); ++j) {
-				event = midiTrack.get(j);
-				processEvent();
+				processEvent(midiTrack.get(j));
 			}
 			seq.addTrack(track);
 		}
 	}
 
-	private void processEvent() {
+	private void processEvent(MidiEvent event) {
 		MidiMessage msg = event.getMessage();
 		if (msg instanceof ShortMessage) {
-			processMessage((ShortMessage) msg);
+			processMessage((ShortMessage) msg, event.getTick());
 		} else if (msg instanceof MetaMessage) {
-			processMessage((MetaMessage) msg);
+			processMessage((MetaMessage) msg, event.getTick());
 		} else {
 			processMessage((SysexMessage) msg);
 		}
 	}
 
-	private void processMessage(MetaMessage msg) {
+	private void processMessage(MetaMessage msg, Long tick) {
 		byte[] data = msg.getData();
 		String strData = new String(data);
 		MetaMessageType type = MetaMessageType.of(msg);
@@ -340,7 +338,7 @@ public class MIDIFileReader extends Module {
 		case MIDI_PORT:				track.setMidiPort(data[0]);				break;
 		case SET_TEMPO:
 			double microSec = (double) ((data[0] << 16) + (data[1] << 8) + data[2]);
-			seq.addTempoChange(event.getTick(), 60000000.0 / microSec);		break;
+			seq.addTempoChange(tick, 60000000.0 / microSec);				break;
 		case TEXT:					track.addText(strData);					break;
 		case TIME_SIGNATURE:
 			seq.setSignature(new Meter(data[0], (int) Math.pow(2, data[1])));
@@ -370,19 +368,19 @@ public class MIDIFileReader extends Module {
 						"SPECIAL SYST. EXCL." : "SYSTEM EXCLUSIVE", strData, toString(data)));
 	}
 
-	private void processMessage(ShortMessage msg) {
+	private void processMessage(ShortMessage msg, Long tick) {
 		ChannelMessageCmd cmd = ChannelMessageCmd.of(msg);
 		boolean ignored = false;
 		boolean logMsg = true;
 
 		switch(cmd) {
 		case NOTE_OFF: case NOTE_ON: 	
-			track.addNote(msg.getData1(), msg.getData2(), event.getTick()); 
+			track.addNote(msg.getData1(), msg.getData2(), tick); 
 			logMsg = false;
 			break;
 
 		case PROGRAM_CHANGE:			
-			track.addInstrumentChange(msg.getData1(), event.getTick());					
+			track.addInstrumentChange(msg.getData1(), tick);					
 			break;
 
 		case SYSTEM_MESSAGE:			
@@ -410,13 +408,13 @@ public class MIDIFileReader extends Module {
 
 	// - - - - - - - - - - - - - - - - ADJUST NOTES TIMESTAMPS - - - - - - - - - - - - - - - - - -\\
 
-	private void adjustNotesTimestamps(float divisionType, int ticksPerQuarterNote) 
+	private int adjustNotesTimestamps(float divisionType, int ticksPerQuarterNote) 
 			throws MIDIFileReaderException {
 
 		checkIfAdjustable(divisionType, ticksPerQuarterNote);
 		int offset = findOptimalTickOffsetForRounding(ticksPerQuarterNote / 8);
 		report.log("Optimal midi tick offset: " + offset);
-		convertTicksToTimeunit(offset, ticksPerQuarterNote / 8);
+		return convertTicksToTimeunit(offset, ticksPerQuarterNote / 8);
 	}
 
 	private void checkIfAdjustable(float divisionType, int ticksPerQuarterNote) 
@@ -456,8 +454,8 @@ public class MIDIFileReader extends Module {
 		return optimalOffset;
 	}
 
-	private void convertTicksToTimeunit(int offset, int ticksPer32thNote) {
-
+	private int convertTicksToTimeunit(int offset, int ticksPer32thNote) {
+		int finalTimeunit = 0;
 		for (int i = 0; i < seq.getNumTracks(); ++i) {
 			Map<Long, Set<MIDINote>> converted = new HashMap<>();
 			Map<Long, Set<MIDINote>> notes = seq.getTrack(i).getNotes();
@@ -475,9 +473,23 @@ public class MIDIFileReader extends Module {
 			notes.clear();
 			notes.putAll(converted);
 		}
+		return finalTimeunit; // TODO
 	}
 
+	//- - - - - - - - - - - - - - - - - - - BUILD PIECE - - - - - - - - - - - - - - - - - - - - - \\
 
+	private Piece buildPiece(int finalTimeunit) {
+		Piece piece = new Piece(seq);
+		return piece;
+	}
+	
+	private getFinalTimeunit() {
+		for (int i = 0; i < seq.getNumTracks(); ++i) {
+			
+		}
+	}
+	
+	
 	//--------------------------------------- SHUTDOWN -------------------------------------------\\
 
 	public void shutdown() {

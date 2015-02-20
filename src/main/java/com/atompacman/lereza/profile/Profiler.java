@@ -17,7 +17,7 @@ public abstract class Profiler {
 	//------------ PROFILE ------------\\
 
 	public final Profile profile(Piece piece) {
-		if (piece.nbParts() == 0) {
+		if (piece.numParts() == 0) {
 			throw new IllegalArgumentException("Cannot profile a piece with no part.");
 		}
 		this.piece = piece;

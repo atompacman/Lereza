@@ -24,7 +24,7 @@ public class TestPiece {
 	public void addRandomParts() {
 		for (int i = 0; i < 50; ++i) {
 			Piece piece = generateRandomPiece(1280);
-			assertEquals(piece.nbParts(), 4);
+			assertEquals(piece.numParts(), 4);
 		}
 	}
 	

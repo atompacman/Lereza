@@ -36,13 +36,13 @@ public class HarmonicProfiler extends Profiler {
 	private void profileBasicStatistics() {
 		if(Log.infos() && Log.title("General statistics", 1));
 
-		basicStatsProfile = new BasicStatisticsProfile(piece.nbParts());
+		basicStatsProfile = new BasicStatisticsProfile(piece.numParts());
 
 		basicStatsProfile.barCount = piece.getPartNo(0).getNbBars();
 		basicStatsProfile.lastTimestamp = piece.getPartNo(0).getNbBars() 
 				* piece.getRythmicSignature().getBarTimeunitLength();
 		
-		for (int i = 0; i < piece.nbParts(); ++i) {
+		for (int i = 0; i < piece.numParts(); ++i) {
 			currPartProfile = new PartBasicStatisticsProfile();
 			basicStatsProfile.addSubProfile(currPartProfile);
 

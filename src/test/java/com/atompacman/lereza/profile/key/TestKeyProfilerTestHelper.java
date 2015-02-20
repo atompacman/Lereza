@@ -38,7 +38,7 @@ public class TestKeyProfilerTestHelper {
 		List<List<Tone>> tones = KeyProfilerTestHelper.parseToneSequence(testFilePath);
 		Piece piece = KeyProfilerTestHelper.buildPiece(tones);
 				
-		assertEquals(4, piece.nbParts());
+		assertEquals(4, piece.numParts());
 		assertEquals(1, piece.getPartNo(2).getNbBars());
 		Set<Note> notes = piece.getPartNo(2).getBarNo(0).getNotesStartingAt(1);
 		assertEquals(Tone.valueOf("Bb"), notes.iterator().next().getPitch().getTone());
