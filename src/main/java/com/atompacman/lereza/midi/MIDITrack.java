@@ -2,15 +2,17 @@ package com.atompacman.lereza.midi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MIDITrack {
 
 	//======================================= FIELDS =============================================\\
 
 	// Notes
-	private Map<Long, MIDINote> notes;
+	private Map<Long, Set<MIDINote>> notes;
 
 	// Names
 	private String name;
@@ -65,7 +67,12 @@ public class MIDITrack {
 			noteBuffer[hexNote] = new MIDINote(hexNote, velocity, tick);
 		} else {
 			note.setEndTick(tick);
-			notes.put(note.startTick(), note);
+			Set<MIDINote> set = notes.get(note.startTick());
+			if (set == null) {
+				set = new HashSet<>();
+				notes.put(note.startTick(), set);
+			}
+			set.add(note);
 			noteBuffer[hexNote] = null;
 		}
 	}
@@ -109,7 +116,7 @@ public class MIDITrack {
 	
 	//--------------------------------------- GETTERS --------------------------------------------\\
 
-	public Map<Long, MIDINote> getNotes() {
+	public Map<Long, Set<MIDINote>> getNotes() {
 		return notes;
 	}
 	

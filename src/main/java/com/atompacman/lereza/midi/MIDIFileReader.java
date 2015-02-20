@@ -1,7 +1,10 @@
 package com.atompacman.lereza.midi;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
@@ -196,21 +199,30 @@ public class MIDIFileReader extends Module {
 				Impact.MINIMAL, 
 				Recoverability.NORMAL,
 				MIDIFileReader.class);
+		}},
+
+		ROUNDED_MIDI_TICK { public Info info() { return new Info(
+				"Rounded MIDI tick",
+				"A MIDI tick (timstamp) had to be rounded to become a timeunit",
+				"Possible deviations in rythm",
+				Impact.MINIMAL,
+				Recoverability.NORMAL,
+				MIDIFileReader.class);
 		}}
 	}
-	
+
 	private enum CP implements Checkpoint {
-		
+
 		LOAD_MIDI_FILE_FROM_DISK { public Info info() { return new Info(
 				"Loading MIDI file from disk", 
 				true);
 		}},
-			
+
 		PROCESS_MIDI_EVENTS { public Info info() { return new Info(
 				"Processing MIDI events", 
 				true);
 		}},
-		
+
 		ADJUST_NOTES_TIMESTAMPS { public Info info() { return new Info(
 				"Adjusting note timestamps", 
 				true);
@@ -243,33 +255,33 @@ public class MIDIFileReader extends Module {
 
 		report.stop().start(CP.ADJUST_NOTES_TIMESTAMPS);
 		adjustNotesTimestamps(midiSeq.getDivisionType(), midiSeq.getResolution());
-		
+
 		report.stop();
-		
+
 		return seq;
 	}
-	
+
 	private void initTempFields(String midiFilePath) {
 		seq = new MIDISequence(midiFilePath);
 		track = null;
 		event = null;
 		report.setVerbose(Verbose.EXTRA);
 	}
-	
+
 	// - - - - - - - - - - - - - - - - - LOAD FILE FROM DISK - - - - - - - - - - - - - - - - - - -\\
 
 	private Sequence loadSequenceFromDisk(String midiFilePath) throws MIDIFileReaderException {
 		report.log(Verbose.INFOS, "URL: \"" + midiFilePath + "\"");
 
 		Sequence seq = null;
-		
+
 		try {
 			seq = MidiSystem.getSequence(IO.getFile(midiFilePath));
 		} catch (InvalidMidiDataException | IOException e) {
 			Throw.a(MIDIFileReaderException.class, "Could not load "
 					+ "MIDI sequence at \"" + midiFilePath + "\"", e);
 		}
-		
+
 		report.log("MIDI sequence infos");
 		report.log("%4s%-18s : %d", "", "Num of tracks", seq.getTracks().length);
 		report.log("%4s%-18s : %.2f%s", "", "Duration", (double) seq.getMicrosecondLength() 
@@ -279,7 +291,7 @@ public class MIDIFileReader extends Module {
 						" frames per second) (SMPTE-based)" : "quarter note (tempo-based)"));
 		return seq;
 	}
-	
+
 	// - - - - - - - - - - - - - - - - - PROCESS MIDI EVENTS - - - - - - - - - - - - - - - - - - -\\
 
 	private void processMIDIEvents(Sequence midiSeq) {
@@ -287,7 +299,7 @@ public class MIDIFileReader extends Module {
 			report.log(Verbose.INFOS, 2, "Reading track " + (i + 1));
 			track = new MIDITrack();
 			Track midiTrack = midiSeq.getTracks()[i];
-			
+
 			for (int j = 0; j < midiTrack.size(); ++j) {
 				event = midiTrack.get(j);
 				processEvent();
@@ -295,7 +307,7 @@ public class MIDIFileReader extends Module {
 			seq.addTrack(track);
 		}
 	}
-	
+
 	private void processEvent() {
 		MidiMessage msg = event.getMessage();
 		if (msg instanceof ShortMessage) {
@@ -341,7 +353,7 @@ public class MIDIFileReader extends Module {
 
 		String toLog = String.format("%s %-17s |  MetaMessage   | %s %s",
 				ignored ? "[ Ignored ]" : "[Processed]", type.name(), strData, toString(data));
-		
+
 		if (ignored) {
 			report.signal(AN.IGNORED_MIDI_EVENT, toLog);
 		} else {
@@ -362,7 +374,7 @@ public class MIDIFileReader extends Module {
 		ChannelMessageCmd cmd = ChannelMessageCmd.of(msg);
 		boolean ignored = false;
 		boolean logMsg = true;
-		
+
 		switch(cmd) {
 		case NOTE_OFF: case NOTE_ON: 	
 			track.addNote(msg.getData1(), msg.getData2(), event.getTick()); 
@@ -380,10 +392,10 @@ public class MIDIFileReader extends Module {
 		default: 
 			ignored = true;
 		}
-		
+
 		String toLog = String.format("%s %-17s | ChannelMessage | %3d %3d",	ignored ? 
 				"[ Ignored ]" : "[Processed]", cmd.name(), msg.getData1(), msg.getData2());
-		
+
 		if (ignored) {
 			report.signal(AN.IGNORED_MIDI_EVENT, toLog);
 		} else {
@@ -400,14 +412,16 @@ public class MIDIFileReader extends Module {
 
 	private void adjustNotesTimestamps(float divisionType, int ticksPerQuarterNote) 
 			throws MIDIFileReaderException {
-		
+
 		checkIfAdjustable(divisionType, ticksPerQuarterNote);
-		findOptimalTickOffsetForRounding(ticksPerQuarterNote / 8);
+		int offset = findOptimalTickOffsetForRounding(ticksPerQuarterNote / 8);
+		report.log("Optimal midi tick offset: " + offset);
+		convertTicksToTimeunit(offset, ticksPerQuarterNote / 8);
 	}
-	
+
 	private void checkIfAdjustable(float divisionType, int ticksPerQuarterNote) 
 			throws MIDIFileReaderException{
-		
+
 		if (divisionType != Sequence.PPQ) {
 			Throw.a(MIDIFileReaderException.class, "SMPTE-based division type is unimplemented");
 		}
@@ -421,18 +435,49 @@ public class MIDIFileReader extends Module {
 					+ "ticks per 32th note is not integral");
 		}
 	}
-	
-	private void findOptimalTickOffsetForRounding(int ticksPer32thNote) {
-		for (int offset = 0; offset < ticksPer32thNote; ++offset)
-		for (int i = 0; i < seq.getNumTracks(); ++i) {
-			Map<Long, MIDINote> notes = seq.geTrack(i).getNotes();
-			if (notes.isEmpty()) {
-				
+
+	private int findOptimalTickOffsetForRounding(int ticksPer32thNote) {
+		int minimalError = Integer.MAX_VALUE;
+		int optimalOffset = 0;
+
+		for (int offset = 0; offset < ticksPer32thNote; ++offset) {
+			int error = 0;
+
+			for (int i = 0; i < seq.getNumTracks(); ++i) {
+				for (Long tick : seq.getTrack(i).getNotes().keySet()) {
+					error += tick % ticksPer32thNote;
+				}
+			}
+			if (error < minimalError) {
+				minimalError = error;
+				optimalOffset = offset;
 			}
 		}
+		return optimalOffset;
 	}
-	
-	
+
+	private void convertTicksToTimeunit(int offset, int ticksPer32thNote) {
+
+		for (int i = 0; i < seq.getNumTracks(); ++i) {
+			Map<Long, Set<MIDINote>> converted = new HashMap<>();
+			Map<Long, Set<MIDINote>> notes = seq.getTrack(i).getNotes();
+			
+			for (Entry<Long, Set<MIDINote>> entry : notes.entrySet()) {
+				double timeunit = (entry.getKey() + offset) / ticksPer32thNote;
+				Long roundedTU = Math.round(timeunit);
+				if (timeunit != roundedTU) {
+					long roundedTick = (roundedTU * ticksPer32thNote - offset);
+					report.signal(AN.ROUNDED_MIDI_TICK, "From " + entry.getKey() + " to " + 
+							roundedTick + "(" + (roundedTick - entry.getKey() + ")"));
+				}
+				converted.put(roundedTU, entry.getValue());
+			}
+			notes.clear();
+			notes.putAll(converted);
+		}
+	}
+
+
 	//--------------------------------------- SHUTDOWN -------------------------------------------\\
 
 	public void shutdown() {

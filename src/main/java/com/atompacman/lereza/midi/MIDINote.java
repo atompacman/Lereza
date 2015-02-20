@@ -45,4 +45,34 @@ public class MIDINote {
 	long startTick() {
 		return startTick;
 	}
+
+
+
+
+	//--------------------------------------- EQUALS ---------------------------------------------\\
+	
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + hexNote;
+		result = prime * result + length;
+		return result;
+	}
+
+
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MIDINote other = (MIDINote) obj;
+		if (hexNote != other.hexNote)
+			return false;
+		if (length != other.length)
+			return false;
+		return true;
+	}
 }

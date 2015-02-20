@@ -93,7 +93,7 @@ public class MIDISequence {
 	
 	//--------------------------------------- GETTERS --------------------------------------------\\
 	
-	public MIDITrack geTrack(int num) {
+	public MIDITrack getTrack(int num) {
 		return tracks.get(num);
 	}
 
