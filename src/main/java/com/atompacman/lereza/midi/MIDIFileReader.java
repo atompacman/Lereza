@@ -2,7 +2,10 @@ package com.atompacman.lereza.midi;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,6 +24,7 @@ import com.atompacman.atomlog.Log;
 import com.atompacman.atomlog.Log.Verbose;
 import com.atompacman.lereza.api.Module;
 import com.atompacman.lereza.exception.MIDIFileReaderException;
+import com.atompacman.lereza.piece.container.Part;
 import com.atompacman.lereza.piece.container.Piece;
 import com.atompacman.lereza.report.Anomaly;
 import com.atompacman.lereza.report.Anomaly.Info.Impact;
@@ -406,6 +410,22 @@ public class MIDIFileReader extends Module {
 				SystemCommonMessageType.of(msg).name()));
 	}
 
+	private static String toString(byte[] bytes) {
+		if (bytes.length == 0) {
+			return "";
+		}
+		if (bytes.length > 8) {
+			return "(...)";
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append('(').append(bytes[0]);
+		for (int i = 1; i < bytes.length; ++i) {
+			sb.append(' ');
+			sb.append(Byte.toString(bytes[i]));
+		}
+		return sb.append(')').toString();
+	}
+	
 	// - - - - - - - - - - - - - - - - ADJUST NOTES TIMESTAMPS - - - - - - - - - - - - - - - - - -\\
 
 	private int adjustNotesTimestamps(float divisionType, int ticksPerQuarterNote) 
@@ -443,7 +463,7 @@ public class MIDIFileReader extends Module {
 
 			for (int i = 0; i < seq.getNumTracks(); ++i) {
 				for (Long tick : seq.getTrack(i).getNotes().keySet()) {
-					error += tick % ticksPer32thNote;
+					error += (tick + offset) % ticksPer32thNote;
 				}
 			}
 			if (error < minimalError) {
@@ -453,68 +473,88 @@ public class MIDIFileReader extends Module {
 		}
 		return optimalOffset;
 	}
-
+	// TODO utiliser un offset variable...
 	private int convertTicksToTimeunit(int offset, int ticksPer32thNote) {
 		int finalTimeunit = 0;
 		for (int i = 0; i < seq.getNumTracks(); ++i) {
 			Map<Long, Set<MIDINote>> converted = new HashMap<>();
 			Map<Long, Set<MIDINote>> notes = seq.getTrack(i).getNotes();
 			
-			for (Entry<Long, Set<MIDINote>> entry : notes.entrySet()) {
-				double timeunit = (entry.getKey() + offset) / ticksPer32thNote;
+			List<Long> timestamps = new ArrayList<>(notes.keySet());
+			Collections.sort(timestamps);
+			
+			for (Long timestamp : timestamps) {
+				double timeunit = (double)(timestamp + offset) / (double) ticksPer32thNote;
 				Long roundedTU = Math.round(timeunit);
 				if (timeunit != roundedTU) {
 					long roundedTick = (roundedTU * ticksPer32thNote - offset);
-					report.signal(AN.ROUNDED_MIDI_TICK, "From " + entry.getKey() + " to " + 
-							roundedTick + "(" + (roundedTick - entry.getKey() + ")"));
+					int delta = (int) (roundedTick - timestamp);
+					report.signal(AN.ROUNDED_MIDI_TICK, "A MIDI tick was rounded from " + timestamp + " to " + 
+							roundedTick + " (" + (delta < 0 ? "" : "+") + (roundedTick - timestamp + ")"));
 				}
-				converted.put(roundedTU, entry.getValue());
+				Set<MIDINote> noteSet = notes.get(timestamp);
+				converted.put(roundedTU, noteSet);
+				
+				if (roundedTU > finalTimeunit) {
+					int tuLen = getTimeunitLengthOfLonguestNote(noteSet, ticksPer32thNote);
+					if (roundedTU + tuLen > finalTimeunit) {
+						finalTimeunit = (int) (roundedTU + tuLen);
+					}
+				}
 			}
 			notes.clear();
 			notes.putAll(converted);
 		}
-		return finalTimeunit; // TODO
+		return finalTimeunit;
+	}
+	
+	private static int getTimeunitLengthOfLonguestNote(Set<MIDINote> notes, int ticksPer32thNote) {
+		int maxTULen = 0;
+		for (MIDINote note : notes) {
+			int tuLen = (int) Math.rint((double) note.getLength() / (double) ticksPer32thNote);
+			if (tuLen > maxTULen) {
+				maxTULen = tuLen;
+			}
+		}
+		return maxTULen;
 	}
 
 	//- - - - - - - - - - - - - - - - - - - BUILD PIECE - - - - - - - - - - - - - - - - - - - - - \\
 
-	private Piece buildPiece(int finalTimeunit) {
+	private Piece buildPiece(int finalTU) {
 		Piece piece = new Piece(seq);
+		
+		for (int i = 0; i < seq.getNumTracks(); ++i) {
+			report.log(Verbose.INFOS, 2, "Building track " + (i + 1));
+			Part part = buildPart(seq.getTrack(i), finalTU);
+			if (part != null) {
+				piece.addPart(part);
+			}
+		}
+		
 		return piece;
 	}
 	
-	private getFinalTimeunit() {
-		for (int i = 0; i < seq.getNumTracks(); ++i) {
-			
+	private Part buildPart(MIDITrack track, int finalTU) {
+		if (track.getNotes().isEmpty()) {
+			report.log("Ignoring empty track");
+			return null;
 		}
+		Part part = new Part(seq.getRythmicSignature(), finalTU);
+		
+		for (Entry<Long, Set<MIDINote>> entry : track.getNotes().entrySet()) {
+			// TODO fusionOddNotesWithTinyRests ?
+			part.addNotes(entry.getValue(), entry.getKey().intValue());
+		}
+		
+		return part;
 	}
-	
+
+		
 	
 	//--------------------------------------- SHUTDOWN -------------------------------------------\\
 
 	public void shutdown() {
 
-	}
-
-
-
-	//==================================== STATIC METHODS ========================================\\
-
-	//-------------------------------------- TO STRING -------------------------------------------\\
-
-	private static String toString(byte[] bytes) {
-		if (bytes.length == 0) {
-			return "";
-		}
-		if (bytes.length > 8) {
-			return "(...)";
-		}
-		StringBuilder sb = new StringBuilder();
-		sb.append('(').append(bytes[0]);
-		for (int i = 1; i < bytes.length; ++i) {
-			sb.append(' ');
-			sb.append(Byte.toString(bytes[i]));
-		}
-		return sb.append(')').toString();
 	}
 }

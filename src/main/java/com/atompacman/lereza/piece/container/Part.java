@@ -2,7 +2,7 @@ package com.atompacman.lereza.piece.container;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
+import java.util.Set;
 
 import com.atompacman.lereza.Parameters.MIDI.FileReader;
 import com.atompacman.lereza.api.Wizard;
@@ -35,7 +35,7 @@ public class Part {
 
 	//------------ ADD ------------\\
 
-	public void addNotes(Stack<MIDINote> notes, int timestamp) {
+	public void addNotes(Set<MIDINote> notes, int timestamp) {
 		for (MIDINote midiNote : notes) {
 			Pitch pitch = Pitch.thatIsMoreCommonForHexValue(midiNote.getHexNote());
 			addNote(pitch, midiNote.getLength(), timestamp);
