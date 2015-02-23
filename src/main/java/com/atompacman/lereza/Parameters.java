@@ -91,7 +91,7 @@ public enum Parameters implements StrictParam {;
 			/** Maximum MIDI file size (in bytes) */
 			MAX_FILE_SIZE 						(1000000),
 			
-			/** Display an animation when loading songs from MIDI files. */
+			/** Display an animation when loading MIDI files. */
 			NOTE_VISUALISATION 					(false),
 			
 			/** If MIDI note visualization is on, play the notes that are being added. */
@@ -99,14 +99,8 @@ public enum Parameters implements StrictParam {;
 			
 			/** A tempo correction factor to adjust MIDI note reading process in order to smoothly 
 			 * play the song that is being read.*/
-			VISUALISATION_SPEED_CORRECTION 		(2.5),
+			VISUALISATION_SPEED_CORRECTION 		(2.5);
 			
-			/** MIDI notes timestamp will not be rounded beyond this value. */
-			NOTE_LENGTH_CORRECTION_THRESHOLD 	(5),
-			
-			/** The threshold over which the cumulative timestamp error is considered as 
-			 * problematic. */
-			TOTAL_ROUND_OFFSET_LIMIT 			(10);
 	
 			private Object defaultValue;
 			private FileReader(Object defaultValue) {this.defaultValue = defaultValue;}

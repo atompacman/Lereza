@@ -148,6 +148,10 @@ public class Report {
 		add(new AnomalyOccurrence(anomaly.info(), details));
 	}
 	
+	public void signal(Anomaly anomaly, String format, Object...args) {
+		add(new AnomalyOccurrence(anomaly.info(), String.format(format, args)));
+	}
+	
 	
 	//----------------------------------------- ADD ----------------------------------------------\\
 

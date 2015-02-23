@@ -27,6 +27,10 @@ public class MIDINote {
 		this.length = (int) (endTick - startTick);
 	}
 	
+	void setTimeunitLength(int timeunitLength) {
+		length = timeunitLength;
+	}
+	
 	
 	//--------------------------------------- GETTERS --------------------------------------------\\
 
@@ -46,9 +50,7 @@ public class MIDINote {
 		return startTick;
 	}
 
-
-
-
+	
 	//--------------------------------------- EQUALS ---------------------------------------------\\
 	
 	public int hashCode() {
@@ -58,8 +60,6 @@ public class MIDINote {
 		result = prime * result + length;
 		return result;
 	}
-
-
 
 	public boolean equals(Object obj) {
 		if (this == obj)

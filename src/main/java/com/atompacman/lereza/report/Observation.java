@@ -56,12 +56,16 @@ public abstract class Observation {
 	//----------------------------------------- LOG ----------------------------------------------\\
 
 	void log() {
+		String formatted = format();
+		if (formatted == null) {
+			return;
+		}
 		switch (verbose()) {
-		case ERROR: if (Log.error() && Log.print(3, format())); break;
-		case EXTRA: if (Log.extra() && Log.print(3, format())); break;
-		case INFOS: if (Log.infos() && Log.print(3, format())); break;
-		case VITAL: if (Log.vital() && Log.print(3, format())); break;
-		case WARNG: if (Log.warng() && Log.print(3, format())); break;
+		case ERROR: if (Log.error() && Log.print(3, formatted)); break;
+		case EXTRA: if (Log.extra() && Log.print(3, formatted)); break;
+		case INFOS: if (Log.infos() && Log.print(3, formatted)); break;
+		case VITAL: if (Log.vital() && Log.print(3, formatted)); break;
+		case WARNG: if (Log.warng() && Log.print(3, formatted)); break;
 		default:
 		}
 	}

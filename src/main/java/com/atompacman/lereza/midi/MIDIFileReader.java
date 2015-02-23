@@ -50,6 +50,12 @@ public class MIDIFileReader extends Module {
 	}
 
 
+	//====================================== CONSTANTS ===========================================\\
+
+	private static final int TIMESTAMP_OFFSET_CORREC_RADIUS = 5;
+	private static final int MAXIMUM_ACCEPTABLE_TS_DELTA = 5;
+	
+
 
 	//===================================== INNER TYPES ==========================================\\
 
@@ -206,12 +212,39 @@ public class MIDIFileReader extends Module {
 				MIDIFileReader.class);
 		}},
 
-		ROUNDED_MIDI_TICK { public Info info() { return new Info(
-				"Rounded MIDI tick",
-				"A MIDI tick (timstamp) had to be rounded to become a timeunit",
-				"Possible deviations in rythm",
+		TIMESTAMP_OFFSET_CHANGE { public Info info() { return new Info(
+				"Timestamp offset change",
+				"A change in timestamp rounding delta",
+				"Possible rhythm deviation",
 				Impact.MINIMAL,
-				Recoverability.NORMAL,
+				Recoverability.UNKNOWN,
+				MIDIFileReader.class);
+		}},
+
+		MINOR_TIMESTAMP_ROUNDING { public Info info() { return new Info(
+				"Minor timestamp rounding",
+				"A timestamp had to be slightly rounded",
+				"Possible rhythm deviation",
+				Impact.MINIMAL,
+				Recoverability.UNKNOWN,
+				MIDIFileReader.class);
+		}},
+		
+		MAJOR_TIMESTAMP_ROUNDING { public Info info() { return new Info(
+				"Major timestamp rounding",
+				"A timestamp had to be heavily rounded",
+				"Expected rhythm deviation",
+				Impact.MODERATE,
+				Recoverability.UNKNOWN,
+				MIDIFileReader.class);
+		}},
+		
+		CHAOTIC_TIMESTAMP_SUBSEQUENCE { public Info info() { return new Info(
+				"Chaotic timestamp subsequence",
+				"A series of timestamps had variable offsets with the main rhythm",
+				"Allmost certain rhythm deviation",
+				Impact.CRITIC,
+				Recoverability.UNKNOWN,
 				MIDIFileReader.class);
 		}}
 	}
@@ -221,15 +254,15 @@ public class MIDIFileReader extends Module {
 		LOAD_MIDI_FILE_FROM_DISK { public Info info() { return new Info(
 				"Loading MIDI file from disk", true);
 		}},
-		
+
 		PROCESS_MIDI_EVENTS { public Info info() { return new Info(
 				"Processing MIDI events", true);
 		}},
 
-		ADJUST_NOTES_TIMESTAMPS { public Info info() { return new Info(
-				"Adjusting note timestamps", true);
+		CONVERT_TICKS_TO_TIMEUNITS { public Info info() { return new Info(
+				"Converting MIDI ticks to timeunits", true);
 		}},
-		
+
 		BUILD_PIECE { public Info info() { return new Info(
 				"Build piece", true);
 		}},
@@ -258,8 +291,8 @@ public class MIDIFileReader extends Module {
 		report.stop().start(CP.PROCESS_MIDI_EVENTS);
 		processMIDIEvents(midiSeq);
 
-		report.stop().start(CP.ADJUST_NOTES_TIMESTAMPS);
-		int finalTU = adjustNotesTimestamps(midiSeq.getDivisionType(), midiSeq.getResolution());
+		report.stop().start(CP.CONVERT_TICKS_TO_TIMEUNITS);
+		int finalTU = convertTicksToTimunits(midiSeq.getDivisionType(), midiSeq.getResolution());
 
 		report.stop().start(CP.BUILD_PIECE);
 		return buildPiece(finalTU);
@@ -367,9 +400,9 @@ public class MIDIFileReader extends Module {
 		byte[] data = msg.getData();
 		String strData = new String(data);
 
-		report.signal(AN.IGNORED_MIDI_EVENT, String.format("[ Ignored ] %-17s |  SysexMessage  | "
+		report.signal(AN.IGNORED_MIDI_EVENT, "[ Ignored ] %-17s |  SysexMessage  | "
 				+ "%s %s", msg.getStatus() == SysexMessage.SPECIAL_SYSTEM_EXCLUSIVE ? 
-						"SPECIAL SYST. EXCL." : "SYSTEM EXCLUSIVE", strData, toString(data)));
+						"SPECIAL SYST. EXCL." : "SYSTEM EXCLUSIVE", strData, toString(data));
 	}
 
 	private void processMessage(ShortMessage msg, Long tick) {
@@ -406,8 +439,8 @@ public class MIDIFileReader extends Module {
 	}
 
 	private void processSystemMessage(ShortMessage msg) {
-		report.signal(AN.IGNORED_MIDI_EVENT, String.format("[ Ignored ] %-17s | System Message |", 
-				SystemCommonMessageType.of(msg).name()));
+		String msgName = SystemCommonMessageType.of(msg).name();
+		report.signal(AN.IGNORED_MIDI_EVENT, "[ Ignored ] %-17s | System Message |", msgName);
 	}
 
 	private static String toString(byte[] bytes) {
@@ -425,20 +458,11 @@ public class MIDIFileReader extends Module {
 		}
 		return sb.append(')').toString();
 	}
-	
-	// - - - - - - - - - - - - - - - - ADJUST NOTES TIMESTAMPS - - - - - - - - - - - - - - - - - -\\
 
-	private int adjustNotesTimestamps(float divisionType, int ticksPerQuarterNote) 
+	//- - - - - - - - - - - - - - - - CONVERT TICKS TO TIMUNITS - - - - - - - - - - - - - - - - - \\
+
+	private int convertTicksToTimunits(float divisionType, int ticksPerQuarterNote) 
 			throws MIDIFileReaderException {
-
-		checkIfAdjustable(divisionType, ticksPerQuarterNote);
-		int offset = findOptimalTickOffsetForRounding(ticksPerQuarterNote / 8);
-		report.log("Optimal midi tick offset: " + offset);
-		return convertTicksToTimeunit(offset, ticksPerQuarterNote / 8);
-	}
-
-	private void checkIfAdjustable(float divisionType, int ticksPerQuarterNote) 
-			throws MIDIFileReaderException{
 
 		if (divisionType != Sequence.PPQ) {
 			Throw.a(MIDIFileReaderException.class, "SMPTE-based division type is unimplemented");
@@ -452,78 +476,97 @@ public class MIDIFileReader extends Module {
 			Throw.a(MIDIFileReaderException.class, "Sequence's num of "
 					+ "ticks per 32th note is not integral");
 		}
-	}
 
-	private int findOptimalTickOffsetForRounding(int ticksPer32thNote) {
-		int minimalError = Integer.MAX_VALUE;
-		int optimalOffset = 0;
-
-		for (int offset = 0; offset < ticksPer32thNote; ++offset) {
-			int error = 0;
-
-			for (int i = 0; i < seq.getNumTracks(); ++i) {
-				for (Long tick : seq.getTrack(i).getNotes().keySet()) {
-					error += (tick + offset) % ticksPer32thNote;
-				}
-			}
-			if (error < minimalError) {
-				minimalError = error;
-				optimalOffset = offset;
-			}
-		}
-		return optimalOffset;
-	}
-	// TODO utiliser un offset variable...
-	private int convertTicksToTimeunit(int offset, int ticksPer32thNote) {
 		int finalTimeunit = 0;
+
 		for (int i = 0; i < seq.getNumTracks(); ++i) {
-			Map<Long, Set<MIDINote>> converted = new HashMap<>();
+			report.log(Verbose.INFOS, 2, "Processing track " + (i + 1));
+
 			Map<Long, Set<MIDINote>> notes = seq.getTrack(i).getNotes();
-			
-			List<Long> timestamps = new ArrayList<>(notes.keySet());
-			Collections.sort(timestamps);
-			
-			for (Long timestamp : timestamps) {
-				double timeunit = (double)(timestamp + offset) / (double) ticksPer32thNote;
-				Long roundedTU = Math.round(timeunit);
-				if (timeunit != roundedTU) {
-					long roundedTick = (roundedTU * ticksPer32thNote - offset);
-					int delta = (int) (roundedTick - timestamp);
-					report.signal(AN.ROUNDED_MIDI_TICK, "A MIDI tick was rounded from " + timestamp + " to " + 
-							roundedTick + " (" + (delta < 0 ? "" : "+") + (roundedTick - timestamp + ")"));
-				}
-				Set<MIDINote> noteSet = notes.get(timestamp);
-				converted.put(roundedTU, noteSet);
-				
-				if (roundedTU > finalTimeunit) {
-					int tuLen = getTimeunitLengthOfLonguestNote(noteSet, ticksPer32thNote);
-					if (roundedTU + tuLen > finalTimeunit) {
-						finalTimeunit = (int) (roundedTU + tuLen);
-					}
-				}
+
+			if (notes.isEmpty()) {
+				report.log("Ignoring empty track");
+				continue;
 			}
-			notes.clear();
-			notes.putAll(converted);
+			
+			convertTicksToTimeunits(notes, ticksPerQuarterNote / 8);
+			int trackFinalTU = convertNotesLenToTU(notes, ticksPerQuarterNote / 8);
+
+			finalTimeunit = Math.max(finalTimeunit, trackFinalTU);
 		}
+
 		return finalTimeunit;
 	}
-	
-	private static int getTimeunitLengthOfLonguestNote(Set<MIDINote> notes, int ticksPer32thNote) {
-		int maxTULen = 0;
-		for (MIDINote note : notes) {
-			int tuLen = (int) Math.rint((double) note.getLength() / (double) ticksPer32thNote);
-			if (tuLen > maxTULen) {
-				maxTULen = tuLen;
+
+	private void convertTicksToTimeunits(Map<Long, Set<MIDINote>> notes, int ticksPer32thNote) {
+		int currDelta = 0;
+		double tuPerTick = 1.0 / (double) ticksPer32thNote;
+		Map<Long, Set<MIDINote>> converted = new HashMap<>();
+
+		List<Long> timestamps = new ArrayList<>(notes.keySet());
+		Collections.sort(timestamps);
+
+		for (int i = 0; i < timestamps.size(); ++i) {
+			long timestamp = timestamps.get(i);
+			Long roundedTU = Math.round((double)(timestamp + currDelta) * tuPerTick);
+			long roundedTS = roundedTU * ticksPer32thNote;
+			int deltaTS = (int) (roundedTS - timestamp);
+			
+			if (deltaTS != currDelta) {
+				Map<Integer,Integer> deltaOcc = new HashMap<>();
+				deltaOcc.put(deltaTS, 0);
+				
+				for (int j=1; j <= TIMESTAMP_OFFSET_CORREC_RADIUS && i+j < timestamps.size(); ++j) {
+					long futureTS = timestamps.get(i+j);
+					Long futureRndTU = Math.round((double)(futureTS + currDelta) * tuPerTick);
+					int futureDeltaTS = (int) (futureRndTU * ticksPer32thNote - futureTS);
+					
+					Integer count = deltaOcc.get(futureDeltaTS);
+					deltaOcc.put(futureDeltaTS, count == null ? 1 : count + 1);
+				}
+								
+				int deltaDelta = deltaTS - currDelta;
+				AN anomaly = Math.abs(deltaDelta) > MAXIMUM_ACCEPTABLE_TS_DELTA ? 
+						AN.MAJOR_TIMESTAMP_ROUNDING : AN.MINOR_TIMESTAMP_ROUNDING;
+				
+				report.signal(anomaly, "Timestamp:%6d >>%6d | Delta: %s >> %s (%s) | Timeunit: %d", 
+						timestamp, roundedTS, formatDelta(currDelta), formatDelta(deltaTS), 
+						formatDelta(deltaDelta), roundedTU);
+				
+				if (deltaOcc.get(deltaTS) > (TIMESTAMP_OFFSET_CORREC_RADIUS - 1) / 2) {
+					report.signal(AN.TIMESTAMP_OFFSET_CHANGE);
+					currDelta = deltaTS;
+				} else if (deltaOcc.size() >= TIMESTAMP_OFFSET_CORREC_RADIUS) {
+					report.signal(AN.CHAOTIC_TIMESTAMP_SUBSEQUENCE, "Chaotic timestamps at " + 
+							timestamp +	", with the following deltas: " + deltaOcc.keySet()); 
+				}
+			} else {
+				report.log("Timestamp:%6d >>%6d | Delta: %s >> %s       | Timeunit: %d", timestamp, 
+						roundedTS, formatDelta(currDelta), formatDelta(deltaTS), roundedTU);
 			}
+			
+			Set<MIDINote> noteSet = notes.get(timestamp);
+			converted.put(roundedTU, noteSet);
 		}
-		return maxTULen;
+
+		notes.clear();
+		notes.putAll(converted);
+	}
+
+	private static String formatDelta(int delta) {
+		return String.format("%s%-2d", delta < 0 ? "-" : "+", Math.abs(delta));
+	}
+	
+	private int convertNotesLenToTU(Map<Long, Set<MIDINote>> notes, int ticksPer32thNote) {
+		int finalTU = 0;
+		return finalTU;
 	}
 
 	//- - - - - - - - - - - - - - - - - - - BUILD PIECE - - - - - - - - - - - - - - - - - - - - - \\
 
 	private Piece buildPiece(int finalTU) {
 		Piece piece = new Piece(seq);
-		
+
 		for (int i = 0; i < seq.getNumTracks(); ++i) {
 			report.log(Verbose.INFOS, 2, "Building track " + (i + 1));
 			Part part = buildPart(seq.getTrack(i), finalTU);
@@ -531,27 +574,27 @@ public class MIDIFileReader extends Module {
 				piece.addPart(part);
 			}
 		}
-		
+
 		return piece;
 	}
-	
+
 	private Part buildPart(MIDITrack track, int finalTU) {
 		if (track.getNotes().isEmpty()) {
 			report.log("Ignoring empty track");
 			return null;
 		}
 		Part part = new Part(seq.getRythmicSignature(), finalTU);
-		
+
 		for (Entry<Long, Set<MIDINote>> entry : track.getNotes().entrySet()) {
 			// TODO fusionOddNotesWithTinyRests ?
 			part.addNotes(entry.getValue(), entry.getKey().intValue());
 		}
-		
+
 		return part;
 	}
 
-		
-	
+
+
 	//--------------------------------------- SHUTDOWN -------------------------------------------\\
 
 	public void shutdown() {

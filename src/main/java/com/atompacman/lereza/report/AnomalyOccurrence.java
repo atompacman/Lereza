@@ -42,8 +42,8 @@ public class AnomalyOccurrence extends Observation {
 	public boolean hasDetails() {
 		return details != null;
 	}
-
-
+	
+	
 	//--------------------------------------- FORMAT ---------------------------------------------\\
 
 	public Verbose verbose() {
