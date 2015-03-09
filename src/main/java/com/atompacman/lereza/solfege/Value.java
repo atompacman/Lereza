@@ -8,7 +8,9 @@ public enum Value {
 	SIXTYFORTH, THIRTYSECONTH, SIXTEENTH, EIGHTH, QUARTER, HALF, WHOLE;
 	
 	
-	//------------ STATIC CONSTRUCTOR ------------\\
+	//======================================= METHODS ============================================\\
+
+	//------------------------------- PUBLIC STATIC CONSTRUCTOR ----------------------------------\\
 
 	public static Value fromTimeunit(int length) {
 		double exponent = Math.log10(length) / Math.log10(2);
@@ -20,14 +22,14 @@ public enum Value {
 	}
 	
 	
-	//------------ TO TIMEUNIT ------------\\
+	//------------------------------------- TO TIMEUNIT ------------------------------------------\\
 
 	public int toTimeunit() {
 		return (int) Math.pow(2, this.ordinal());
 	}
 	
 	
-	//------------ SPLIT INTO VALUES ------------\\
+	//---------------------------------- SPLIT INTO VALUES ---------------------------------------\\
 
 	public static List<Value> splitIntoValues(int length) {
 		List<Value> values = new ArrayList<Value>();
@@ -47,5 +49,12 @@ public enum Value {
 		values.add(Value.values()[(int)exponent]);
 
 		return values;
+	}
+
+
+	//-------------------------------------- TO STRING -------------------------------------------\\
+
+	public String toString() {
+		return "1/" + Integer.toString((int) Math.pow(2, Value.values().length - ordinal()));
 	}
 }

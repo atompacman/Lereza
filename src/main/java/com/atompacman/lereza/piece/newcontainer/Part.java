@@ -1,4 +1,4 @@
-package com.atompacman.lereza.piece.container;
+package com.atompacman.lereza.piece.newcontainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +10,11 @@ import com.atompacman.lereza.midi.MIDINote;
 import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.RythmicSignature;
 
-public class Part {
+public class Part<T extends BarNote> {
 
 	//======================================= FIELDS =============================================\\
 
-	private final List<Bar> 		bars;
+	private final List<Bar<T>> 		bars;
 	private final RythmicSignature 	rythmicSign;
 
 
@@ -23,10 +23,10 @@ public class Part {
 
 	//------------------------------ PUBLIC STATIC CONSTRUCTORS ----------------------------------\\
 
-	public static Part valueOf(RythmicSignature rythmicSignature, int finalTimeunit) {
-		int tuPerBar = rythmicSignature.timeunitsInABar();
-		int numBars = (int) Math.ceil((double) finalTimeunit / (double) tuPerBar);
-		return Part.valueOf(numBars, rythmicSignature);
+	public static Part valueOf(RythmicSignature rythmicSign, int finalTU) {
+		int tuPerBar = rythmicSign.timeunitsInABar();
+		int numBars = (int) Math.ceil((double) finalTU / (double) tuPerBar);
+		return Part.valueOf(numBars, rythmicSign);
 	}
 	
 	public static Part valueOf(int numBars, RythmicSignature rythmicSignature) {

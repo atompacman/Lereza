@@ -1,10 +1,7 @@
 package com.atompacman.lereza.piece;
 
 import java.util.Random;
-import java.util.Stack;
 
-import com.atompacman.lereza.Parameters;
-import com.atompacman.lereza.midi.MIDINote;
 import com.atompacman.lereza.piece.container.Bar;
 import com.atompacman.lereza.piece.container.Part;
 import com.atompacman.lereza.solfege.Accidental;
@@ -14,34 +11,33 @@ import com.atompacman.lereza.solfege.NoteLetter;
 import com.atompacman.lereza.solfege.Octave;
 import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.RythmicSignature;
-import com.atompacman.lereza.solfege.Semitones;
 import com.atompacman.lereza.solfege.Value;
 
 public class PieceTestsHelper {
 
-	private static Random rand = Parameters.rand;
+	private static Random rand = new Random();
 	
 	
 	//------------ PART ------------\\
 
-	public static MIDINote nextRandMIDINote() {
-		int hexNote = rand.nextInt(100) + Semitones.IN_OCTAVE + 1;
-		int noteLength = rand.nextInt(Value.HALF.toTimeunit()) + 1;
-		return new MIDINote(hexNote, noteLength);
-	}
+//	public static MIDINote nextRandMIDINote() {
+//		int hexNote = rand.nextInt(100) + Semitones.IN_OCTAVE + 1;
+//		int noteLength = rand.nextInt(Value.HALF.toTimeunit()) + 1;
+//		return new MIDINote(hexNote, noteLength);
+//	}
 	
-	public static Stack<MIDINote> nextRandMIDINoteStack() {
-		Stack<MIDINote> notes = new Stack<MIDINote>();
-		int nbNotes = 1;
-		
-		if (rand.nextInt(5) == 1) {
-			nbNotes = rand.nextInt(5) + 1;
-		}
-		for (int i = 0; i < nbNotes; ++i) {
-			notes.add(nextRandMIDINote());
-		}
-		return notes;
-	}
+//	public static Stack<MIDINote> nextRandMIDINoteStack() {
+//		Stack<MIDINote> notes = new Stack<MIDINote>();
+//		int nbNotes = 1;
+//		
+//		if (rand.nextInt(5) == 1) {
+//			nbNotes = rand.nextInt(5) + 1;
+//		}
+//		for (int i = 0; i < nbNotes; ++i) {
+//			notes.add(nextRandMIDINote());
+//		}
+//		return notes;
+//	}
 	
 	public static Part emptyPart(int finalTimestamp) {
 		return new Part(standardRythmicSign(), finalTimestamp);

@@ -39,7 +39,7 @@ public class TestKeyProfilerTestHelper {
 		Piece piece = KeyProfilerTestHelper.buildPiece(tones);
 				
 		assertEquals(4, piece.numParts());
-		assertEquals(1, piece.getPartNo(2).getNbBars());
+		assertEquals(1, piece.getPartNo(2).numBars());
 		Set<Note> notes = piece.getPartNo(2).getBarNo(0).getNotesStartingAt(1);
 		assertEquals(Tone.valueOf("Bb"), notes.iterator().next().getPitch().getTone());
 	}

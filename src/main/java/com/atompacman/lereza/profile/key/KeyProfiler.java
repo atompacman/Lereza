@@ -35,7 +35,7 @@ public class KeyProfiler extends Profiler {
 
 	protected Profile profile() {
 		for (int i = 0; i < piece.numParts(); ++i) {
-			int finalTimestamp = piece.getPartNo(i).finalTimestamp();
+			int finalTimestamp = piece.getPartNo(i).finalTU();
 			currPartKeyProfile = new PartKeyProfile(possibleKeysMap.nbNotes(i), finalTimestamp);
 			basicAnalysis(i);
 			findKeyPath(i);

@@ -565,7 +565,7 @@ public class MIDIFileReader extends Module {
 	//- - - - - - - - - - - - - - - - - - - BUILD PIECE - - - - - - - - - - - - - - - - - - - - - \\
 
 	private Piece buildPiece(int finalTU) {
-		Piece piece = new Piece(seq);
+		Piece piece = Piece.valueOf(seq);
 
 		for (int i = 0; i < seq.getNumTracks(); ++i) {
 			report.log(Verbose.INFOS, 2, "Building track " + (i + 1));
@@ -583,7 +583,7 @@ public class MIDIFileReader extends Module {
 			report.log("Ignoring empty track");
 			return null;
 		}
-		Part part = new Part(seq.getRythmicSignature(), finalTU);
+		Part part = Part.valueOf(seq.getRythmicSignature(), finalTU);
 
 		for (Entry<Long, Set<MIDINote>> entry : track.getNotes().entrySet()) {
 			// TODO fusionOddNotesWithTinyRests ?

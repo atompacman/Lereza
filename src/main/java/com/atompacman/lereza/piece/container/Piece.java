@@ -6,36 +6,49 @@ import java.util.List;
 import com.atompacman.lereza.midi.MIDISequence;
 import com.atompacman.lereza.solfege.RythmicSignature;
 
-public class Piece {
+public final class Piece {
 
 	//======================================= FIELDS =============================================\\
 
-	private List<Part> parts;
-	private RythmicSignature rythmicSignature;
-
-	private MIDISequence midiSeq;
+	private final List<Part> 		parts;
+	private final RythmicSignature 	rythmicSignature;
+	private final MIDISequence 		midiSeq;
 	
 	
 	
 	//======================================= METHODS ============================================\\
 
-	//---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
+	//------------------------------- PUBLIC STATIC CONSTRUCTORS ---------------------------------\\
 	
-	public Piece(MIDISequence midiSeq) {
-		this.parts = new ArrayList<Part>();
-		this.rythmicSignature = midiSeq.getRythmicSignature();
+	public static Piece valueOf(MIDISequence midiSeq) {
+		return new Piece(new ArrayList<Part>(), midiSeq.getRythmicSignature(), midiSeq);
+	}
+	
+	public static Piece valueOf(RythmicSignature rythmicSign) {
+		return new Piece(new ArrayList<Part>(), rythmicSign, null);
+	}
+	
+	public static Piece valueOf(List<Part> parts) {
+		if (parts.isEmpty()) {
+			throw new IllegalArgumentException("Cannot create a piece from an empty part list.");
+		}
+		return new Piece(parts, parts.get(0).getRythmicSignature(), null);
+	}
+	
+	
+	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
+
+	private Piece(List<Part> parts, RythmicSignature rythmicSign, MIDISequence midiSeq) {
+		this.parts = parts;
+		this.rythmicSignature = rythmicSign;
 		this.midiSeq = midiSeq;
 	}
 	
 	
-	//--------------------------------------- SETTERS --------------------------------------------\\
+	//----------------------------------------- ADD ----------------------------------------------\\
 
 	public void addPart(Part part) {
 		parts.add(part);
-	}
-	
-	public void setRythmicSignature(RythmicSignature rythmicSignature) {
-		this.rythmicSignature = rythmicSignature;
 	}
 	
 	
@@ -58,5 +71,9 @@ public class Piece {
 
 	public int numParts() {
 		return parts.size();
+	}
+
+	public boolean hasAssociatedMIDISequence() {
+		return midiSeq != null;
 	}
 }

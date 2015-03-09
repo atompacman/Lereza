@@ -119,9 +119,9 @@ public class PieceNavigator {
 	}
 
 	public void goToBar(int barNo) {
-		if (barNo >= getCurrentPart().getNbBars() || barNo < 0) {
+		if (barNo >= getCurrentPart().numBars() || barNo < 0) {
 			throwExcep("Cannot go to bar \"" + barNo + "\": The current part "
-					+ "only has " + getCurrentPart().getNbBars() + " bars.");
+					+ "only has " + getCurrentPart().numBars() + " bars.");
 		}
 		while (barNo > pbt.bar) {
 			goToNextBar();
@@ -263,7 +263,7 @@ public class PieceNavigator {
 	}
 
 	public boolean endOfPart() {
-		return pbt.bar == getCurrentPart().getNbBars();
+		return pbt.bar == getCurrentPart().numBars();
 	}
 
 	public int getCurrentTimestamp() {
