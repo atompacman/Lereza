@@ -72,11 +72,7 @@ public class Pitch {
 	//------------ EQUALITIES ------------\\
 
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((octave == null) ? 0 : octave.hashCode());
-		result = prime * result + ((tone == null) ? 0 : tone.hashCode());
-		return result;
+		return semitoneValue();
 	}
 
 	public boolean equals(Object obj) {

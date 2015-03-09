@@ -1,6 +1,5 @@
 package com.atompacman.lereza.piece.newcontainer;
 
-import com.atompacman.lereza.solfege.Dynamic;
 import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.Value;
 
@@ -10,7 +9,6 @@ public class Note {
 
 	private final Pitch 	pitch;
 	private final Value 	value;
-	private final Dynamic 	dynamic;
 	
 
 	
@@ -18,23 +16,20 @@ public class Note {
 	
 	//------------------------------ PUBLIC STATIC CONSTRUCTOR -----------------------------------\\
 	
-	public static Note valueOf(int hexPitch, Value value, int hexVelocity) {
-		Pitch pitch = Pitch.thatIsMoreCommonForHexValue(hexPitch);
-		Dynamic dynamic = Dynamic.valueOf(hexVelocity);
-		return new Note(pitch, value, dynamic);
+	public static Note valueOf(int hexPitch, Value value) {
+		return new Note(Pitch.thatIsMoreCommonForHexValue(hexPitch), value);
 	}
 	
-	public static Note valueOf(Pitch pitch, Value value, Dynamic dynamic) {
-		return new Note(pitch, value, dynamic);
+	public static Note valueOf(Pitch pitch, Value value) {
+		return new Note(pitch, value);
 	}
 	
 
 	//--------------------------------- PROTECTED CONSTRUCTOR ------------------------------------\\
 
-	protected Note(Pitch pitch, Value value, Dynamic dynamic) {
+	protected Note(Pitch pitch, Value value) {
 		this.pitch = pitch;
 		this.value = value;
-		this.dynamic = dynamic;
 	}
 	
 	
@@ -48,10 +43,6 @@ public class Note {
 		return value;
 	}
 
-	public Dynamic getDynamic() {
-		return dynamic;
-	}
-	
 
 	//-------------------------------------- TO STRING -------------------------------------------\\
 
@@ -59,7 +50,6 @@ public class Note {
 		StringBuilder sb = new StringBuilder();
 		sb.append('[').append(pitch.toString());
 		sb.append('|').append(value.toString());
-		sb.append('|').append(dynamic.toString());
 		sb.append(']');
 		return sb.toString();
 	}

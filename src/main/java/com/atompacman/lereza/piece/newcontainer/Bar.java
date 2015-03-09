@@ -11,7 +11,7 @@ import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.RythmicSignature;
 import com.atompacman.lereza.solfege.Value;
 
-public class Bar<T extends BarNote> {
+public final class Bar<T extends BarNote> {
 
 	//======================================= FIELDS =============================================\\
 
@@ -22,9 +22,16 @@ public class Bar<T extends BarNote> {
 	
 	//======================================= METHODS ============================================\\
 
-	//---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
+	//------------------------------ PACKAGE STATIC CONSTRUCTOR ----------------------------------\\
 
-	Bar(RythmicSignature rythmicSign) {
+	static <T extends BarNote> Bar<T> valueOf(RythmicSignature rythmicSign, Class<T> noteClass) {
+		return new Bar<T>(rythmicSign);
+	}
+	
+	
+	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
+
+	private Bar(RythmicSignature rythmicSign) {
 		this.notes = new ArrayList<>();
 		for (int i = 0; i < rythmicSign.timeunitsInABar(); ++i) {
 			notes.add(new HashSet<T>());
@@ -36,8 +43,8 @@ public class Bar<T extends BarNote> {
 	//----------------------------------------- ADD ----------------------------------------------\\
 	
 	@SuppressWarnings("unchecked")
-	void add(Pitch pitch, Dynamic dynamic, int tuPos, int tuLength, boolean isTiedNote) {
-		List<Value> values = splitIntoValues(tuPos, tuPos + tuLength);
+	void add(Pitch pitch, Dynamic dynamic, int begTU, int lenTU, boolean isTiedNote) {
+		List<Value> values = splitIntoValues(begTU, begTU + lenTU);
 
 		int noteStartPos = 0;
 		
@@ -54,9 +61,6 @@ public class Bar<T extends BarNote> {
 			isTiedNote = true;
 		}
 	}
-
-
-	//---------------------------------- SPLIT INTO VALUES ---------------------------------------\\
 
 	private static List<Value> splitIntoValues(int noteStart, int noteEnd) {
 		List<Value> values = new ArrayList<>();
