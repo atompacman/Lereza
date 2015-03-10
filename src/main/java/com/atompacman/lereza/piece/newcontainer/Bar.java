@@ -11,12 +11,12 @@ import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.RythmicSignature;
 import com.atompacman.lereza.solfege.Value;
 
-public final class Bar<T extends BarNote> {
+public final class Bar<T extends NoteStack<? extends BarNote>> {
 
 	//======================================= FIELDS =============================================\\
 
-	private final List<Set<T>> 	 	notes;
-	private final RythmicSignature 	rythmicSign;
+	private final List<NoteStack<? extends BarNote>> noteStacks;
+	private final RythmicSignature rythmicSign;
 
 
 	
@@ -32,9 +32,9 @@ public final class Bar<T extends BarNote> {
 	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
 
 	private Bar(RythmicSignature rythmicSign) {
-		this.notes = new ArrayList<>();
+		this.noteStacks = new ArrayList<>();
 		for (int i = 0; i < rythmicSign.timeunitsInABar(); ++i) {
-			notes.add(new HashSet<T>());
+			noteStacks.add(new HashSet<T>());
 		}
 		this.rythmicSign = rythmicSign;
 	}

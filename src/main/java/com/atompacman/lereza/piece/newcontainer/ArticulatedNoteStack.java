@@ -1,8 +1,10 @@
 package com.atompacman.lereza.piece.newcontainer;
 
+import java.util.Map;
+
 import com.atompacman.lereza.solfege.Articulation;
 import com.atompacman.lereza.solfege.Dynamic;
-import com.atompacman.toolkat.test.Assert;
+import com.atompacman.lereza.solfege.Pitch;
 
 public final class ArticulatedNoteStack<T extends BarNote> extends NoteStack<T> {
 
@@ -14,11 +16,25 @@ public final class ArticulatedNoteStack<T extends BarNote> extends NoteStack<T> 
 	
 	//======================================= METHODS ============================================\\
 
-	//---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
+	//------------------------------ PACKAGE STATIC CONSTRUCTOR ----------------------------------\\
+	
+	static <T extends BarNote> ArticulatedNoteStack<T> valueOf(NoteStack<T> noteStack, 
+															   Articulation articulation) {
+		
+		return new ArticulatedNoteStack<T>(noteStack.getStartingNoteMap(), 
+				noteStack.getStartedNoteMap(), noteStack.getDynamic(), articulation);
+	}
+	
+	
+	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
 
-	ArticulatedNoteStack(Dynamic dynamic, Articulation articulation) {
-		super(dynamic);
-		this.articulation = Assert.paramIsNotNull(articulation, "articulation");
+	private ArticulatedNoteStack(Map<Pitch, T> startingNotes, 
+								 Map<Pitch, T> startedNotes, 
+								 Dynamic dynamic, 
+								 Articulation articulation) {
+		
+		super(startingNotes, startedNotes, dynamic);
+		this.articulation = articulation;
 	}
 	
 	

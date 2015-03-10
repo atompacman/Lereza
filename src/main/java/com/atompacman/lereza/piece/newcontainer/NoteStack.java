@@ -20,33 +20,42 @@ public class NoteStack<T extends BarNote> {
 
 	//======================================= METHODS ============================================\\
 
-	//---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
+	//------------------------------ PACKAGE STATIC CONSTRUCTOR ----------------------------------\\
 
-	NoteStack(Dynamic dynamic) {
-		this.startingNotes = new HashMap<>();
-		this.startedNotes = new HashMap<>();
+	static <T extends BarNote> NoteStack<T> valueOf(Set<T> startingNotes, 
+			Set<T> startedNotes, Dynamic dynamic) {
 		
-		this.dynamic = dynamic;
-	}
-
-
-	//----------------------------------------- ADD ----------------------------------------------\\
-
-	void addStartingNote(T note) {
-		addNoteTo(note, startingNotes, "starting");
-	}
-
-	void addStartedNote(T note) {
-		addNoteTo(note, startedNotes, "started");
-	}
-
-	private void addNoteTo(T note, Map<Pitch, T> map, String mapName) {
-		Pitch pitch = note.getPitch();
-		if (containsNoteOfPitch(note.getPitch())) {
-			throw new IllegalArgumentException("A note of pitch " + pitch.toString() + 
-					" was already added to " + mapName + " note stack.");
+		Map<Pitch, T> startingNotesMap = new HashMap<>();
+		for (T note : startingNotes) {
+			if (startingNotesMap.put(note.getPitch(), note) != null) {
+				throw new IllegalArgumentException("A note of pitch " + note.getPitch().toString() + 
+						" was already added to starting note stack.");
+			}
 		}
-		map.put(pitch, note);
+		
+		Map<Pitch, T> startedNotesMap = new HashMap<>();
+		for (T note : startedNotes) {
+			Pitch pitch = note.getPitch();
+			if (startedNotesMap.put(pitch, note) != null) {
+				throw new IllegalArgumentException("A note of pitch " + pitch.toString() + 
+						" was already added to started note stack.");
+			}
+			if (startingNotesMap.containsKey(pitch)) {
+				throw new IllegalArgumentException("A note of pitch " + note.getPitch().toString() + 
+						" was already added to starting note stack.");
+			}
+		}
+		
+		return new NoteStack<>(startingNotesMap, startedNotesMap, dynamic);
+	}
+	
+	
+	//--------------------------------- PROTECTED CONSTRUCTOR ------------------------------------\\
+
+	protected NoteStack(Map<Pitch, T> startingNotes, Map<Pitch, T> startedNotes, Dynamic dynamic) {
+		this.startingNotes = startingNotes;
+		this.startedNotes = startedNotes;
+		this.dynamic = dynamic;
 	}
 
 
@@ -66,6 +75,14 @@ public class NoteStack<T extends BarNote> {
 		return notes;
 	}
 
+	Map<Pitch, T> getStartingNoteMap() {
+		return startingNotes;
+	}
+	
+	Map<Pitch, T> getStartedNoteMap() {
+		return startedNotes;
+	}
+	
 	public T getNote(Pitch pitch) {
 		T note = startingNotes.get(pitch);
 		if (note != null) {
