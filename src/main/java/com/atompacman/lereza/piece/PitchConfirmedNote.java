@@ -1,15 +1,15 @@
-package com.atompacman.lereza.piece.newcontainer;
+package com.atompacman.lereza.piece;
 
 import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.Value;
 
-public class PitchConfirmedNote extends BarNote {
+public class PitchConfirmedNote extends Note {
 	
 	//======================================= METHODS ============================================\\
 	
 	//------------------------------ PUBLIC STATIC CONSTRUCTOR -----------------------------------\\
 	
-	public static PitchConfirmedNote valueOf(BarNote note, Pitch confirmedPitch) {
+	public static PitchConfirmedNote valueOf(Note note, Pitch confirmedPitch) {
 		return new PitchConfirmedNote(confirmedPitch, note.getValue(), note.isTied());
 	}
 	

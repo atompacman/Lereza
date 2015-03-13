@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.atompacman.lereza.solfege.Grouping;
 import com.atompacman.lereza.solfege.Key;
-import com.atompacman.lereza.solfege.Meter;
 import com.atompacman.lereza.solfege.NoteLetter;
 import com.atompacman.lereza.solfege.RythmicSignature;
 import com.atompacman.lereza.solfege.Tone;
@@ -17,10 +16,9 @@ public class MIDISequence {
 
 	//====================================== CONSTANTS ===========================================\\
 
-	static final int						DEFAULT_NUM_32TH_NOTES_PER_BEAT = 8;
-	private static final Key 				DEFAULT_KEY = Key.valueOf(Tone.valueOf(NoteLetter.C));
-	private static final RythmicSignature 	DEFAULT_RYTHMIC_SIGNATURE = 
-			new RythmicSignature(new Meter(4, 4), Grouping.DUPLETS);
+	static final int DEFAULT_NUM_32TH_NOTES_PER_BEAT = 8;
+	
+	private static final Key DEFAULT_KEY = Key.valueOf(Tone.valueOf(NoteLetter.C));
 	
 	
 	
@@ -65,11 +63,11 @@ public class MIDISequence {
 		this.key = key;
 	}
 
-	void setSignature(Meter meter) {
+	void setSignature(int numMeter, int denMeter) {
 		if (this.signature != null) {
 			throw new IllegalArgumentException("A MIDI sequence cannot specify multiple meter");
 		}
-		this.signature = new RythmicSignature(meter, Grouping.DUPLETS);
+		this.signature = RythmicSignature.valueOf(numMeter, denMeter, Grouping.DUPLETS);
 	}
 
 	void setNum32thNotesPerBeat(int num32thNotesPerBeat) {
@@ -111,7 +109,7 @@ public class MIDISequence {
 	}
 
 	public RythmicSignature getRythmicSignature() {
-		return signature == null ? DEFAULT_RYTHMIC_SIGNATURE : signature;
+		return signature == null ? RythmicSignature.STANDARD_4_4 : signature;
 	}
 
 	public int getNum32thNotesPerBeat() {

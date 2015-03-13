@@ -1,30 +1,58 @@
 package com.atompacman.lereza.solfege;
 
-public class RythmicSignature {
+public final class RythmicSignature {
 	
-	private Meter meter;
-	private Grouping noteGrouping;
+	//====================================== CONSTANTS ===========================================\\
+
+	public static final RythmicSignature STANDARD_4_4 = new RythmicSignature(4,4, Grouping.DUPLETS);
+	
+	
+	
+	//======================================= FIELDS =============================================\\
+
+	private final int meterNum;
+	private final int meterDen;
+	private final Grouping noteGrouping;
 
 
-	//------------ CONSTRUCTOR ------------\\
+	
+	//======================================= METHODS ============================================\\
 
-	public RythmicSignature(Meter meter, Grouping noteGrouping) {
-		this.meter = meter;
+	//------------------------------ PUBLIC STATIC CONSTRUCTORS ----------------------------------\\
+
+	public static RythmicSignature valueOf(int meterNum, int meterDen) {
+		return new RythmicSignature(meterNum, meterDen, Grouping.DUPLETS);
+	}
+	
+	public static RythmicSignature valueOf(int meterNum, int meterDen, Grouping noteGrouping) {
+		return new RythmicSignature(meterNum, meterDen, noteGrouping);
+	}
+	
+	
+	//--------------------------------- PRIVATE CONSTRUCTOR --------------------------------------\\
+
+	private RythmicSignature(int meterNum, int meterDen, Grouping noteGrouping) {
+		this.meterNum = meterNum;
+		this.meterDen = meterDen;
 		this.noteGrouping = noteGrouping;
 	}
 	
 	
-	//------------ GETTERS ------------\\
+	//--------------------------------------- GETTERS --------------------------------------------\\
 
-	public Meter getMeter() {
-		return meter;
+	public int getMeterNumerator() {
+		return meterNum;
 	}
 
+	public int getMeterDenominator() {
+		return meterDen;
+	}
+	
 	public Grouping getNoteGrouping() {
 		return noteGrouping;
 	}
 	
 	public int timeunitsInABar() {
-		return meter.numerator() * Value.QUARTER.toTimeunit();
+		return meterNum * Value.QUARTER.toTimeunit();
 	}
 }

@@ -61,7 +61,7 @@ public class MIDITrack {
 	
 	//--------------------------------------- SETTERS --------------------------------------------\\
 
-	void addNote(int hexNote, int velocity, long tick) {
+	void addNote(byte hexNote, byte velocity, long tick) {
 		MIDINote note = noteBuffer[hexNote];
 		if (note == null) {
 			noteBuffer[hexNote] = new MIDINote(hexNote, velocity, tick);

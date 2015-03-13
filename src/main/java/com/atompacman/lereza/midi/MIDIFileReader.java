@@ -24,15 +24,17 @@ import com.atompacman.atomlog.Log;
 import com.atompacman.atomlog.Log.Verbose;
 import com.atompacman.lereza.api.Module;
 import com.atompacman.lereza.exception.MIDIFileReaderException;
-import com.atompacman.lereza.piece.container.Part;
-import com.atompacman.lereza.piece.container.Piece;
+import com.atompacman.lereza.piece.Note;
+import com.atompacman.lereza.piece.Piece;
+import com.atompacman.lereza.piece.PieceBuilder;
+import com.atompacman.lereza.piece.PieceBuilderSupervisor;
+import com.atompacman.lereza.piece.Stack;
 import com.atompacman.lereza.report.Anomaly;
 import com.atompacman.lereza.report.Anomaly.Info.Impact;
 import com.atompacman.lereza.report.Anomaly.Info.Recoverability;
 import com.atompacman.lereza.report.Checkpoint;
 import com.atompacman.lereza.solfege.CircleOfFifths;
 import com.atompacman.lereza.solfege.Key;
-import com.atompacman.lereza.solfege.Meter;
 import com.atompacman.lereza.solfege.Tone;
 import com.atompacman.lereza.solfege.quality.Quality;
 import com.atompacman.toolkat.exception.Throw;
@@ -282,7 +284,7 @@ public class MIDIFileReader extends Module {
 
 	//---------------------------------------- READ ----------------------------------------------\\
 
-	public Piece read(File midiFile) throws MIDIFileReaderException {
+	public Piece<Stack<Note>> read(File midiFile) throws MIDIFileReaderException {
 		initTempFields(midiFile);
 
 		report.start(CP.LOAD_MIDI_FILE_FROM_DISK);		
@@ -292,10 +294,10 @@ public class MIDIFileReader extends Module {
 		processMIDIEvents(midiSeq);
 
 		report.stop().start(CP.CONVERT_TICKS_TO_TIMEUNITS);
-		int finalTU = convertTicksToTimunits(midiSeq.getDivisionType(), midiSeq.getResolution());
+		convertTicksToTimunits(midiSeq.getDivisionType(), midiSeq.getResolution());
 
 		report.stop().start(CP.BUILD_PIECE);
-		return buildPiece(finalTU);
+		return buildPiece();
 	}
 
 	private void initTempFields(File midiFile) {
@@ -378,7 +380,7 @@ public class MIDIFileReader extends Module {
 			seq.addTempoChange(tick, 60000000.0 / microSec);				break;
 		case TEXT:					track.addText(strData);					break;
 		case TIME_SIGNATURE:
-			seq.setSignature(new Meter(data[0], (int) Math.pow(2, data[1])));
+			seq.setSignature(data[0], (int) Math.pow(2, data[1]));
 			seq.setNum32thNotesPerBeat(data[3]);							break;
 		case TRACK_NAME:			track.setName(strData);					break;
 		default:		
@@ -412,7 +414,7 @@ public class MIDIFileReader extends Module {
 
 		switch(cmd) {
 		case NOTE_OFF: case NOTE_ON: 	
-			track.addNote(msg.getData1(), msg.getData2(), tick); 
+			track.addNote((byte) msg.getData1(), (byte) msg.getData2(), tick); 
 			logMsg = false;
 			break;
 
@@ -461,7 +463,7 @@ public class MIDIFileReader extends Module {
 
 	//- - - - - - - - - - - - - - - - CONVERT TICKS TO TIMUNITS - - - - - - - - - - - - - - - - - \\
 
-	private int convertTicksToTimunits(float divisionType, int ticksPerQuarterNote) 
+	private void convertTicksToTimunits(float divisionType, int ticksPerQuarterNote) 
 			throws MIDIFileReaderException {
 
 		if (divisionType != Sequence.PPQ) {
@@ -477,8 +479,6 @@ public class MIDIFileReader extends Module {
 					+ "ticks per 32th note is not integral");
 		}
 
-		int finalTimeunit = 0;
-
 		for (int i = 0; i < seq.getNumTracks(); ++i) {
 			report.log(Verbose.INFOS, 2, "Processing track " + (i + 1));
 
@@ -488,14 +488,8 @@ public class MIDIFileReader extends Module {
 				report.log("Ignoring empty track");
 				continue;
 			}
-			
 			convertTicksToTimeunits(notes, ticksPerQuarterNote / 8);
-			int trackFinalTU = convertNotesLenToTU(notes, ticksPerQuarterNote / 8);
-
-			finalTimeunit = Math.max(finalTimeunit, trackFinalTU);
 		}
-
-		return finalTimeunit;
 	}
 
 	private void convertTicksToTimeunits(Map<Long, Set<MIDINote>> notes, int ticksPer32thNote) {
@@ -564,35 +558,34 @@ public class MIDIFileReader extends Module {
 
 	//- - - - - - - - - - - - - - - - - - - BUILD PIECE - - - - - - - - - - - - - - - - - - - - - \\
 
-	private Piece buildPiece(int finalTU) {
-		Piece piece = Piece.valueOf(seq);
+	private Piece<Stack<Note>> buildPiece() {
+		PieceBuilderSupervisor supervisor = new PieceBuilderSupervisor();
+		PieceBuilder builder = PieceBuilder.create(seq, supervisor);
 
+		int partNum = 0;
+		
 		for (int i = 0; i < seq.getNumTracks(); ++i) {
 			report.log(Verbose.INFOS, 2, "Building track " + (i + 1));
-			Part part = buildPart(seq.getTrack(i), finalTU);
-			if (part != null) {
-				piece.addPart(part);
+			
+			seq.getTrack(i);
+			
+			if (track.getNotes().isEmpty()) {
+				report.log("Ignoring empty track");
+				continue;
 			}
+			
+			for (Entry<Long, Set<MIDINote>> entry : track.getNotes().entrySet()) {
+				// TODO fusionOddNotesWithTinyRests ?
+				for (MIDINote note : entry.getValue()) {
+					builder.add(note.getHexNote(), note.getVelocity(), partNum, 
+							entry.getKey().intValue(), note.getLength());
+				}
+			}
+			++partNum;
 		}
 
-		return piece;
+		return builder.buildComponent();
 	}
-
-	private Part buildPart(MIDITrack track, int finalTU) {
-		if (track.getNotes().isEmpty()) {
-			report.log("Ignoring empty track");
-			return null;
-		}
-		Part part = Part.valueOf(seq.getRythmicSignature(), finalTU);
-
-		for (Entry<Long, Set<MIDINote>> entry : track.getNotes().entrySet()) {
-			// TODO fusionOddNotesWithTinyRests ?
-			part.addNotes(entry.getValue(), entry.getKey().intValue());
-		}
-
-		return part;
-	}
-
 
 
 	//--------------------------------------- SHUTDOWN -------------------------------------------\\

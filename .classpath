@@ -9,5 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/AtomLog"/>
 	<classpathentry kind="lib" path="C:/Users/jeremie_coulombe/.m2/repository/org/json/json/20140107/json-20140107.jar"/>
 	<classpathentry kind="lib" path="C:/Users/jeremie_coulombe/.m2/repository/mysql/mysql-connector-java-5.1.33-bin.jar"/>
+	<classpathentry kind="lib" path="C:/Users/jeremie_coulombe/eclipse_workspace/jfugue-5.0.jar" sourcepath="C:/Users/jeremie_coulombe/eclipse_workspace/jfugue-5.0-src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

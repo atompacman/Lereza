@@ -1,11 +1,11 @@
-package com.atompacman.lereza.piece.newcontainer;
+package com.atompacman.lereza.piece;
 
 import java.util.List;
 
 import com.atompacman.lereza.midi.MIDISequence;
 import com.atompacman.lereza.solfege.RythmicSignature;
 
-public final class Piece<T extends BarNote> {
+public final class Piece<T extends Stack<?>> implements PieceComponent {
 
 	//======================================= FIELDS =============================================\\
 
@@ -16,20 +16,10 @@ public final class Piece<T extends BarNote> {
 
 
 	//======================================= METHODS ============================================\\
-
-	//------------------------------ PACKAGE STATIC CONSTRUCTOR ----------------------------------\\
-
-	static <T extends BarNote> Piece<T> valueOf(List<Part<T>> parts, 
-											 	RythmicSignature rythmicSign, 
-											 	MIDISequence midiSeq) {
 		
-		return new Piece<T>(parts, rythmicSign, midiSeq);
-	}
-	
-	
-	//---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
+	//---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-	private Piece(List<Part<T>> parts, RythmicSignature rythmicSign, MIDISequence midiSeq) {
+	Piece(List<Part<T>> parts, RythmicSignature rythmicSign, MIDISequence midiSeq) {
 		this.parts = parts;
 		this.rythmicSign = rythmicSign;
 		this.midiSeq = midiSeq;
@@ -61,7 +51,40 @@ public final class Piece<T extends BarNote> {
 		return parts.size();
 	}
 
+	public int numNotes() {
+		int sum = 0;
+		for (Part<T> part : parts) {
+			sum += part.numNotes();
+		}
+		return sum;
+	}
+	
 	public boolean hasAssociatedMIDISequence() {
 		return midiSeq != null;
+	}
+
+
+
+	//==================================== STATIC METHODS ========================================\\
+
+	//------------------------------------ PACKAGE UTILS -----------------------------------------\\
+
+	static int checkPositiveTU(int timeunit, String name) {
+		if (timeunit < 0) {
+			// TODO log and return 0 instead
+			throw new IllegalArgumentException("Timeunit " + name + 
+					" cannot be negative (" + timeunit + ").");
+		}
+		return timeunit;
+	}
+
+	static int checkBoundedTU(int timeunit, int maximum, String a, String b) {
+		checkPositiveTU(timeunit, a);
+		if (timeunit > maximum) {
+			// TODO log and return max instead
+			throw new IllegalArgumentException("Timeunit " + a + "(" + timeunit + 
+					")" + " cannot be greater than " + b + " (" + maximum + ").");
+		}
+		return timeunit;
 	}
 }

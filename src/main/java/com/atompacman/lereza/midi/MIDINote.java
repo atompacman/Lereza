@@ -4,9 +4,9 @@ public class MIDINote {
 	
 	//======================================= FIELDS =============================================\\
 
-	private int hexNote;
-	private int velocity;
-	private int length;
+	private byte hexNote;
+	private byte velocity;
+	private int  length;
 	private long startTick;
 	
 	
@@ -14,7 +14,7 @@ public class MIDINote {
 
 	//---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-	MIDINote(int hexNote, int velocity, long startTick) {
+	MIDINote(byte hexNote, byte velocity, long startTick) {
 		this.hexNote 	= hexNote;
 		this.velocity 	= velocity;
 		this.startTick 	= startTick;
@@ -34,11 +34,11 @@ public class MIDINote {
 	
 	//--------------------------------------- GETTERS --------------------------------------------\\
 
-	public int getHexNote() {
+	public byte getHexNote() {
 		return hexNote;
 	}
 
-	public int getVelocity() {
+	public byte getVelocity() {
 		return velocity;
 	}
 	

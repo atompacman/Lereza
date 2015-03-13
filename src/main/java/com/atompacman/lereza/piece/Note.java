@@ -1,35 +1,43 @@
-package com.atompacman.lereza.piece.newcontainer;
+package com.atompacman.lereza.piece;
 
 import com.atompacman.lereza.solfege.Pitch;
 import com.atompacman.lereza.solfege.Value;
 
 public class Note {
-	
+
 	//======================================= FIELDS =============================================\\
 
 	private final Pitch 	pitch;
 	private final Value 	value;
 	
+	private final boolean 	isTied;
 
+	
 	
 	//======================================= METHODS ============================================\\
 	
 	//------------------------------ PUBLIC STATIC CONSTRUCTOR -----------------------------------\\
 	
-	public static Note valueOf(int hexPitch, Value value) {
-		return new Note(Pitch.thatIsMoreCommonForHexValue(hexPitch), value);
+	public static Note valueOf(Pitch pitch, Value value) {
+		return new Note(pitch, value, false);
 	}
 	
-	public static Note valueOf(Pitch pitch, Value value) {
-		return new Note(pitch, value);
+	public static Note valueOf(byte hexNote, Value value, boolean isTied) {
+		Pitch pitch = Pitch.thatIsMoreCommonForHexValue(hexNote);
+		return new Note(pitch, value, isTied);
+	}
+	
+	public static Note valueOf(Pitch pitch, Value value, boolean isTied) {
+		return new Note(pitch, value, isTied);
 	}
 	
 
 	//--------------------------------- PROTECTED CONSTRUCTOR ------------------------------------\\
 
-	protected Note(Pitch pitch, Value value) {
+	protected Note(Pitch pitch, Value value, boolean isTied) {
 		this.pitch = pitch;
 		this.value = value;
+		this.isTied = isTied;
 	}
 	
 	
@@ -43,14 +51,21 @@ public class Note {
 		return value;
 	}
 
+	
+	//---------------------------------------- STATE ---------------------------------------------\\
+
+	public boolean isTied() {
+		return isTied;
+	}
+
 
 	//-------------------------------------- TO STRING -------------------------------------------\\
 
 	public String toCompleteString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append('[').append(pitch.toString());
+		sb.append(isTied ? '(' : '[').append(pitch.toString());
 		sb.append('|').append(value.toString());
-		sb.append(']');
+		sb.append(isTied ? ')' : ']');
 		return sb.toString();
 	}
 	
@@ -58,12 +73,13 @@ public class Note {
 		return pitch.toString();
 	}
 
-
+	
 	//--------------------------------------- EQUALS ---------------------------------------------\\
-
+	
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (isTied ? 1231 : 1237);
 		result = prime * result + ((pitch == null) ? 0 : pitch.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
@@ -77,6 +93,8 @@ public class Note {
 		if (getClass() != obj.getClass())
 			return false;
 		Note other = (Note) obj;
+		if (isTied != other.isTied)
+			return false;
 		if (pitch == null) {
 			if (other.pitch != null)
 				return false;

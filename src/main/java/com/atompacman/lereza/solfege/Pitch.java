@@ -33,9 +33,9 @@ public class Pitch {
 		return enumRepresConstructor.newInstance(repres);
 	}
 
-	public static Pitch thatIsMoreCommonForHexValue(int hexValue) {
-		Tone tone = Tone.thatIsMoreCommonForSemitoneValue(hexValue);
-		Octave octave = Octave.fromHex(hexValue);
+	public static Pitch thatIsMoreCommonForHexValue(byte hexNote) {
+		Tone tone = Tone.thatIsMoreCommonForSemitoneValue(hexNote);
+		Octave octave = Octave.fromHex(hexNote);
 		return new Pitch(tone, octave);
 	}
 	

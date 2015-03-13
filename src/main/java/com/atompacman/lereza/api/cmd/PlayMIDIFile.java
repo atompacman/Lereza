@@ -9,7 +9,7 @@ import com.atompacman.configuana.Flag;
 import com.atompacman.configuana.FlagInfo;
 import com.atompacman.lereza.api.Wizard;
 import com.atompacman.lereza.api.cmd.PlayMIDIFile.CmdFlag;
-import com.atompacman.lereza.exception.InvalidArgumentException;
+import com.atompacman.lereza.exception.InvalidCmdArgException;
 import com.atompacman.lereza.midi.MIDIManager;
 import com.atompacman.toolkat.exception.Throw;
 
@@ -68,7 +68,7 @@ public class PlayMIDIFile implements Cmd<Wizard, CmdFlag> {
 				try {
 					enablTracks[i] = Integer.parseInt(paramValues.get(i));
 				} catch (Exception e) {
-					Throw.aRuntime(InvalidArgumentException.class, 
+					Throw.aRuntime(InvalidCmdArgException.class, 
 							"Track numbers must be integers");
 				}
 			}
@@ -83,7 +83,7 @@ public class PlayMIDIFile implements Cmd<Wizard, CmdFlag> {
 		try {
 			return Long.parseLong(paramValue);
 		} catch (Exception e) {
-			Throw.aRuntime(InvalidArgumentException.class, "Initial position must be an integer");
+			Throw.aRuntime(InvalidCmdArgException.class, "Initial position must be an integer");
 		}
 		return 0;
 	}
@@ -95,7 +95,7 @@ public class PlayMIDIFile implements Cmd<Wizard, CmdFlag> {
 		try {
 			return Integer.parseInt(paramValue);
 		} catch (Exception e) {
-			Throw.aRuntime(InvalidArgumentException.class, "BPM tempo must be an integer");
+			Throw.aRuntime(InvalidCmdArgException.class, "BPM tempo must be an integer");
 		}
 		return 0;
 	}
