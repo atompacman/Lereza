@@ -12,5 +12,6 @@
 
    <modules>
       <module>lereza-core</module>
+      <module>lereza-kpf</module>
    </modules>
 </project>

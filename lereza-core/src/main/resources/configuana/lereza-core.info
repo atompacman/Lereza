@@ -1,0 +1,7 @@
+artifact.name				: ${project.name}
+artifact.description		: ${project.description}
+artifact.groupId			: ${project.groupId}
+artifact.artifactId			: ${project.artifactId}
+artifact.version			: ${project.version}
+configuana.main.class 		: com.atompacman.klusterz.Klusterz
+configuana.default.settings : default

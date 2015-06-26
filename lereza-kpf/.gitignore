@@ -1,4 +1,2 @@
-/Debug
-/Release
-*.sdf
-*.log
+/bin/
+/target/
