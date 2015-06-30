@@ -8,9 +8,9 @@ import java.util.Map;
 import com.atompacman.lereza.core.solfege.Dynamic;
 import com.atompacman.lereza.core.solfege.Pitch;
 import com.atompacman.lereza.core.solfege.Value;
-import com.atompacman.toolkat.module.Anomaly;
-import com.atompacman.toolkat.module.Anomaly.Impact;
-import com.atompacman.toolkat.module.Anomaly.Recoverability;
+import com.atompacman.toolkat.module.AnomalyDescription;
+import com.atompacman.toolkat.module.AnomalyDescription.Impact;
+import com.atompacman.toolkat.module.AnomalyDescription.Recoverability;
 
 public class StackBuilder extends PieceComponentBuilder<Stack<Note>> {
 
@@ -48,7 +48,7 @@ public class StackBuilder extends PieceComponentBuilder<Stack<Note>> {
 
     private enum AN {
 
-        @Anomaly (
+        @AnomalyDescription (
                 name            = "Multiple note entry for same pitch", 
                 description     = "More than one note has been registered for a specific pitch",
                 consequences    = "Ignoring potentially important data", 
@@ -56,7 +56,7 @@ public class StackBuilder extends PieceComponentBuilder<Stack<Note>> {
                 recoverability  = Recoverability.IMPOSSIBLE)
         MULTIPLE_NOTE_ENTRY_FOR_SAME_PITCH,
         
-        @Anomaly (
+        @AnomalyDescription (
                 name            = "Note velocity not between 0 and 127", 
                 description     = "The velocity of a note is not within the range of a byte",
                 consequences    = "Velocity is brought back in the interval", 

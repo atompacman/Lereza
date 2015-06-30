@@ -8,9 +8,9 @@ import org.apache.logging.log4j.Level;
 import com.atompacman.lereza.core.solfege.Pitch;
 import com.atompacman.lereza.core.solfege.RythmicSignature;
 import com.atompacman.lereza.core.solfege.Value;
-import com.atompacman.toolkat.module.Anomaly;
-import com.atompacman.toolkat.module.Anomaly.Impact;
-import com.atompacman.toolkat.module.Anomaly.Recoverability;
+import com.atompacman.toolkat.module.AnomalyDescription;
+import com.atompacman.toolkat.module.AnomalyDescription.Impact;
+import com.atompacman.toolkat.module.AnomalyDescription.Recoverability;
 
 public class BarBuilder extends PieceComponentBuilder<Bar<Stack<Note>>> {
 
@@ -18,7 +18,7 @@ public class BarBuilder extends PieceComponentBuilder<Bar<Stack<Note>>> {
 
     private enum AN {
 
-        @Anomaly (
+        @AnomalyDescription (
                 name            = "Timeunit outside bar limits", 
                 description     = "A note beginning or ending timeunit was outside bar limits",
                 consequences    = "Timeunit is brought back within the limits", 

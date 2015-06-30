@@ -35,11 +35,11 @@ import com.atompacman.lereza.core.solfege.Quality;
 import com.atompacman.lereza.core.solfege.Tone;
 import com.atompacman.toolkat.IO;
 import com.atompacman.toolkat.exception.Throw;
-import com.atompacman.toolkat.module.Anomaly;
+import com.atompacman.toolkat.module.AnomalyDescription;
 import com.atompacman.toolkat.module.Module;
 import com.atompacman.toolkat.module.ProcedureDescription;
-import com.atompacman.toolkat.module.Anomaly.Impact;
-import com.atompacman.toolkat.module.Anomaly.Recoverability;
+import com.atompacman.toolkat.module.AnomalyDescription.Impact;
+import com.atompacman.toolkat.module.AnomalyDescription.Recoverability;
 
 public class MIDIFileReader extends Module {
 
@@ -208,7 +208,7 @@ public class MIDIFileReader extends Module {
 
     private enum AN {
         
-        @Anomaly (
+        @AnomalyDescription (
                 name            = "Ignored MIDI event", 
                 description     = "Processing for some MIDI event is not implemented", 
                 consequences    = "May contain useful information", 
@@ -217,7 +217,7 @@ public class MIDIFileReader extends Module {
                 assocModule     = MIDIFileReader.class)
         IGNORED_MIDI_EVENT,
 
-        @Anomaly (
+        @AnomalyDescription (
                 name            = "Timestamp offset change", 
                 description     = "A change in timestamp rounding delta", 
                 consequences    = "Possible rhythm deviation", 
@@ -226,7 +226,7 @@ public class MIDIFileReader extends Module {
                 assocModule     = MIDIFileReader.class)
         TIMESTAMP_OFFSET_CHANGE,
 
-        @Anomaly (
+        @AnomalyDescription (
                 name            = "Minor timestamp rounding", 
                 description     = "A timestamp had to be slightly rounded", 
                 consequences    = "Possible rhythm deviation", 
@@ -235,7 +235,7 @@ public class MIDIFileReader extends Module {
                 assocModule     = MIDIFileReader.class)
         MINOR_TIMESTAMP_ROUNDING,
 
-        @Anomaly (
+        @AnomalyDescription (
                 name            = "Major timestamp rounding", 
                 description     = "A timestamp had to be heavily rounded", 
                 consequences    = "Expected rhythm deviation", 
@@ -244,7 +244,7 @@ public class MIDIFileReader extends Module {
                 assocModule     = MIDIFileReader.class)
         MAJOR_TIMESTAMP_ROUNDING,
 
-        @Anomaly (
+        @AnomalyDescription (
                 name            = "Chaotic timestamp subsequence", 
                 description     = "A series of timestamps had variable offsets with main rhythm", 
                 consequences    = "Allmost certain rhythm deviation", 
