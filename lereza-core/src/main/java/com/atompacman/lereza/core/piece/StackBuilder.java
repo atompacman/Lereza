@@ -1,6 +1,7 @@
 package com.atompacman.lereza.core.piece;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,59 +10,34 @@ import com.atompacman.lereza.core.solfege.Dynamic;
 import com.atompacman.lereza.core.solfege.Pitch;
 import com.atompacman.lereza.core.solfege.Value;
 import com.atompacman.toolkat.module.AnomalyDescription;
-import com.atompacman.toolkat.module.AnomalyDescription.Impact;
-import com.atompacman.toolkat.module.AnomalyDescription.Recoverability;
+import com.atompacman.toolkat.module.AnomalyDescription.Severity;
 
 public class StackBuilder extends PieceComponentBuilder<Stack<Note>> {
 
     //====================================== CONSTANTS ===========================================\\
 
-    static final int   DEFAULT_VELOCITY = 100;
-    static final Value DEFAULT_VALUE    = Value.QUARTER;
+    static final int         DEFAULT_VELOCITY = 100;
+    static final List<Value> DEFAULT_VALUES   = Arrays.asList(Value.QUARTER);
 
 
 
     //===================================== INNER TYPES ==========================================\\
 
-    private class NoteEntry {
-
-        //===================================== FIELDS ===========================================\\
-
-        public Pitch   pitch;
-        public Value   value;
-        public int     velocity;
-        public boolean isTied;
-
-
-
-        //===================================== METHODS ==========================================\\
-
-        //-------------------------------- PUBLIC CONSTRUCTOR ------------------------------------\\
-
-        public NoteEntry(Pitch pitch, Value value, int velocity, boolean isTied) {
-            this.pitch    = pitch;
-            this.value    = value;
-            this.velocity = velocity;
-            this.isTied   = isTied;
-        }
-    }
-
-    private enum AN {
+    private enum Anomaly {
 
         @AnomalyDescription (
-                name            = "Multiple note entry for same pitch", 
+                name            = "Multiple note entry for same pitch",
+                detailsFormat   = "A note of pitch \"%s\" was already added to the %s note stack",
                 description     = "More than one note has been registered for a specific pitch",
                 consequences    = "Ignoring potentially important data", 
-                impact          = Impact.MINIMAL, 
-                recoverability  = Recoverability.IMPOSSIBLE)
+                severity        = Severity.MINIMAL)
         MULTIPLE_NOTE_ENTRY_FOR_SAME_PITCH,
-        
+
         @AnomalyDescription (
                 name            = "Note velocity not between 0 and 127", 
                 description     = "The velocity of a note is not within the range of a byte",
                 consequences    = "Velocity is brought back in the interval", 
-                impact          = Impact.MINIMAL, 
-                recoverability  = Recoverability.TRIVIAL)
+                severity        = Severity.MINIMAL)
         VELOCITY_NOT_BETWEEN_0_AND_127;
     }
 
@@ -69,13 +45,13 @@ public class StackBuilder extends PieceComponentBuilder<Stack<Note>> {
 
     //======================================= FIELDS =============================================\\
 
-    private final List<NoteEntry> startingNotes;
-    private final List<NoteEntry> startedNotes;
+    private final List<Note>    startingNotes;
+    private final List<Note>    startedNotes;
+    private final List<Integer> velocities;
 
-    private Value   currValue;
-    private int     currVelocity;
-    private boolean currIsTied;
-
+    private List<Value> currValues;
+    private int         currVelocity;
+    private boolean     currIsStarting;
 
 
     //======================================= METHODS ============================================\\
@@ -85,35 +61,49 @@ public class StackBuilder extends PieceComponentBuilder<Stack<Note>> {
     public StackBuilder() {
         this.startingNotes  = new LinkedList<>();
         this.startedNotes   = new LinkedList<>();
-        
-        this.currValue      = DEFAULT_VALUE;
+        this.velocities     = new LinkedList<>();
+
+        this.currValues     = DEFAULT_VALUES;
         this.currVelocity   = DEFAULT_VELOCITY;
-        this.currIsTied     = false;
+        this.currIsStarting = true;
     }
 
 
     //----------------------------------------- ADD ----------------------------------------------\\
 
-    public StackBuilder add(Pitch pitch, Value value, int velocity, boolean isTied) {
-        startingNotes.add(new NoteEntry(pitch, value, velocity, isTied));
+    public StackBuilder add(Note note, int velocity, boolean isStarting) {
+        if (isStarting) {
+            startingNotes.add(note);
+            velocities.add(velocity);
+        } else {
+            startedNotes.add(note);
+        }
         return this;
+    }
+
+    public StackBuilder add(Pitch pitch, List<Value> values, int velocity, boolean isStarting) {
+        return add(Note.valueOf(pitch, values), velocity, isStarting);
+    }
+
+    public StackBuilder add(Note note) {
+        return add(note, currVelocity, currIsStarting);
     }
 
     public StackBuilder add(Pitch pitch) {
-        return add(pitch, currValue, currVelocity, currIsTied);
+        return add(Note.valueOf(pitch, currValues), currVelocity, currIsStarting);
     }
 
-    public StackBuilder addStarted(Pitch pitch, Value value, int velocity, boolean isTied) {
-        startedNotes.add(new NoteEntry(pitch, value, velocity, isTied));
+    public StackBuilder add(String pitch) {
+        return add(Note.valueOf(pitch, currValues), currVelocity, currIsStarting);
+    }
+
+    public StackBuilder values(List<Value> values) {
+        currValues = values;
         return this;
     }
 
-    public StackBuilder addStarted(Pitch pitch) {
-        return addStarted(pitch, currValue, currVelocity, currIsTied);
-    }
-
     public StackBuilder value(Value value) {
-        this.currValue = value;
+        currValues = Arrays.asList(value);
         return this;
     }
 
@@ -122,8 +112,8 @@ public class StackBuilder extends PieceComponentBuilder<Stack<Note>> {
         return this;
     }
 
-    public StackBuilder isTied(boolean isTied) {
-        this.currIsTied = isTied;
+    public StackBuilder isStarting(boolean isStarting) {
+        this.currIsStarting = isStarting;
         return this;
     }
 
@@ -132,58 +122,46 @@ public class StackBuilder extends PieceComponentBuilder<Stack<Note>> {
 
     protected Stack<Note> buildComponent() {
         // Create starting notes map
-        Map<Pitch, NoteEntry> startingNotesMap = new HashMap<>();
-        for (NoteEntry startingEntry : startingNotes) {
-            putEntryInMap(startingEntry, startingNotesMap, "starting");
-        }
-        
-        // Create started notes map
-        Map<Pitch, NoteEntry> startedNotesMap = new HashMap<>();
-        for (NoteEntry startedEntry : startedNotes) {
-            putEntryInMap(startedEntry, startedNotesMap, "started");
-            if (startingNotesMap.remove(startedEntry.pitch) != null) {
-                signal(AN.MULTIPLE_NOTE_ENTRY_FOR_SAME_PITCH, "A started note of pitch " + 
-                    startedEntry.pitch.toString() +" was already added to the starting note stack");
+        Map<Pitch, Note> startingNotesMap = new LinkedHashMap<>();
+        for (Note note : startingNotes) {
+            if (startingNotesMap.put(note.getPitch(), note) != null) {
+                signal(Anomaly.MULTIPLE_NOTE_ENTRY_FOR_SAME_PITCH, note.getPitch(), "starting");
             }
         }
-        
+
+        // Create started notes map
+        Map<Pitch, Note> startedNotesMap = new LinkedHashMap<>();
+        for (Note note : startedNotes) {
+            if (startedNotesMap.put(note.getPitch(), note) != null) {
+                signal(Anomaly.MULTIPLE_NOTE_ENTRY_FOR_SAME_PITCH, note.getPitch(), "started");
+            }
+            if (startingNotesMap.remove(note.getPitch()) != null) {
+                signal(Anomaly.MULTIPLE_NOTE_ENTRY_FOR_SAME_PITCH, note.getPitch(), "starting");
+            }
+        }
+
         Dynamic dynamic = null;
-        
+
         if (!startingNotesMap.isEmpty()) {
             // Compute note stack overall dynamic
             int velocitySum = 0;
-            for (NoteEntry entry : startingNotesMap.values()) {
-                if (entry.velocity < 0) {
-                    entry.velocity = 0;
-                    signal(AN.VELOCITY_NOT_BETWEEN_0_AND_127, "Negative note velocity");
+            for (int velocity : velocities) {
+                if (velocity < 0) {
+                    velocity = 0;
+                    signal(Anomaly.VELOCITY_NOT_BETWEEN_0_AND_127, "Negative note velocity");
                 }
-                if (entry.velocity >= 128) {
-                    entry.velocity = 127;
-                    signal(AN.VELOCITY_NOT_BETWEEN_0_AND_127, "Note velocity above 127");
+                if (velocity >= 128) {
+                    velocity = 127;
+                    signal(Anomaly.VELOCITY_NOT_BETWEEN_0_AND_127, "Note velocity above 127");
                 }
-                velocitySum += entry.velocity;
+                velocitySum += velocity;
             }
-            double avg = (double) velocitySum / (double) startingNotesMap.size();
+            double avg = (double) velocitySum / (double) velocities.size();
             dynamic = Dynamic.valueOf((byte) Math.rint(avg));
         }
-        
+
         // Create definitive stack data structure
-        return new Stack<Note>(toNoteMap(startingNotesMap), toNoteMap(startedNotesMap), dynamic);
-    }
-
-    private void putEntryInMap(NoteEntry entry, Map<Pitch, NoteEntry> map, String mapName) {
-        if (map.put(entry.pitch, entry) != null) {
-            signal(AN.MULTIPLE_NOTE_ENTRY_FOR_SAME_PITCH, "A note of pitch " + entry.pitch 
-                    + " was already added to the " + mapName + " note stack");
-        }
-    }
-
-    private static Map<Pitch, Note> toNoteMap(Map<Pitch, NoteEntry> entries) {
-        Map<Pitch, Note> notes = new HashMap<>();
-        for (NoteEntry entry : entries.values()) {
-            notes.put(entry.pitch, Note.valueOf(entry.pitch, entry.value, entry.isTied));
-        }
-        return notes;
+        return new Stack<Note>(startingNotesMap, startedNotesMap, dynamic);
     }
 
 

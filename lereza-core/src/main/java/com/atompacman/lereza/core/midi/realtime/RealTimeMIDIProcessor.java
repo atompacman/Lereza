@@ -7,29 +7,27 @@ import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.atompacman.toolkat.misc.Log;
 
 public abstract class RealTimeMIDIProcessor implements Receiver {
 
-    //====================================== CONSTANTS ===========================================\\
-
-    private static final Logger logger = LogManager.getLogger(RealTimeMIDIProcessor.class);
-    
-    public static final int MILLIS_PER_TIMEUNIT = 20;
-
-    
-
     //======================================= FIELDS =============================================\\
 
+    // Settings
+    private final int timeIntervalMillis;
+
+    // Status
+    private boolean started;
+
+    // Temporary
+    private final List<MidiEvent> events;
     private long seqStartTime;
-    private List<MidiEvent> events;
-    
+
 
 
     //=================================== ABSTRACT METHODS =======================================\\
 
-    public abstract void process(List<MidiEvent> events, int endTU);
+    public abstract void process(List<MidiEvent> events);
 
 
 
@@ -38,41 +36,53 @@ public abstract class RealTimeMIDIProcessor implements Receiver {
     //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
     public RealTimeMIDIProcessor(int timeIntervalMillis) {
+        // Settings
+        this.timeIntervalMillis = timeIntervalMillis;
+
+        // Status
+        this.started = false;
+
+        // Temporary
         this.seqStartTime = 0;
         this.events = new LinkedList<>();
+    }
+
+
+    //---------------------------------------- START ---------------------------------------------\\
+
+    public void start() {
+        if (started) {
+            Log.warn("Real-time MIDI processor was already started");
+            return;
+        }
         
         new Thread(new Runnable() {
             public void run() {
                 try {
                     while (true) {
-                        seqStartTime = System.currentTimeMillis();
+                        seqStartTime = System.nanoTime();
                         Thread.sleep(timeIntervalMillis);
-                        process(new LinkedList<>(events), timeIntervalMillis / MILLIS_PER_TIMEUNIT);
+                        LinkedList<MidiEvent> copy = new LinkedList<>(events);
                         events.clear();
+                        process(copy);
                     }
                 } catch (InterruptedException e) {
-                    logger.error(e);
+                    Log.error(e);
                 }
             }
         }).start();
+        
+        started = true;
     }
 
-    
+
     //---------------------------------------- SEND ----------------------------------------------\\
 
     public void send(MidiMessage msg, long timestamp) {
-        events.add(new MidiEvent(msg, (int) (System.currentTimeMillis() 
-                - seqStartTime) / MILLIS_PER_TIMEUNIT));
+        events.add(new MidiEvent(msg, (int) ((System.nanoTime() - seqStartTime) * 0.001)));
     }
 
 
-    //--------------------------------------- GETTERS --------------------------------------------\\
-
-    public List<MidiEvent> getEvents() {
-        return events;
-    }
-    
-    
     //---------------------------------------- CLOSE ---------------------------------------------\\
 
     public void close() {

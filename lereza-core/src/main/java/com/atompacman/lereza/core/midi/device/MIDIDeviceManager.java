@@ -13,10 +13,8 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.atompacman.toolkat.exception.Throw;
+import com.atompacman.toolkat.misc.Log;
 
 public class MIDIDeviceManager {
 
@@ -34,7 +32,6 @@ public class MIDIDeviceManager {
     
     //====================================== CONSTANTS ===========================================\\
 
-    private static final Logger logger = LogManager.getLogger(MIDIDeviceManager.class);
     private static final Set<String> DEVICES_TO_IGNORE = new HashSet<>(Arrays.asList(
             "[Unknown vendor] Microsoft MIDI Mapper (v5.0) - Windows MIDI_MAPPER"));
     
@@ -53,9 +50,9 @@ public class MIDIDeviceManager {
     //---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
 
     private MIDIDeviceManager() {
-        logger.info("Starting MIDI device manager");
+        Log.info("Starting MIDI device manager");
         this.detectedDevices = new HashSet<>();
-        this.openedDevices = new HashMap<>();
+        this.openedDevices   = new HashMap<>();
         refreshDevices();
     }
     
@@ -79,7 +76,7 @@ public class MIDIDeviceManager {
         
         String transmiterName = transmitter.getAPIInfo().getName();
         try {
-            logger.debug("Connecting \"" + transmiterName + "\" to \"" + receiverName + "\"");
+            Log.debug("Connecting \"%s\" to \"%s\"", transmiterName, receiverName);
             getDevice(transmitter).getTransmitter().setReceiver(receiver);
         } catch (MIDIDeviceException | MidiUnavailableException e) {
             Throw.a(MIDIDeviceException.class, "Could not connect " + 
@@ -91,7 +88,7 @@ public class MIDIDeviceManager {
     //------------------------------------- CLOSE DEVICES ----------------------------------------\\
 
     public void closeAllDevices() {
-        logger.debug("Closing opened devices");
+        Log.debug("Closing opened devices");
         for (MidiDevice device : openedDevices.values()) {
             device.close();
         }
@@ -108,7 +105,7 @@ public class MIDIDeviceManager {
         MidiDevice device = openedDevices.get(deviceInfo);
         
         if (device == null) {
-            logger.debug("Opening device \"" + deviceInfo + "\"");
+            Log.debug("Opening device \"%s\"", deviceInfo);
             try {
                 device = MidiSystem.getMidiDevice(deviceInfo.getAPIInfo());
                 if (!device.isOpen()) {
@@ -154,17 +151,17 @@ public class MIDIDeviceManager {
     //------------------------------------ REFRESH DEVICES ---------------------------------------\\
     
     public void refreshDevices() {
-        logger.debug("Refreshing available devices");
+        Log.debug("Refreshing available devices");
         detectedDevices.clear();
         for (MidiDevice.Info deviceInfo : MidiSystem.getMidiDeviceInfo()) {
             MIDIDeviceInfo info = new MIDIDeviceInfo(deviceInfo);
             
             if (DEVICES_TO_IGNORE.contains(info.toString())) {
-                logger.debug("Ignored : " + info);
+                Log.debug("Ignored : %s", info);
             } else {
-                logger.info("Detected: " + info);
+                Log.info("Detected: %s", info);
                 if (!detectedDevices.add(info)) {
-                    logger.warn("Ignore additionnal MIDI devices with description \"" + info + "\"");
+                    Log.warn("Ignore additionnal MIDI devices with description \"%s\"", info);
                 }
             }
         }

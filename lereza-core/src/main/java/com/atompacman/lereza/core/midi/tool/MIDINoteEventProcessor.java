@@ -6,35 +6,28 @@ import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.atompacman.toolkat.misc.Log;
 
 public final class MIDINoteEventProcessor {
 
-    //====================================== CONSTANTS ===========================================\\
-
-    private static final Logger logger = LogManager.getLogger(MIDINoteEventProcessor.class);
-
-    
-    
     //===================================== INNER TYPES ==========================================\\
 
     @FunctionalInterface
     public interface Function {
         void processNoteEvent(byte hexNote, long tick);
     }
-    
-    
-    
+
+
+
     //======================================= METHODS ============================================\\
 
     //---------------------------------- PRIVATE CONSTRUCTOR -------------------------------------\\
 
     private MIDINoteEventProcessor() {
-        
+
     }
-    
-    
+
+
     //--------------------------------------- PROCESS --------------------------------------------\\
 
     public static void process(Collection<MidiEvent> events, Function noteOn, Function noteOff) {
@@ -46,7 +39,7 @@ public final class MIDINoteEventProcessor {
     public static void process(MidiEvent event, Function noteOn, Function noteOff) {
         process(event.getMessage(), event.getTick(), noteOn, noteOff);
     }
-    
+
     public static void process(MidiMessage msg, long tick, Function noteOn, Function noteOff) {
         switch (msg.getStatus()) {
         case ShortMessage.NOTE_ON:
@@ -56,7 +49,7 @@ public final class MIDINoteEventProcessor {
             noteOff.processNoteEvent((byte)((ShortMessage) msg).getData1(), tick);
             break;
         default:
-            logger.warn("Ignoring event with unknown status byte \"" + msg.getStatus());
+            Log.warn("Ignoring event with unknown status byte \"%s", msg.getStatus());
         }
     }
 }

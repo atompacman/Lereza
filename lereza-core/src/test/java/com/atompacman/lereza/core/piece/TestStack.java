@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import org.junit.Before;
@@ -35,9 +36,7 @@ public class TestStack extends AbstractTest {
 
     @Test
     public void addSimpleStartingNotes() {
-        builder.add(Pitch.valueOf("C5"))
-               .add(Pitch.valueOf("E5"))
-               .add(Pitch.valueOf("G5"));
+        builder.add("C5").add("E5").add("G5");
 
         Stack<Note> stack = buildAndPerformBasicAssertions(3, 0);
 
@@ -45,15 +44,13 @@ public class TestStack extends AbstractTest {
         assertTrue(set.contains(Note.valueOf(Pitch.valueOf("E5"), Value.QUARTER)));
         assertTrue(stack.containsNoteOfPitch(Pitch.valueOf("E5")));
         Note note = stack.getNote(Pitch.valueOf("E5"));
-        assertEquals(StackBuilder.DEFAULT_VALUE, note.getValue());
+        assertEquals(StackBuilder.DEFAULT_VALUES, note.getValues());
         assertEquals(StackBuilder.DEFAULT_VELOCITY, stack.getDynamic().getVelocity());
     }
 
     @Test
     public void addSimpleStartedNotes() {
-        builder.addStarted(Pitch.valueOf("F3"))
-               .addStarted(Pitch.valueOf("Ab8"))
-               .addStarted(Pitch.valueOf("G#2"));
+        builder.isStarting(false).add("F3").add("Ab8").add("G#2");
 
         Stack<Note> stack = buildAndPerformBasicAssertions(0, 3);
 
@@ -61,43 +58,35 @@ public class TestStack extends AbstractTest {
         assertTrue(set.contains(Note.valueOf(Pitch.valueOf("F3"), Value.QUARTER)));
         assertTrue(stack.containsNoteOfPitch(Pitch.valueOf("Ab8")));
         Note note = stack.getNote(Pitch.valueOf("G#2"));
-        assertEquals(StackBuilder.DEFAULT_VALUE, note.getValue());
+        assertEquals(StackBuilder.DEFAULT_VALUES, note.getValues());
     }
 
     @Test
     public void addStartingNotes() {
-        builder.velocity(50) .isTied(false).value(Value.EIGHTH)    .add(Pitch.valueOf("B1"))
-                                           .value(Value.SIXTYFORTH).add(Pitch.valueOf("D1"))
-               .velocity(100)                                      .add(Pitch.valueOf("F1"))
-                             .isTied(true)                         .add(Pitch.valueOf("A1"));
+        builder.velocity(50) .value(Value.EIGHTH)    .add(Pitch.valueOf("B1"))
+                             .value(Value.SIXTYFORTH).add(Pitch.valueOf("D1"))
+               .velocity(100)                        .add(Pitch.valueOf("F1"))
+                                                     .add(Pitch.valueOf("A1"));
 
         Stack<Note> stack = buildAndPerformBasicAssertions(4, 0);
-        
+
         assertEquals(75, stack.getDynamic().getVelocity());
-        
-        assertEquals(false, stack.getNote(Pitch.valueOf("B1")).isTied());
-        assertEquals(true, stack.getNote(Pitch.valueOf("A1")).isTied());
-        
-        assertEquals(Value.EIGHTH, stack.getNote(Pitch.valueOf("B1")).getValue());
-        assertEquals(Value.SIXTYFORTH, stack.getNote(Pitch.valueOf("F1")).getValue());
+        assertEquals(Value.EIGHTH,     stack.getNote(Pitch.valueOf("B1")).getMainValue());
+        assertEquals(Value.SIXTYFORTH, stack.getNote(Pitch.valueOf("F1")).getMainValue());
     }
 
     @Test
     public void addBothTypeOfNotes() {
-        builder.velocity(50) .isTied(false).value(Value.EIGHTH)    .add       (Pitch.valueOf("B1"))
-                                           .value(Value.SIXTYFORTH).add       (Pitch.valueOf("D1"))
-               .velocity(100)                                      .addStarted(Pitch.valueOf("F1"))
-                             .isTied(true)                         .addStarted(Pitch.valueOf("A1"));
+        builder.isStarting(true) .velocity(50) .value(Value.EIGHTH)    .add(Pitch.valueOf("B1"))
+                                               .value(Value.SIXTYFORTH).add(Pitch.valueOf("D1"))
+               .isStarting(false).velocity(100)                        .add(Pitch.valueOf("F1"))
+                                               .value(Value.HALF)      .add(Pitch.valueOf("A1"));
 
         Stack<Note> stack = buildAndPerformBasicAssertions(2, 2);
-        
+
         assertEquals(50, stack.getDynamic().getVelocity());
-        
-        assertEquals(false, stack.getNote(Pitch.valueOf("B1")).isTied());
-        assertEquals(true, stack.getNote(Pitch.valueOf("A1")).isTied());
-        
-        assertEquals(Value.EIGHTH, stack.getNote(Pitch.valueOf("B1")).getValue());
-        assertEquals(Value.SIXTYFORTH, stack.getNote(Pitch.valueOf("F1")).getValue());
+        assertEquals(Value.EIGHTH,     stack.getNote(Pitch.valueOf("B1")).getMainValue());
+        assertEquals(Value.SIXTYFORTH, stack.getNote(Pitch.valueOf("F1")).getMainValue());
     }
 
     @Test
@@ -108,10 +97,10 @@ public class TestStack extends AbstractTest {
 
     @Test
     public void anomalyWhenAddingMultipleTimeTheSamePitchII() {
-        builder.add(Pitch.valueOf("C5")).addStarted(Pitch.valueOf("C5"));
+        builder.add(Pitch.valueOf("C5")).isStarting(false).add(Pitch.valueOf("C5"));
         buildAndPerformBasicAssertions(0, 1);
     }
-    
+
     @Test
     public void anomalyVelocityIsNegative() {
         builder.velocity(-32).add(Pitch.valueOf("C5"));
@@ -127,7 +116,7 @@ public class TestStack extends AbstractTest {
     @Test
     public void cannotGetStackDynamicWhenThereAreNoStartingNotes() {
         expect("Cannot get dynamic of a stack with no starting notes");
-        builder.addStarted(Pitch.valueOf("F3"));
+        builder.isStarting(false).add(Pitch.valueOf("F3"));
         buildAndPerformBasicAssertions(0, 1).getDynamic();
     }
 
@@ -135,7 +124,7 @@ public class TestStack extends AbstractTest {
     public void emptyStack() {
         buildAndPerformBasicAssertions(0, 0);
     }
-    
+
     @Test
     public void missingNote() {
         expect("Does not contain a note of pitch \"C3\".");
@@ -144,22 +133,33 @@ public class TestStack extends AbstractTest {
         stack.getNote(Pitch.valueOf("C3"));
     }
 
+    @Test
+    public void staccatoSerialization() {
+        builder.add(Pitch.valueOf("Ab4"), Arrays.asList(Value.QUARTER),            70, true)
+               .add(Pitch.valueOf("C3"),  Arrays.asList(Value.SIXTEENTH),          80, true)
+               .add(Pitch.valueOf("F#7"), Arrays.asList(Value.HALF, Value.EIGHTH), 30, true)
+               .add(Pitch.valueOf("Bb1"), Arrays.asList(Value.HALF),               32, false);
+
+        Stack<Note> stack = buildAndPerformBasicAssertions(3, 1);
+
+        assertEquals("Ab4qA60+C3sA60+F#7hiA60", stack.toStaccato());
+    }
+
 
     //--------------------------------------- HELPERS --------------------------------------------\\
 
     private Stack<Note> buildAndPerformBasicAssertions(int numStartingNotes, int numStartedNotes) {
-        
         // Build note stack
         Stack<Note> stack = builder.build();
 
         // Get sets
-        assertEquals(numStartingNotes, stack.getStartingNotes().size());
-        assertEquals(numStartedNotes, stack.getStartedNotes().size());
+        assertEquals(numStartingNotes,                   stack.getStartingNotes().size());
+        assertEquals(numStartedNotes,                    stack.getStartedNotes().size());
         assertEquals(numStartingNotes + numStartedNotes, stack.getPlayingNotes().size());
 
         // Get num
-        assertEquals(numStartingNotes, stack.getNumStartingNotes());
-        assertEquals(numStartedNotes, stack.getNumStartedNotes());
+        assertEquals(numStartingNotes,                   stack.getNumStartingNotes());
+        assertEquals(numStartedNotes,                    stack.getNumStartedNotes());
         assertEquals(numStartingNotes + numStartedNotes, stack.getNumPlayingNotes());
 
         // Get dynamic

@@ -32,8 +32,8 @@ public abstract class PressedKeysListener implements Receiver {
     
     //---------------------------------------- SEND ----------------------------------------------\\
     
-    public void send(MidiMessage message, long timeStamp) {
-        MIDINoteEventProcessor.process(message, timeStamp,
+    public void send(MidiMessage message, long timestamp) {
+        MIDINoteEventProcessor.process(message, timestamp,
                 (hexNote, tick) -> heldKeys[hexNote] = true,
                 (hexNote, tick) -> heldKeys[hexNote] = false);
         update(heldKeys);

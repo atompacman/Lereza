@@ -1,1 +1,1 @@
-"System\\Simple\\MonophonicSequences" = yolo
+System/Simple/MonophonicSequences/FreresJacques.mid = yolo

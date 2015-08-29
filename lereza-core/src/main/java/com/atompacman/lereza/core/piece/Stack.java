@@ -1,6 +1,7 @@
 package com.atompacman.lereza.core.piece;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,8 +24,8 @@ public class Stack<T extends Note> implements PieceComponent {
 
     protected Stack(Map<Pitch, T> startingNotes, Map<Pitch, T> startedNotes, Dynamic dynamic) {
         this.startingNotes = startingNotes;
-        this.startedNotes = startedNotes;
-        this.dynamic = dynamic;
+        this.startedNotes  = startedNotes;
+        this.dynamic       = dynamic;
     }
 
 
@@ -93,5 +94,21 @@ public class Stack<T extends Note> implements PieceComponent {
 
     public boolean hasPlayingNotes() {
         return hasStartingNotes() || hasStartedNotes();
+    }
+
+
+    //-------------------------------------- TO STRING -------------------------------------------\\
+
+    public String toStaccato() {
+        if (startingNotes.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        Iterator<T> it = startingNotes.values().iterator();
+        sb.append(it.next().toStaccato((byte) dynamic.getVelocity()));
+        while (it.hasNext()) {
+            sb.append('+').append(it.next().toStaccato((byte) dynamic.getVelocity()));
+        }
+        return sb.toString();
     }
 }

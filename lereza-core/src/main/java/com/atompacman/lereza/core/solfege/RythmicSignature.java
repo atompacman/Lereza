@@ -55,4 +55,11 @@ public final class RythmicSignature {
     public int timeunitsInABar() {
         return meterNum * Value.QUARTER.toTimeunit();
     }
+
+
+    //-------------------------------------- TO STRING -------------------------------------------\\
+
+    public String toString() {
+        return "[" + meterNum + "|" + meterDen + "]";
+    }
 }

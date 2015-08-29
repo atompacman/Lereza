@@ -62,4 +62,15 @@ public final class Piece<T extends Stack<?>> implements PieceComponent {
     public boolean hasAssociatedMIDISequence() {
         return midiSeq != null;
     }
+
+
+    //-------------------------------------- TO STRING -------------------------------------------\\
+
+    public String toStaccato() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parts.size(); ++i) {
+            sb.append('V').append(i).append(' ').append(parts.get(i).toStaccato()).append(' ');
+        }
+        return sb.toString();
+    }
 }
