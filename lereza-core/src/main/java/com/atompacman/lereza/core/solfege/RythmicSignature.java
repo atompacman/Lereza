@@ -1,5 +1,7 @@
 package com.atompacman.lereza.core.solfege;
 
+import java.nio.ByteBuffer;
+
 public final class RythmicSignature {
 
     //====================================== CONSTANTS ===========================================\\
@@ -28,7 +30,13 @@ public final class RythmicSignature {
         return new RythmicSignature(meterNum, meterDen, noteGrouping);
     }
 
+    //- - - - - - - - - - - - - - - - - - - FROM BINARY - - - - - - - - - - - - - - - - - - - - - \\
 
+    public static RythmicSignature valueOf(ByteBuffer buffer) {
+        return new RythmicSignature(buffer.get(), buffer.get(), Grouping.values()[buffer.get()]);
+    }
+    
+    
     //--------------------------------- PRIVATE CONSTRUCTOR --------------------------------------\\
 
     private RythmicSignature(int meterNum, int meterDen, Grouping noteGrouping) {

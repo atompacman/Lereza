@@ -4,42 +4,46 @@ import com.atompacman.lereza.core.profile.drum.punctuation.Punctuation;
 
 public class DrumPattern {
 
-	//======================================= FIELDS =============================================\\
+    //======================================= FIELDS =============================================\\
 
-	private final DrumBeat 		beat;
-	private final int		 	nbRepet;
-	private final Punctuation 	punctuation;
-	private final DrumBeat		fill;
-	
-	
-	
-	//======================================= METHODS ============================================\\
+    private final DrumBeat    beat;
+    private final int         numRepet;
+    private final Punctuation punctuation;
+    private final DrumBeat    fill;
 
-	//---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-	public DrumPattern(DrumBeat beat, int nbRepet, Punctuation punctuation, DrumBeat fill) {
-		this.beat = beat;
-		this.nbRepet = nbRepet;
-		this.punctuation = punctuation;
-		this.fill = fill;
-	}
 
-	
-	//--------------------------------------- GETTERS --------------------------------------------\\
+    //======================================= METHODS ============================================\\
 
-	public DrumBeat getBeat() {
-		return beat;
-	}
-	
-	public int getNbRepet() {
-		return nbRepet;
-	}
-	
-	public Punctuation getPunctuation() {
-		return punctuation;
-	}
-	
-	public DrumBeat getFill() {
-		return fill;
-	}
+    //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
+
+    public DrumPattern(DrumBeat beat, int numRepet, Punctuation punctuation, DrumBeat fill) {
+        this.beat        = beat;
+        this.numRepet    = numRepet;
+        this.punctuation = punctuation;
+        this.fill        = fill;
+    }
+
+
+    //--------------------------------------- GETTERS --------------------------------------------\\
+
+    public DrumBeat getBeat() {
+        return beat;
+    }
+
+    public int getNbRepet() {
+        return numRepet;
+    }
+
+    public Punctuation getPunctuation() {
+        return punctuation;
+    }
+
+    public DrumBeat getFill() {
+        return fill;
+    }
+
+    public int getNumBars() {
+        return numRepet * beat.getNumBars();
+    }
 }

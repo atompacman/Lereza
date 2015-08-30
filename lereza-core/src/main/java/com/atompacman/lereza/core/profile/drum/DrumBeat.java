@@ -1,5 +1,6 @@
 package com.atompacman.lereza.core.profile.drum;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,54 +8,65 @@ import com.atompacman.lereza.core.solfege.RythmicSignature;
 
 public class DrumBeat {
 
-	//======================================= FIELDS =============================================\\
+    //======================================= FIELDS =============================================\\
 
-	private RythmicSignature rythSign;
-	private int				 nbBars;
-	private int				 bpm;
-	
-	private Map<PercussionElement, PercussionPattern> patterns;
+    private RythmicSignature rythSign;
+    private int              numBars;
 
-	
-	
-	//======================================= METHODS ============================================\\
+    private Map<PercussionElement, PercussionPattern> patterns;
 
-	//---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-	public DrumBeat(RythmicSignature rythSign, int nbBars, int bpm) {
-		this.rythSign 	= rythSign;
-		this.nbBars 	= nbBars;
-		this.bpm 		= bpm;
-		this.patterns	= new HashMap<>();
-	}
-	
-	
-	//--------------------------------------- SETTERS --------------------------------------------\\
 
-	public void addPattern(PercussionElement elem, PercussionPattern pattern) {
-		if (patterns.put(elem, pattern) != null) {
-			throw new IllegalArgumentException("A " + elem + " pattern "
-					+ "was already added to this pattern.");
-		}
-	}
-	
-	
-	//--------------------------------------- GETTERS --------------------------------------------\\
+    //======================================= METHODS ============================================\\
 
-	public RythmicSignature getRythSign() {
-		return rythSign;
-	}
+    //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-	public int getNbBars() {
-		return nbBars;
-	}
+    public DrumBeat(RythmicSignature rythSign, int numBars) {
+        this.rythSign = rythSign;
+        this.numBars  = numBars;
+        this.patterns = new HashMap<>();
+    }
 
-	public int getBpm() {
-		return bpm;
-	}
+    //- - - - - - - - - - - - - - - - - - - FROM BINARY - - - - - - - - - - - - - - - - - - - - - \\
 
-	
-	public Map<PercussionElement, PercussionPattern> getPatterns() {
-		return patterns;
-	}
+    public DrumBeat(ByteBuffer buffer) {
+        // Create beat from rhythmic signature and number of bars
+        this(RythmicSignature.valueOf(buffer), buffer.get());
+        
+        // Read percussion patterns
+        int numTracks = buffer.get();
+        for (int i = 0; i < numTracks; ++i) {
+            addPattern(new PercussionPattern(buffer));
+        }
+    }
+    
+    
+    //--------------------------------------- SETTERS --------------------------------------------\\
+
+    public void addPattern(PercussionPattern pattern) {
+        if (patterns.put(pattern.getPercussionElement(), pattern) != null) {
+            throw new IllegalArgumentException("A " + pattern.getPercussionElement() + 
+                    " pattern was already added to this pattern.");
+        }
+    }
+
+
+    //--------------------------------------- GETTERS --------------------------------------------\\
+
+    public RythmicSignature getRythSign() {
+        return rythSign;
+    }
+
+    public int getNumBars() {
+        return numBars;
+    }
+
+    public int getLengthTU() {
+        double numOnDen=(double)rythSign.getMeterNumerator()/(double)rythSign.getMeterDenominator();
+        return (int)((double)numBars * numOnDen * 64.0); 
+    }
+    
+    public Map<PercussionElement, PercussionPattern> getPatterns() {
+        return patterns;
+    }
 }

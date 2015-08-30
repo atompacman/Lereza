@@ -12,6 +12,7 @@ import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
+import javax.sound.midi.Transmitter;
 
 import com.atompacman.toolkat.exception.Throw;
 import com.atompacman.toolkat.misc.Log;
@@ -74,16 +75,29 @@ public class MIDIDeviceManager {
     public void connectDeviceToReceiver(MIDIDeviceInfo transmitter, 
             Receiver receiver, String receiverName) throws MIDIDeviceException {
         
-        String transmiterName = transmitter.getAPIInfo().getName();
+        String transmitterName = transmitter.getAPIInfo().getName();
         try {
-            Log.debug("Connecting \"%s\" to \"%s\"", transmiterName, receiverName);
+            Log.debug("Connecting \"%s\" to \"%s\"", transmitterName, receiverName);
             getDevice(transmitter).getTransmitter().setReceiver(receiver);
         } catch (MIDIDeviceException | MidiUnavailableException e) {
             Throw.a(MIDIDeviceException.class, "Could not connect " + 
-                    transmiterName + " to " + receiverName, e);
+                    transmitterName + " to " + receiverName, e);
         }
     }
 
+    public void connectTransmitterToDevice(Transmitter transmitter, 
+            MIDIDeviceInfo receiver, String transmitterName) throws MIDIDeviceException {
+        
+        String receiverName = receiver.getAPIInfo().getName();
+        try {
+            Log.debug("Connecting \"%s\" to \"%s\"", transmitterName, receiverName);
+            transmitter.setReceiver(getDevice(receiver).getReceiver());
+        } catch (MIDIDeviceException | MidiUnavailableException e) {
+            Throw.a(MIDIDeviceException.class, "Could not connect " + 
+                    transmitterName + " to " + receiverName, e);
+        }
+    }
+    
     
     //------------------------------------- CLOSE DEVICES ----------------------------------------\\
 

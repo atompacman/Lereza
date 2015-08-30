@@ -1,6 +1,6 @@
 package com.atompacman.lereza.core.profile.drum;
 
 public enum PercussionType {
-	
-	CYMBAL, TOM, SNARE, BASS_DRUM, OTHER;
+
+    BASS_DRUM, SNARE, HI_HAT, TOM, CRASH, RIDE, AFRO_LATIN, OTHER
 }

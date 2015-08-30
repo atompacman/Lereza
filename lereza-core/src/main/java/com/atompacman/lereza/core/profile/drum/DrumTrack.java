@@ -1,41 +1,35 @@
 package com.atompacman.lereza.core.profile.drum;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class DrumTrack {
 
-	//======================================= FIELDS =============================================\\
+    //======================================= FIELDS =============================================\\
 
-	private List<DrumPattern> patterns;
-	private int				  firstBar;
-	
-	
-		
-	//======================================= METHODS ============================================\\
-
-	//---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
-
-	public DrumTrack(int firstBar) {
-		this.firstBar = firstBar;
-		this.patterns = new ArrayList<>();
-	}
+    private Map<Integer, DrumPattern> patterns;
 
 
-	//--------------------------------------- SETTERS --------------------------------------------\\
 
-	public void addPattern(DrumPattern pattern) {
-		this.patterns.add(pattern);
-	}
-	
-	
-	//--------------------------------------- GETTERS --------------------------------------------\\
+    //======================================= METHODS ============================================\\
 
-	public List<DrumPattern> getPatterns() {
-		return patterns;
-	}
+    //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-	public int getFirstBar() {
-		return firstBar;
-	}
+    public DrumTrack(int firstBar) {
+        this.patterns = new LinkedHashMap<>();
+    }
+
+
+    //--------------------------------------- SETTERS --------------------------------------------\\
+
+    public void addPattern(int firstBar, DrumPattern pattern) {
+        this.patterns.put(firstBar, pattern);
+    }
+
+
+    //--------------------------------------- GETTERS --------------------------------------------\\
+
+    public Map<Integer, DrumPattern> getPatterns() {
+        return patterns;
+    }
 }

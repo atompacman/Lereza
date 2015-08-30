@@ -4,30 +4,30 @@ import com.atompacman.lereza.core.profile.drum.PercussionPattern;
 
 public class CymbalPunctuation {
 
-	//======================================= FIELDS =============================================\\
+    //======================================= FIELDS =============================================\\
 
-	private final PercussionPattern pattern;
-	private final boolean			replace;
-	
-	
-	
-	//======================================= METHODS ============================================\\
+    private final PercussionPattern pattern;
+    private final boolean			replace;
 
-	//---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-	public CymbalPunctuation(PercussionPattern pattern, boolean replace) {
-		this.pattern = pattern;
-		this.replace = replace;
-	}
 
-	
-	//--------------------------------------- GETTERS --------------------------------------------\\
+    //======================================= METHODS ============================================\\
 
-	public PercussionPattern getPattern() {
-		return pattern;
-	}
+    //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-	public boolean isReplace() {
-		return replace;
-	}
+    public CymbalPunctuation(PercussionPattern pattern, boolean replace) {
+        this.pattern = pattern;
+        this.replace = replace;
+    }
+
+
+    //--------------------------------------- GETTERS --------------------------------------------\\
+
+    public PercussionPattern getPattern() {
+        return pattern;
+    }
+
+    public boolean doReplace() {
+        return replace;
+    }
 }

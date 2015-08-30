@@ -1,32 +1,28 @@
 package com.atompacman.lereza.core.profile.drum.punctuation;
 
+import com.atompacman.toolkat.math.Interval;
+
 public class SilencePunctuation implements Punctuation {
 
-	//======================================= FIELDS =============================================\\
+    //======================================= FIELDS =============================================\\
 
-	private final int begTU;
-	private final int endTU;
-	
-	
-	
-	//======================================= METHODS ============================================\\
+    private final Interval<Integer> intervalTU;
 
-	//---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-	public SilencePunctuation(int begTU, int endTU) {
-		super();
-		this.begTU = begTU;
-		this.endTU = endTU;
-	}
-	
-	
-	//--------------------------------------- GETTERS --------------------------------------------\\
 
-	public int getBegTU() {
-		return begTU;
-	}
-	
-	public int getEndTU() {
-		return endTU;
-	}
+    //======================================= METHODS ============================================\\
+
+    //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
+
+    public SilencePunctuation(int begTU, int endTU) {
+        super();
+        this.intervalTU = new Interval<Integer>(begTU, endTU);
+    }
+
+
+    //--------------------------------------- GETTERS --------------------------------------------\\
+
+    public Interval<Integer> getIntervalTU() {
+        return intervalTU;
+    }
 }
