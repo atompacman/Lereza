@@ -23,37 +23,37 @@ import com.atompacman.lereza.core.midi.device.MIDIDeviceType;
 import com.atompacman.lereza.core.midi.realtime.PlayingTonesListener;
 import com.atompacman.lereza.core.midi.realtime.RealTimeMIDIProcessor;
 import com.atompacman.lereza.core.solfege.Tone;
-import com.atompacman.lereza.kpf.key.RealTimeKeyPathFinder;
+import com.atompacman.lereza.kpf.key.RealTimeKeyChangeDetector;
 import com.atompacman.toolkat.IO;
-import com.atompacman.toolkat.gui.AbstractJFrame;
+import com.atompacman.toolkat.gui.CenteredJFrame;
 import com.atompacman.toolkat.misc.Log;
 
 @SuppressWarnings("serial")
-public class LRTFKWindow extends AbstractJFrame {
+public class LRTFKWindow extends CenteredJFrame {
 
     //====================================== CONSTANTS ===========================================\\
 
     // Labels
-    private static final String     WIN_TITLE = "Lereza Real-Time Key Finder";
+    private static final String WIN_TITLE = "Lereza Real-Time Key Finder";
 
     // Dimensions
-    private static final Dimension  WIN_DIM                  = new Dimension(500, 700);
-    private static final int        BORDER_WIDTH             = 10;
-    private static final int        DEVICE_SEL_LABEL_SIZE    = 12;
-    private static final int        DEVICE_COMBO_BOX_HEIGHT  = 40;
-    private static final String     CONNEC_STATUS_MSG        = "Connection status: ";
+    private static final Dimension WIN_DIM                 = new Dimension(500, 700);
+    private static final int       BORDER_WIDTH            = 10;
+    private static final int       DEVICE_SEL_LABEL_SIZE   = 12;
+    private static final int       DEVICE_COMBO_BOX_HEIGHT = 40;
+    private static final String    CONNEC_STATUS_MSG       = "Connection status: ";
 
     // Key path finder config
-    static final String             KCW_FILE                        = "default.kcw";
-    private static final int        KEY_DETECTION_INTERVAL_MILLIS   = 500; 
-    private static final int        MILLIS_PER_TU                   = 20;
+    public  static final String KCW_FILE                      = "default.kcw";
+    private static final int    KEY_DETECTION_INTERVAL_MILLIS = 500; 
+    private static final int    MILLIS_PER_TU                 = 20;
 
     // Key path finder instance
-    private static RealTimeKeyPathFinder KPF;
+    private static RealTimeKeyChangeDetector KPF;
     static {
         try {
             int tuInterval = KEY_DETECTION_INTERVAL_MILLIS / MILLIS_PER_TU;
-            KPF = new RealTimeKeyPathFinder(IO.getResource(KCW_FILE), tuInterval);
+            KPF = new RealTimeKeyChangeDetector(IO.getResource(KCW_FILE), 64, 0.5, tuInterval);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -110,10 +110,10 @@ public class LRTFKWindow extends AbstractJFrame {
     //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
     public LRTFKWindow() throws MIDIDeviceException {
+        super(WIN_DIM);
+        
         // Set basic properties
-        setSize(WIN_DIM);
         setTitle(WIN_TITLE);
-        centerFrame();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Get device manager
@@ -179,7 +179,7 @@ public class LRTFKWindow extends AbstractJFrame {
                         RealTimeMIDIProcessor rtmp = 
                                 new RealTimeMIDIProcessor(KEY_DETECTION_INTERVAL_MILLIS) {
                             public void process(List<MidiEvent> events) {
-                                KPF.find(events, 1); 
+                                KPF.detect(events); 
                             }
                         };
                         rtmp.start();
