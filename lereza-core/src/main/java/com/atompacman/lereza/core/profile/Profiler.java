@@ -3,9 +3,9 @@ package com.atompacman.lereza.core.profile;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atompacman.atomlog.Log;
-import com.atompacman.lereza.core.piece.container.Piece;
+import com.atompacman.lereza.core.piece.Piece;
 import com.atompacman.lereza.core.piece.tool.PieceNavigator;
+import com.atompacman.toolkat.misc.Log;
 
 public abstract class Profiler {
 

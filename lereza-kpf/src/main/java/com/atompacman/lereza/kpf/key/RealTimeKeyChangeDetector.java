@@ -7,7 +7,7 @@ import javax.sound.midi.MidiEvent;
 
 import com.atompacman.lereza.core.midi.tool.MIDINoteEventProcessor;
 
-public class RealTimeKeyPathFinder extends AbstractKeyPathFinder<List<MidiEvent>> {
+public class RealTimeKeyChangeDetector extends AbstractKeyChangeAnalyzer<List<MidiEvent>> {
 
     //======================================= FIELDS =============================================\\
 
@@ -19,8 +19,12 @@ public class RealTimeKeyPathFinder extends AbstractKeyPathFinder<List<MidiEvent>
 
     //--------------------------------- PUBLIC CONSTRUCTORS --------------------------------------\\
 
-    public RealTimeKeyPathFinder(File keyConsonanceWindow, int noteBufferTUlen) {
-        super(keyConsonanceWindow);
+    public RealTimeKeyChangeDetector(File  keyConsonanceWindow, 
+                                    int    minKeyChangeGap, 
+                                    double keyChangeSensibility, 
+                                    int    noteBufferTUlen) {
+        
+        super(keyConsonanceWindow, minKeyChangeGap, keyChangeSensibility);
         this.noteBufferTUlen = noteBufferTUlen;
     }
 

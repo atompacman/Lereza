@@ -1,4 +1,4 @@
-package com.atompacman.lereza.kpf;
+package com.atompacman.lereza.kpf.key;
 
 import static org.junit.Assert.fail;
 
@@ -12,7 +12,7 @@ import com.atompacman.lereza.core.midi.sequence.MIDIFileReader;
 import com.atompacman.lereza.core.piece.Note;
 import com.atompacman.lereza.core.piece.Piece;
 import com.atompacman.lereza.core.piece.Stack;
-import com.atompacman.lereza.kpf.key.BadKeyPathFinder;
+import com.atompacman.lereza.kpf.LRTFKWindow;
 import com.atompacman.toolkat.IO;
 import com.atompacman.toolkat.test.TextInputBasedTest;
 
@@ -31,13 +31,14 @@ public class TestKeyPathFinder {
         Wizard.manualInit();
         MIDIFileReader reader = Wizard.getModule(MIDIFileReader.class);
 
-        BadKeyPathFinder finder = new BadKeyPathFinder(IO.getResource(LRTFKWindow.KCW_FILE));
+        File kwcFile = IO.getResource(LRTFKWindow.KCW_FILE);
+        KeyChangeAnalyzer detector = new KeyChangeAnalyzer(kwcFile, 64, 0.5);
         
         TextInputBasedTest.launchTestsWithExpectedOutput(TEST_LIST_FILE, 
                 input -> {
                     try {
                         Piece<Stack<Note>> piece = reader.read(new File(input));
-                        return finder.find(piece.getPart(0), 1).toString();
+                        return detector.detect(piece.getPart(0)).toString();
                     } catch (Exception e) {
                         fail(e.getMessage());
                     }

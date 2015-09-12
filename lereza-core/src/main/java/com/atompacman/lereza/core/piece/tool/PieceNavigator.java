@@ -8,7 +8,7 @@ import com.atompacman.lereza.core.piece.Stack;
 import com.atompacman.toolkat.exception.Throw;
 import com.atompacman.toolkat.misc.Log;
 
-public class PieceNavigator<T extends Stack<?>> {
+public class PieceNavigator<T extends Stack<? extends Note>> {
 
     //======================================= FIELDS =============================================\\
 

@@ -7,14 +7,17 @@ import com.atompacman.lereza.core.piece.Note;
 import com.atompacman.lereza.core.piece.Part;
 import com.atompacman.lereza.core.piece.Stack;
 
-public class BadKeyPathFinder extends AbstractKeyPathFinder<Part<Stack<Note>>> {
+public class KeyChangeAnalyzer extends AbstractKeyChangeAnalyzer<Part<Stack<Note>>> {
 
     //======================================= METHODS ============================================\\
 
     //--------------------------------- PUBLIC CONSTRUCTORS --------------------------------------\\
 
-    public BadKeyPathFinder(File keyConsonanceWindow) {
-        super(keyConsonanceWindow);
+    public KeyChangeAnalyzer(File   keyConsonanceWindow, 
+                             int    minKeyChangeGap, 
+                             double keyChangeSensibility) {
+        
+        super(keyConsonanceWindow, minKeyChangeGap, keyChangeSensibility);
     }
 
 
