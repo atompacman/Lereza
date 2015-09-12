@@ -16,7 +16,7 @@ import com.atompacman.lereza.core.midi.device.MIDIDeviceException;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceInfo;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceManager;
 import com.atompacman.lereza.core.midi.realtime.RealTimeMIDIProcessor;
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 import com.atompacman.toolkat.misc.Log;
 
 public class RealTimeTempoDetector extends RealTimeMIDIProcessor {
@@ -62,7 +62,7 @@ public class RealTimeTempoDetector extends RealTimeMIDIProcessor {
         MIDIDeviceInfo device = manager.getDeviceList().stream().filter(
                 d -> d.getAPIInfo().getName().contains("SAMSON")).findFirst().get();
         RealTimeMIDIProcessor rtmp = new RealTimeTempoDetector(180, 
-                2000, 500, RythmicSignature.valueOf(3, 4), true);
+                2000, 500, TimeSignature.valueOf(3, 4), true);
         rtmp.start();
         manager.connectDeviceToReceiver(device, rtmp, "TempoDetector");
     }
@@ -74,13 +74,13 @@ public class RealTimeTempoDetector extends RealTimeMIDIProcessor {
             throws LineUnavailableException, IOException, UnsupportedAudioFileException {
         
         this(Metronome.DEFAULT_INITIAL_BPM, timeIntervalMillis, 
-                noteHitBufLen, RythmicSignature.valueOf(3,4), false);
+                noteHitBufLen, TimeSignature.valueOf(3,4), false);
     }
     
     public RealTimeTempoDetector(double           initBPM, 
                                  int              timeIntervalMillis, 
                                  int              noteHitBufLen,
-                                 RythmicSignature timeSign,
+                                 TimeSignature timeSign,
                                  boolean          startMetronome)
             throws LineUnavailableException, IOException, UnsupportedAudioFileException {
 

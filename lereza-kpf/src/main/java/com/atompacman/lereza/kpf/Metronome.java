@@ -7,7 +7,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 import com.atompacman.toolkat.IO;
 import com.atompacman.toolkat.misc.Log;
 
@@ -31,7 +31,7 @@ public class Metronome {
     private Thread playback;
     
     // State
-    private RythmicSignature timeSign;
+    private TimeSignature timeSign;
     private double           bpm;
     private boolean          isPlaying;
 
@@ -45,10 +45,10 @@ public class Metronome {
         this(IO.getResource(DEFAULT_BAR_CLICK_SOUND), 
              IO.getResource(DEFAULT_BEAT_CLICK_SOUND), 
              DEFAULT_INITIAL_BPM, 
-             RythmicSignature.STANDARD_4_4 );
+             TimeSignature.STANDARD_4_4 );
     }
     
-    public Metronome(double initBPM, RythmicSignature timeSign) 
+    public Metronome(double initBPM, TimeSignature timeSign) 
             throws LineUnavailableException, IOException, UnsupportedAudioFileException {
         
         this(IO.getResource(DEFAULT_BAR_CLICK_SOUND), 
@@ -57,7 +57,7 @@ public class Metronome {
              timeSign);
     }
     
-    public Metronome(File barSound, File beatSound, double initBPM, RythmicSignature timeSign) 
+    public Metronome(File barSound, File beatSound, double initBPM, TimeSignature timeSign) 
             throws LineUnavailableException, IOException, UnsupportedAudioFileException {
 
         // Resources
@@ -125,7 +125,7 @@ public class Metronome {
         return bpm;
     }
 
-    public RythmicSignature getTimeSignature() {
+    public TimeSignature getTimeSignature() {
         return timeSign;
     }
     

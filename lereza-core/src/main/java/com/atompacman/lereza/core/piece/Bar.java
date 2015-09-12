@@ -2,15 +2,15 @@ package com.atompacman.lereza.core.piece;
 
 import java.util.List;
 
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 import com.atompacman.lereza.core.solfege.Value;
 
-public final class Bar<T extends Stack<? extends Note>> implements PieceComponent {
+public final class Bar<T extends Stack<? extends TiedNote>> implements PieceComponent {
 
     //======================================= FIELDS =============================================\\
 
-    private final List<T> noteStacks;
-    private final RythmicSignature rythmicSign;
+    private final List<T>       noteStacks;
+    private final TimeSignature timeSign;
 
 
 
@@ -18,41 +18,41 @@ public final class Bar<T extends Stack<? extends Note>> implements PieceComponen
 
     //---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-    Bar(List<T> noteStacks, RythmicSignature rythmicSign) {
+    Bar(List<T> noteStacks, TimeSignature timeSign) {
         this.noteStacks = noteStacks;
-        this.rythmicSign = rythmicSign;
+        this.timeSign   = timeSign;
     }
 
 
     //--------------------------------------- GETTERS --------------------------------------------\\
 
     public T getNoteStack(int timeunit) {
-        if (timeunit < 0 || timeunit >= rythmicSign.timeunitsInABar()) {
+        if (timeunit < 0 || timeunit >= timeSign.timeunitsInABar()) {
             throw new IllegalArgumentException("Cannot access note stack at timeunit \"" + timeunit 
-                    + "\": bar is only " + rythmicSign.timeunitsInABar() + " timunits long");
+                    + "\": bar is only " + timeSign.timeunitsInABar() + " timunits long");
         }
         return noteStacks.get(timeunit);
     }
 
     @SuppressWarnings("unchecked")
-    public <N extends Note> N getNote(int timeunit) {
+    public <N extends TiedNote> N getNote(int timeunit) {
         T stack = getNoteStack(timeunit);
-        if (stack.getNumStartingNotes() != 1) {
+        if (stack.countStartingNotes() != 1) {
             throw new IllegalArgumentException("Expecting only one "
                     + "starting note at timeunit \"" + timeunit + "\"");
         }
         return (N) stack.getStartingNotes().iterator().next();
     }
 
-    public RythmicSignature getRythmicSignature() {
-        return rythmicSign;
+    public TimeSignature getTimeSignature() {
+        return timeSign;
     }
 
 
     //---------------------------------------- STATE ---------------------------------------------\\
 
     public boolean isEmpty() {
-        for (Stack<? extends Note> stack : noteStacks) {
+        for (Stack<? extends TiedNote> stack : noteStacks) {
             if (stack.hasPlayingNotes()) {
                 return false;
             }
@@ -60,16 +60,24 @@ public final class Bar<T extends Stack<? extends Note>> implements PieceComponen
         return true;
     }
 
+    public int getNumStartingUntiedNotes() {
+        int sum = 0;
+        for (Stack<? extends TiedNote> stack : noteStacks) {
+            sum += stack.countStartingUntiedNotes();
+        }
+        return sum;
+    }
+    
     public int getNumStartingNotes() {
         int sum = 0;
-        for (Stack<? extends Note> stack : noteStacks) {
-            sum += stack.getNumStartingNotes();
+        for (Stack<? extends TiedNote> stack : noteStacks) {
+            sum += stack.countStartingNotes();
         }
         return sum;
     }
 
     public int numTimeunits() {
-        return rythmicSign.timeunitsInABar();
+        return timeSign.timeunitsInABar();
     }
 
 
@@ -78,14 +86,10 @@ public final class Bar<T extends Stack<? extends Note>> implements PieceComponen
     public String toStaccato() {
         StringBuilder sb = new StringBuilder();
         int rests = 0;
-        String notes = null;
         
         for (int i = 0; i < numTimeunits(); ++i) {
             T stack = noteStacks.get(i);
             if (stack.hasStartingNotes()) {
-                if (notes != null) {
-                    sb.append(notes).append('+');
-                }
                 if (rests > 0) {
                     sb.append('R');
                     for (Value value : Value.splitIntoValues(rests)) {
@@ -93,16 +97,14 @@ public final class Bar<T extends Stack<? extends Note>> implements PieceComponen
                     }
                     sb.append(' ');
                 }
-                notes = stack.toStaccato();
+                sb.append(stack.toStaccato()).append(' ');
                 rests = 0;
-            } else {
+
+            } else if (!stack.hasStartedNotes()){
                 ++rests;
             }
         }
-        
-        if (notes != null) {
-            sb.append(notes);
-        }
+
         return sb.toString();
     }
 }

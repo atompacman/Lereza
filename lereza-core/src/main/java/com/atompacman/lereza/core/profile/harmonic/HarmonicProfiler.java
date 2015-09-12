@@ -40,7 +40,7 @@ public class HarmonicProfiler extends Profiler {
 
 		basicStatsProfile.barCount = piece.getPartNo(0).numBars();
 		basicStatsProfile.lastTimestamp = piece.getPartNo(0).numBars() 
-				* piece.getRythmicSignature().getBarTimeunitLength();
+				* piece.getTimeSignature().getBarTimeunitLength();
 		
 		for (int i = 0; i < piece.numParts(); ++i) {
 			currPartProfile = new PartBasicStatisticsProfile();
@@ -78,7 +78,7 @@ public class HarmonicProfiler extends Profiler {
 	}
 	
 	private void findPartLastTimestamp(int partNo) {
-		int nbTimeunitsInBar = piece.getRythmicSignature().getBarTimeunitLength();
+		int nbTimeunitsInBar = piece.getTimeSignature().getBarTimeunitLength();
 
 		for (int i = nbTimeunitsInBar * piece.getPartNo(partNo).numBars() - 1; i >= 0; --i) {
 			if (!piece.getPartNo(partNo).getBarNo(i / nbTimeunitsInBar).getNotes().get(i % nbTimeunitsInBar).isEmpty()) {

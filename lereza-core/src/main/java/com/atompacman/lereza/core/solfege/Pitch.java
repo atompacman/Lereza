@@ -74,6 +74,10 @@ public class Pitch {
     //-------------------------------------- TO STRING -------------------------------------------\\
 
     public String toString() {
+        return toStaccato();
+    }
+
+    public String toStaccato() {
         return tone.toString() + octave.toString();
     }
 

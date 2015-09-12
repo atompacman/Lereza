@@ -9,7 +9,7 @@ import java.util.Map;
 import com.atompacman.lereza.core.solfege.Grouping;
 import com.atompacman.lereza.core.solfege.Key;
 import com.atompacman.lereza.core.solfege.NoteLetter;
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 
 public class MIDISequence {
 
@@ -23,14 +23,14 @@ public class MIDISequence {
 
     //======================================= FIELDS =============================================\\
 
-    private List<MIDITrack>     tracks;
+    private List<MIDITrack>   tracks;
 
-    private File                file;
+    private File              file;
 
-    private Key                 key;
-    private RythmicSignature    signature;
-    private Map<Long, Double>   tempoChanges;
-    private String              copyrightNotice;
+    private Key               key;
+    private TimeSignature     signature;
+    private Map<Long, Double> tempoChanges;
+    private String            copyrightNotice;
 
 
 
@@ -70,7 +70,7 @@ public class MIDISequence {
         if (this.signature != null) {
             throw new IllegalArgumentException("A MIDI sequence cannot specify multiple meter");
         }
-        this.signature = RythmicSignature.valueOf(numMeter, denMeter, Grouping.DUPLETS);
+        this.signature = TimeSignature.valueOf(numMeter, denMeter, Grouping.DUPLETS);
     }
 
     void addTempoChange(long tick, double bpm) {
@@ -103,8 +103,8 @@ public class MIDISequence {
         return key == null ? DEFAULT_KEY : key;
     }
 
-    public RythmicSignature getRythmicSignature() {
-        return signature == null ? RythmicSignature.STANDARD_4_4 : signature;
+    public TimeSignature getTimeSignature() {
+        return signature == null ? TimeSignature.STANDARD_4_4 : signature;
     }
 
     public Map<Long, Double> getTempoChanges() {

@@ -3,15 +3,15 @@ package com.atompacman.lereza.core.piece;
 import java.util.List;
 
 import com.atompacman.lereza.core.midi.sequence.MIDISequence;
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 
-public final class Piece<T extends Stack<?>> implements PieceComponent {
+public final class Piece<T extends Stack<? extends TiedNote>> implements PieceComponent {
 
     //======================================= FIELDS =============================================\\
 
-    private final List<Part<T>>		parts;
-    private final RythmicSignature 	rythmicSign;
-    private final MIDISequence 		midiSeq;
+    private final List<Part<T>> parts;
+    private final TimeSignature timeSign;
+    private final MIDISequence  midiSeq;
 
 
 
@@ -19,10 +19,10 @@ public final class Piece<T extends Stack<?>> implements PieceComponent {
 
     //---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-    Piece(List<Part<T>> parts, RythmicSignature rythmicSign, MIDISequence midiSeq) {
-        this.parts = parts;
-        this.rythmicSign = rythmicSign;
-        this.midiSeq = midiSeq;
+    Piece(List<Part<T>> parts, TimeSignature timeSign, MIDISequence midiSeq) {
+        this.parts    = parts;
+        this.timeSign = timeSign;
+        this.midiSeq  = midiSeq;
     }
 
 
@@ -36,8 +36,8 @@ public final class Piece<T extends Stack<?>> implements PieceComponent {
         return parts.get(index);
     }
 
-    public RythmicSignature getRythmicSignature() {
-        return rythmicSign;
+    public TimeSignature getTimeSignature() {
+        return timeSign;
     }
 
     public MIDISequence getMIDISequence() {

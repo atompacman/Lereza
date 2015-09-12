@@ -3,11 +3,11 @@ package com.atompacman.lereza.kpf.key;
 import java.io.File;
 
 import com.atompacman.lereza.core.piece.Bar;
-import com.atompacman.lereza.core.piece.Note;
+import com.atompacman.lereza.core.piece.TiedNote;
 import com.atompacman.lereza.core.piece.Part;
 import com.atompacman.lereza.core.piece.Stack;
 
-public class BadKeyPathFinder extends AbstractKeyPathFinder<Part<Stack<Note>>> {
+public class BadKeyPathFinder extends AbstractKeyPathFinder<Part<Stack<TiedNote>>> {
 
     //======================================= METHODS ============================================\\
 
@@ -20,21 +20,21 @@ public class BadKeyPathFinder extends AbstractKeyPathFinder<Part<Stack<Note>>> {
 
     //------------------------------------ TU LENGTH OF ------------------------------------------\\
 
-    protected int timeunitLengthOf(Part<Stack<Note>> part) {
+    protected int timeunitLengthOf(Part<Stack<TiedNote>> part) {
         return part.finalTimeunit();
     }
 
 
     //-------------------------------------- ADD NOTE --------------------------------------------\\
 
-    protected void addNotes(Part<Stack<Note>> part) {
+    protected void addNotes(Part<Stack<TiedNote>> part) {
         int timeunit = 0;
 
         for (int i = 0; i < part.numBars(); ++i) {
-            Bar<Stack<Note>> bar = part.getBar(i);
+            Bar<Stack<TiedNote>> bar = part.getBar(i);
             for (int j = 0; j < bar.numTimeunits(); ++j) {
-                Stack<Note> stack = bar.getNoteStack(j);
-                for (Note note : stack.getPlayingNotes()) {
+                Stack<TiedNote> stack = bar.getNoteStack(j);
+                for (TiedNote note : stack.getPlayingNotes()) {
                     addNote(timeunit, timeunit + 1, note.getPitch().getTone().semitoneValue());
                 }
                 ++timeunit;

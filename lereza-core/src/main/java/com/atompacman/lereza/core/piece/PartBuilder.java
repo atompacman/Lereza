@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 
-public final class PartBuilder extends PieceComponentBuilder<Part<Stack<Note>>> {
+public final class PartBuilder extends PieceComponentBuilder<Part<Stack<TiedNote>>> {
 
     //======================================= FIELDS =============================================\\
 
     private final List<BarBuilder> builders;
-    private final RythmicSignature rythmicSign;
+    private final TimeSignature    timeSign;
 
     private int  currBegTU;
     private int  currLenTU;
@@ -24,15 +24,15 @@ public final class PartBuilder extends PieceComponentBuilder<Part<Stack<Note>>> 
     //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
     public PartBuilder() {
-        this(RythmicSignature.STANDARD_4_4);
+        this(TimeSignature.STANDARD_4_4);
     }
 
-    public PartBuilder(RythmicSignature rythmicSign) {
-        this.builders = new ArrayList<>();
-        this.rythmicSign = rythmicSign;
+    public PartBuilder(TimeSignature timeSign) {
+        this.builders     = new ArrayList<>();
+        this.timeSign     = timeSign;
 
-        this.currBegTU = 0;
-        this.currLenTU = 32;
+        this.currBegTU    = 0;
+        this.currLenTU    = 32;
         this.currVelocity = 100;
     }
 
@@ -40,17 +40,20 @@ public final class PartBuilder extends PieceComponentBuilder<Part<Stack<Note>>> 
     //----------------------------------------- ADD ----------------------------------------------\\
 
     public PartBuilder add(Pitch pitch, byte velocity, int begTU, int lengthTU) {
-        int tuInBar = rythmicSign.timeunitsInABar();
+        int tuInBar = timeSign.timeunitsInABar();
         int barPosTU = begTU % tuInBar;
         int actualLen = lengthTU;
 
+        // Check if note spans more than one bar
         if (barPosTU + lengthTU > tuInBar) {
             actualLen = tuInBar - barPosTU;
         }
-        builderAt(begTU).add(pitch, velocity, barPosTU, actualLen, false);
-
+        
+        // Add first untied note
+        TiedNote untiedNote = builderAt(begTU).add(pitch, velocity, barPosTU, actualLen, null);
         lengthTU -= actualLen;
 
+        // Add tied notes
         while (lengthTU != 0) {
             begTU += actualLen;
             if (lengthTU > tuInBar) {
@@ -58,7 +61,7 @@ public final class PartBuilder extends PieceComponentBuilder<Part<Stack<Note>>> 
             } else {
                 actualLen = lengthTU;
             }
-            builderAt(begTU).add(pitch, velocity, 0, actualLen, true);
+            untiedNote = builderAt(begTU).add(pitch, velocity, 0, actualLen, untiedNote);
             lengthTU -= actualLen;
         }
         return this;
@@ -91,10 +94,10 @@ public final class PartBuilder extends PieceComponentBuilder<Part<Stack<Note>>> 
         return this;
     }
 
-    private BarBuilder builderAt(int timestamp) {
-        int barNum = (int)((double) timestamp / (double) rythmicSign.timeunitsInABar());
+    private BarBuilder builderAt(int timeunit) {
+        int barNum = (int)((double) timeunit / (double) timeSign.timeunitsInABar());
         while (barNum >= builders.size()) {
-            BarBuilder barBuilder = new BarBuilder(rythmicSign);
+            BarBuilder barBuilder = new BarBuilder(timeSign);
             registerSubmodule(barBuilder);
             builders.add(barBuilder);
         }
@@ -104,12 +107,12 @@ public final class PartBuilder extends PieceComponentBuilder<Part<Stack<Note>>> 
 
     //---------------------------------------- BUILD ---------------------------------------------\\
 
-    public Part<Stack<Note>> buildComponent() {
-        List<Bar<Stack<Note>>> bars = new ArrayList<>();
+    public Part<Stack<TiedNote>> buildComponent() {
+        List<Bar<Stack<TiedNote>>> bars = new ArrayList<>();
         for (BarBuilder builder : builders) {
             bars.add(builder.build());
         }
-        return new Part<Stack<Note>>(bars, rythmicSign);
+        return new Part<Stack<TiedNote>>(bars, timeSign);
     }
 
 

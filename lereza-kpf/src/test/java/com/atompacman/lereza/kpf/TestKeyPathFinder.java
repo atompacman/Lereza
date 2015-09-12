@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.atompacman.lereza.core.Wizard;
 import com.atompacman.lereza.core.midi.sequence.MIDIFileReader;
-import com.atompacman.lereza.core.piece.Note;
+import com.atompacman.lereza.core.piece.TiedNote;
 import com.atompacman.lereza.core.piece.Piece;
 import com.atompacman.lereza.core.piece.Stack;
 import com.atompacman.lereza.kpf.key.BadKeyPathFinder;
@@ -36,7 +36,7 @@ public class TestKeyPathFinder {
         TextInputBasedTest.launchTestsWithExpectedOutput(TEST_LIST_FILE, 
                 input -> {
                     try {
-                        Piece<Stack<Note>> piece = reader.read(new File(input));
+                        Piece<Stack<TiedNote>> piece = reader.read(new File(input));
                         return finder.find(piece.getPart(0), 1).toString();
                     } catch (Exception e) {
                         fail(e.getMessage());

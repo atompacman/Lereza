@@ -2,11 +2,11 @@ package com.atompacman.lereza.core.solfege;
 
 import java.nio.ByteBuffer;
 
-public final class RythmicSignature {
+public final class TimeSignature {
 
     //====================================== CONSTANTS ===========================================\\
 
-    public static final RythmicSignature STANDARD_4_4 = new RythmicSignature(4,4, Grouping.DUPLETS);
+    public static final TimeSignature STANDARD_4_4 = new TimeSignature(4,4, Grouping.DUPLETS);
 
 
 
@@ -22,24 +22,24 @@ public final class RythmicSignature {
 
     //------------------------------ PUBLIC STATIC CONSTRUCTORS ----------------------------------\\
 
-    public static RythmicSignature valueOf(int meterNum, int meterDen) {
-        return new RythmicSignature(meterNum, meterDen, Grouping.DUPLETS);
+    public static TimeSignature valueOf(int meterNum, int meterDen) {
+        return new TimeSignature(meterNum, meterDen, Grouping.DUPLETS);
     }
 
-    public static RythmicSignature valueOf(int meterNum, int meterDen, Grouping noteGrouping) {
-        return new RythmicSignature(meterNum, meterDen, noteGrouping);
+    public static TimeSignature valueOf(int meterNum, int meterDen, Grouping noteGrouping) {
+        return new TimeSignature(meterNum, meterDen, noteGrouping);
     }
 
     //- - - - - - - - - - - - - - - - - - - FROM BINARY - - - - - - - - - - - - - - - - - - - - - \\
 
-    public static RythmicSignature valueOf(ByteBuffer buffer) {
-        return new RythmicSignature(buffer.get(), buffer.get(), Grouping.values()[buffer.get()]);
+    public static TimeSignature valueOf(ByteBuffer buffer) {
+        return new TimeSignature(buffer.get(), buffer.get(), Grouping.values()[buffer.get()]);
     }
     
     
     //--------------------------------- PRIVATE CONSTRUCTOR --------------------------------------\\
 
-    private RythmicSignature(int meterNum, int meterDen, Grouping noteGrouping) {
+    private TimeSignature(int meterNum, int meterDen, Grouping noteGrouping) {
         this.meterNum = meterNum;
         this.meterDen = meterDen;
         this.noteGrouping = noteGrouping;

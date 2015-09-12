@@ -1,14 +1,14 @@
 package com.atompacman.lereza.core.piece.tool;
 
 import com.atompacman.lereza.core.piece.Bar;
-import com.atompacman.lereza.core.piece.Note;
+import com.atompacman.lereza.core.piece.TiedNote;
 import com.atompacman.lereza.core.piece.Part;
 import com.atompacman.lereza.core.piece.Piece;
 import com.atompacman.lereza.core.piece.Stack;
 import com.atompacman.toolkat.exception.Throw;
 import com.atompacman.toolkat.misc.Log;
 
-public class PieceNavigator<T extends Stack<?>> {
+public class PieceNavigator<T extends Stack<? extends TiedNote>> {
 
     //======================================= FIELDS =============================================\\
 
@@ -158,7 +158,7 @@ public class PieceNavigator<T extends Stack<?>> {
 
     public void goToNextTimeunit() {
         ++pbt.timeunit;
-        if (pbt.timeunit < piece.getRythmicSignature().timeunitsInABar()) {
+        if (pbt.timeunit < piece.getTimeSignature().timeunitsInABar()) {
             int nbNotesInStack = countStartingNotesInStack();
             noteInBar  += nbNotesInStack;
             noteInPart += nbNotesInStack;
@@ -242,7 +242,7 @@ public class PieceNavigator<T extends Stack<?>> {
         return getCurrentPart().getBar(pbt.bar);
     }
 
-    public final Stack<? extends Note> getNoteStack() {
+    public final Stack<? extends TiedNote> getNoteStack() {
         return getCurrentBar().getNoteStack(pbt.timeunit);
     }
 
@@ -258,7 +258,7 @@ public class PieceNavigator<T extends Stack<?>> {
     }
 
     public int getCurrentTimestamp() {
-        return pbt.bar * piece.getRythmicSignature().timeunitsInABar() + pbt.timeunit;
+        return pbt.bar * piece.getTimeSignature().timeunitsInABar() + pbt.timeunit;
     }
 
     public final PBT getPBT() {
@@ -277,7 +277,7 @@ public class PieceNavigator<T extends Stack<?>> {
     }
 
     public int countStartingNotesInStack() {
-        return getNoteStack().getNumStartingNotes();
+        return getNoteStack().countStartingNotes();
     }
 
 

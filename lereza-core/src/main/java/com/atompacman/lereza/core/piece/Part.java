@@ -2,14 +2,14 @@ package com.atompacman.lereza.core.piece;
 
 import java.util.List;
 
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 
-public final class Part<T extends Stack<? extends Note>> implements PieceComponent {
+public final class Part<T extends Stack<? extends TiedNote>> implements PieceComponent {
 
     //======================================= FIELDS =============================================\\
 
-    private final List<Bar<T>> 		bars;
-    private final RythmicSignature 	rythmicSign;
+    private final List<Bar<T>>  bars;
+    private final TimeSignature timeSign;
 
 
 
@@ -17,9 +17,9 @@ public final class Part<T extends Stack<? extends Note>> implements PieceCompone
 
     //---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-    Part(List<Bar<T>> bars, RythmicSignature rythmicSign) {
-        this.bars = bars;
-        this.rythmicSign = rythmicSign;
+    Part(List<Bar<T>> bars, TimeSignature timeSign) {
+        this.bars     = bars;
+        this.timeSign = timeSign;
     }
 
 
@@ -34,11 +34,11 @@ public final class Part<T extends Stack<? extends Note>> implements PieceCompone
     }
 
     public Bar<T> getBarAt(int timestamp) {
-        return getBar((int)((double) timestamp / (double) rythmicSign.timeunitsInABar()));
+        return getBar((int)((double) timestamp / (double) timeSign.timeunitsInABar()));
     }
 
-    public RythmicSignature getRythmicSignature() {
-        return rythmicSign;
+    public TimeSignature getTimeSignature() {
+        return timeSign;
     }
 
 
@@ -66,7 +66,7 @@ public final class Part<T extends Stack<? extends Note>> implements PieceCompone
     }
 
     public int finalTimeunit() {
-        return bars.size() * rythmicSign.timeunitsInABar();
+        return bars.size() * timeSign.timeunitsInABar();
     }
 
 
@@ -74,7 +74,7 @@ public final class Part<T extends Stack<? extends Note>> implements PieceCompone
 
     public String toStaccato() {
         StringBuilder sb = new StringBuilder();
-        sb.append("I[").append("INSTRUMENTS_NOT_IMPLEMENTED").append("] ");
+        sb.append("I[").append("PIANO").append("] ");
         for (Bar<T> bar : bars) {
             sb.append(bar.toStaccato()).append(" | ");
         }

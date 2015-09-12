@@ -23,7 +23,7 @@ import javax.sound.midi.Track;
 
 import org.apache.logging.log4j.Level;
 
-import com.atompacman.lereza.core.piece.Note;
+import com.atompacman.lereza.core.piece.TiedNote;
 import com.atompacman.lereza.core.piece.Piece;
 import com.atompacman.lereza.core.piece.PieceBuilder;
 import com.atompacman.lereza.core.piece.Stack;
@@ -296,7 +296,7 @@ public class MIDIFileReader extends Module {
 
     //---------------------------------------- READ ----------------------------------------------\\
 
-    public Piece<Stack<Note>> read(File midiFile) throws MIDIFileReaderException {
+    public Piece<Stack<TiedNote>> read(File midiFile) throws MIDIFileReaderException {
         // Initialize temporary fields
         seq = new MIDISequence(midiFile);
         track = null;
@@ -407,7 +407,7 @@ public class MIDIFileReader extends Module {
                         "Unimplemented timestamp adjustment for sequence with num of 32th notes "
                         + "per beat different than " + MIDISequence.NUM_32TH_NOTES_PER_BEAT);
             }
-            strData = seq.getRythmicSignature().toString();           break;
+            strData = seq.getTimeSignature().toString();              break;
         case SET_TEMPO:
             double microSec = (double) ((data[0] << 16) + (data[1] << 8) + data[2]);
             double bmp = 60000000.0 / microSec;
@@ -621,7 +621,7 @@ public class MIDIFileReader extends Module {
 
     //- - - - - - - - - - - - - - - - - - - BUILD PIECE - - - - - - - - - - - - - - - - - - - - - \\
 
-    private Piece<Stack<Note>> buildPiece(List<Map<Long, Integer>> conversionMaps) {
+    private Piece<Stack<TiedNote>> buildPiece(List<Map<Long, Integer>> conversionMaps) {
         PieceBuilder builder = new PieceBuilder(seq);
         registerSubmodule(builder);
 

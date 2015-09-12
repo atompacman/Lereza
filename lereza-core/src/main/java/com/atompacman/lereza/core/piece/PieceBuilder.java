@@ -5,14 +5,14 @@ import java.util.List;
 
 import com.atompacman.lereza.core.midi.sequence.MIDISequence;
 import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 
-public class PieceBuilder extends PieceComponentBuilder<Piece<Stack<Note>>> {
+public class PieceBuilder extends PieceComponentBuilder<Piece<Stack<TiedNote>>> {
 
     //======================================= FIELDS =============================================\\
 
     private final List<PartBuilder> builders;
-    private final RythmicSignature  rythmicSign;
+    private final TimeSignature     timeSign;
     private final MIDISequence      midiSeq;
 
     private int  currPart;
@@ -27,20 +27,20 @@ public class PieceBuilder extends PieceComponentBuilder<Piece<Stack<Note>>> {
     //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
     public PieceBuilder() {
-        this(null, RythmicSignature.STANDARD_4_4);
+        this(null, TimeSignature.STANDARD_4_4);
     }
 
-    public PieceBuilder(RythmicSignature rythmicSignature) {
-        this(null, rythmicSignature);
+    public PieceBuilder(TimeSignature timeSignature) {
+        this(null, timeSignature);
     }
 
     public PieceBuilder(MIDISequence midiSeq) {
-        this(midiSeq, midiSeq.getRythmicSignature());
+        this(midiSeq, midiSeq.getTimeSignature());
     }
 
-    private PieceBuilder(MIDISequence midiSeq, RythmicSignature rythmicSign) {
+    private PieceBuilder(MIDISequence midiSeq, TimeSignature timeSign) {
         this.builders     = new ArrayList<>();
-        this.rythmicSign  = rythmicSign;
+        this.timeSign     = timeSign;
         this.midiSeq      = midiSeq;
 
         this.currPart     = 0;
@@ -54,7 +54,7 @@ public class PieceBuilder extends PieceComponentBuilder<Piece<Stack<Note>>> {
 
     public PieceBuilder add(Pitch pitch, byte velocity, int part, int begTU, int lengthTU) {
         while (part >= builders.size()) {
-            PartBuilder partBuilder = new PartBuilder(rythmicSign);
+            PartBuilder partBuilder = new PartBuilder(timeSign);
             registerSubmodule(partBuilder);
             builders.add(partBuilder);
         }
@@ -101,12 +101,12 @@ public class PieceBuilder extends PieceComponentBuilder<Piece<Stack<Note>>> {
 
     //---------------------------------------- BUILD ---------------------------------------------\\
 
-    public Piece<Stack<Note>> buildComponent() {
-        List<Part<Stack<Note>>> parts = new ArrayList<>();
+    public Piece<Stack<TiedNote>> buildComponent() {
+        List<Part<Stack<TiedNote>>> parts = new ArrayList<>();
         for (PartBuilder builder : builders) {
             parts.add(builder.build());
         }
-        return new Piece<Stack<Note>>(parts, rythmicSign, midiSeq);
+        return new Piece<Stack<TiedNote>>(parts, timeSign, midiSeq);
     }
 
 

@@ -4,14 +4,14 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.atompacman.lereza.core.solfege.RythmicSignature;
+import com.atompacman.lereza.core.solfege.TimeSignature;
 
 public class DrumBeat {
 
     //======================================= FIELDS =============================================\\
 
-    private RythmicSignature rythSign;
-    private int              numBars;
+    private TimeSignature timeSign;
+    private int           numBars;
 
     private Map<PercussionElement, PercussionPattern> patterns;
 
@@ -21,8 +21,8 @@ public class DrumBeat {
 
     //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-    public DrumBeat(RythmicSignature rythSign, int numBars) {
-        this.rythSign = rythSign;
+    public DrumBeat(TimeSignature timeSign, int numBars) {
+        this.timeSign = timeSign;
         this.numBars  = numBars;
         this.patterns = new HashMap<>();
     }
@@ -31,7 +31,7 @@ public class DrumBeat {
 
     public DrumBeat(ByteBuffer buffer) {
         // Create beat from rhythmic signature and number of bars
-        this(RythmicSignature.valueOf(buffer), buffer.get());
+        this(TimeSignature.valueOf(buffer), buffer.get());
         
         // Read percussion patterns
         int numTracks = buffer.get();
@@ -53,8 +53,8 @@ public class DrumBeat {
 
     //--------------------------------------- GETTERS --------------------------------------------\\
 
-    public RythmicSignature getRythSign() {
-        return rythSign;
+    public TimeSignature getTimeSignature() {
+        return timeSign;
     }
 
     public int getNumBars() {
@@ -62,7 +62,7 @@ public class DrumBeat {
     }
 
     public int getLengthTU() {
-        double numOnDen=(double)rythSign.getMeterNumerator()/(double)rythSign.getMeterDenominator();
+        double numOnDen=(double)timeSign.getMeterNumerator()/(double)timeSign.getMeterDenominator();
         return (int)((double)numBars * numOnDen * 64.0); 
     }
     
