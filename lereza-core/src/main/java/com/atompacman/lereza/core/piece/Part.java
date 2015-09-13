@@ -4,11 +4,11 @@ import java.util.List;
 
 import com.atompacman.lereza.core.solfege.TimeSignature;
 
-public final class Part<T extends Stack<? extends TiedNote>> implements PieceComponent {
+public final class Part implements PieceComponent {
 
     //======================================= FIELDS =============================================\\
 
-    private final List<Bar<T>>  bars;
+    private final List<Bar>     bars;
     private final TimeSignature timeSign;
 
 
@@ -17,7 +17,7 @@ public final class Part<T extends Stack<? extends TiedNote>> implements PieceCom
 
     //---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-    Part(List<Bar<T>> bars, TimeSignature timeSign) {
+    Part(List<Bar> bars, TimeSignature timeSign) {
         this.bars     = bars;
         this.timeSign = timeSign;
     }
@@ -25,7 +25,7 @@ public final class Part<T extends Stack<? extends TiedNote>> implements PieceCom
 
     //--------------------------------------- GETTERS --------------------------------------------\\
 
-    public Bar<T> getBar(int bar) {
+    public Bar getBar(int bar) {
         if (bar < 0 || bar >= bars.size()) {
             throw new IllegalArgumentException("Cannot access bar no." + 
                     bar + "\": Part has " + bars.size() + " bars.");
@@ -33,7 +33,7 @@ public final class Part<T extends Stack<? extends TiedNote>> implements PieceCom
         return bars.get(bar);
     }
 
-    public Bar<T> getBarAt(int timestamp) {
+    public Bar getBarAt(int timestamp) {
         return getBar((int)((double) timestamp / (double) timeSign.timeunitsInABar()));
     }
 
@@ -45,7 +45,7 @@ public final class Part<T extends Stack<? extends TiedNote>> implements PieceCom
     //---------------------------------------- STATE ---------------------------------------------\\
 
     public boolean isEmpty() {
-        for (Bar<T> bar : bars) {
+        for (Bar bar : bars) {
             if (!bar.isEmpty()) {
                 return false;
             }
@@ -59,7 +59,7 @@ public final class Part<T extends Stack<? extends TiedNote>> implements PieceCom
 
     public int numNotes() {
         int sum = 0;
-        for (Bar<T> bar : bars) {
+        for (Bar bar : bars) {
             sum += bar.getNumStartingNotes();
         }
         return sum;
@@ -75,7 +75,7 @@ public final class Part<T extends Stack<? extends TiedNote>> implements PieceCom
     public String toStaccato() {
         StringBuilder sb = new StringBuilder();
         sb.append("I[").append("PIANO").append("] ");
-        for (Bar<T> bar : bars) {
+        for (Bar bar : bars) {
             sb.append(bar.toStaccato()).append(" | ");
         }
         sb.setLength(sb.length() - 2);

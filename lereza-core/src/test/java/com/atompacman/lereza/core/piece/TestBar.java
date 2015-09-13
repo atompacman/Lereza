@@ -2,7 +2,6 @@ package com.atompacman.lereza.core.piece;
 
 import static org.junit.Assert.assertEquals;
 
-import org.jfugue.player.Player;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,18 +28,17 @@ public class TestBar {
     @Test
     public void addSimpleUntiedNotes() {
         builder.add("C4").pos(16).add("E5").add("G5").pos(24).add("B4");
-        Bar<Stack<TiedNote>> bar = buildAndPerformBasicAssertions(4,1);
-        new Player().play(bar.toStaccato());
+        buildAndPerformBasicAssertions(4,1);
     }
 
 
     //--------------------------------------- HELPERS --------------------------------------------\\
 
-    private Bar<Stack<TiedNote>> buildAndPerformBasicAssertions(int numStartingUntiedNotes, 
+    private Bar buildAndPerformBasicAssertions(int numStartingUntiedNotes, 
                                                                 int numStartingTiedNotes) {
         
         // Build bar
-        Bar<Stack<TiedNote>> bar = builder.build();
+        Bar bar = builder.build();
 
         // State
         assertEquals(numStartingUntiedNotes == 0, bar.isEmpty());

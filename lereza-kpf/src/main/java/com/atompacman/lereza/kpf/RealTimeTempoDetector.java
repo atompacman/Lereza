@@ -77,11 +77,11 @@ public class RealTimeTempoDetector extends RealTimeMIDIProcessor {
                 noteHitBufLen, TimeSignature.valueOf(3,4), false);
     }
     
-    public RealTimeTempoDetector(double           initBPM, 
-                                 int              timeIntervalMillis, 
-                                 int              noteHitBufLen,
+    public RealTimeTempoDetector(double        initBPM, 
+                                 int           timeIntervalMillis, 
+                                 int           noteHitBufLen,
                                  TimeSignature timeSign,
-                                 boolean          startMetronome)
+                                 boolean       startMetronome)
             throws LineUnavailableException, IOException, UnsupportedAudioFileException {
 
         super(timeIntervalMillis);

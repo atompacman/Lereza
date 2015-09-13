@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceException;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceInfo;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceManager;
-import com.atompacman.lereza.core.profile.drum.DrumBeat;
+import com.atompacman.lereza.pluggin.builtin.drum.DrumBeat;
 import com.atompacman.toolkat.IO;
 
 public class TROLL {

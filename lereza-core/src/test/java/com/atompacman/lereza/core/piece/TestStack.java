@@ -17,7 +17,7 @@ public class TestStack extends AbstractTest {
 
     //======================================= FIELDS =============================================\\
 
-    private StackBuilder builder;
+    private NoteStackBuilder builder;
 
 
 
@@ -25,7 +25,7 @@ public class TestStack extends AbstractTest {
 
     @Before
     public void beforeTest() {
-        builder = new StackBuilder();
+        builder = new NoteStackBuilder();
     }
 
 
@@ -35,49 +35,49 @@ public class TestStack extends AbstractTest {
     public void addSimpleStartingUntiedNotes() {
         builder.add("C5").add("E5").add("G5");
 
-        Stack<TiedNote> stack = buildAndPerformBasicAssertions(3,0,0,0);
+        NoteStack stack = buildAndPerformBasicAssertions(3,0,0,0);
 
-        Set<TiedNote> set = stack.getStartingUntiedNotes();
-        assertTrue(set.contains(TiedNote.valueOf(Pitch.valueOf("E5"), Value.QUARTER)));
+        Set<Note> set = stack.getStartingUntiedNotes();
+        assertTrue(set.contains(Note.valueOf(Pitch.valueOf("E5"), Value.QUARTER)));
         assertTrue(stack.containsNoteOfPitch(Pitch.valueOf("E5")));
-        TiedNote note = stack.getNote(Pitch.valueOf("E5"));
-        assertEquals(StackBuilder.DEFAULT_VALUE, note.getValue());
-        assertEquals(StackBuilder.DEFAULT_VELOCITY, stack.getDynamic().getVelocity());
+        Note note = stack.getNote(Pitch.valueOf("E5"));
+        assertEquals(NoteStackBuilder.DEFAULT_VALUE, note.getValue());
+        assertEquals(NoteStackBuilder.DEFAULT_VELOCITY, stack.getDynamic().getVelocity());
     }
 
     @Test
     public void addSimpleStartingTiedNotes() {
-        TiedNote a   = TiedNote.valueOf("C5", Value.EIGHTH);
-        TiedNote b4a = TiedNote.valueOf("C5", Value.EIGHTH);
+        Note a   = Note.valueOf("C5", Value.EIGHTH);
+        Note b4a = Note.valueOf("C5", Value.EIGHTH);
         b4a.tieTo(a);
         
-        TiedNote b   = TiedNote.valueOf("E5", Value.EIGHTH);
-        TiedNote b4b = TiedNote.valueOf("E5", Value.EIGHTH);
+        Note b   = Note.valueOf("E5", Value.EIGHTH);
+        Note b4b = Note.valueOf("E5", Value.EIGHTH);
         b4b.tieTo(b);
         
         builder.add(a).add(b);
 
-        Stack<TiedNote> stack = buildAndPerformBasicAssertions(0,2,0,0);
+        NoteStack stack = buildAndPerformBasicAssertions(0,2,0,0);
 
-        Set<TiedNote> set = stack.getStartingNotes();
-        assertTrue(set.contains(TiedNote.valueOf(Pitch.valueOf("E5"), Value.EIGHTH)));
+        Set<Note> set = stack.getStartingNotes();
+        assertTrue(set.contains(Note.valueOf(Pitch.valueOf("E5"), Value.EIGHTH)));
         assertTrue(stack.containsNoteOfPitch(Pitch.valueOf("E5")));
-        TiedNote note = stack.getNote(Pitch.valueOf("E5"));
+        Note note = stack.getNote(Pitch.valueOf("E5"));
         assertEquals(Value.EIGHTH, note.getValue());
-        assertEquals(StackBuilder.DEFAULT_VELOCITY, stack.getDynamic().getVelocity());
+        assertEquals(NoteStackBuilder.DEFAULT_VELOCITY, stack.getDynamic().getVelocity());
     }
     
     @Test
     public void addSimpleStartedUntiedNotes() {
         builder.isStarting(false).add("F3").add("Ab8").add("G#2");
 
-        Stack<TiedNote> stack = buildAndPerformBasicAssertions(0,0,3,0);
+        NoteStack stack = buildAndPerformBasicAssertions(0,0,3,0);
 
-        Set<TiedNote> set = stack.getStartedNotes();
-        assertTrue(set.contains(TiedNote.valueOf(Pitch.valueOf("F3"), Value.QUARTER)));
+        Set<Note> set = stack.getStartedNotes();
+        assertTrue(set.contains(Note.valueOf(Pitch.valueOf("F3"), Value.QUARTER)));
         assertTrue(stack.containsNoteOfPitch(Pitch.valueOf("Ab8")));
-        TiedNote note = stack.getNote(Pitch.valueOf("G#2"));
-        assertEquals(StackBuilder.DEFAULT_VALUE, note.getValue());
+        Note note = stack.getNote(Pitch.valueOf("G#2"));
+        assertEquals(NoteStackBuilder.DEFAULT_VALUE, note.getValue());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class TestStack extends AbstractTest {
                .velocity(100)                        .add(Pitch.valueOf("F1"))
                                                      .add(Pitch.valueOf("A1"));
 
-        Stack<TiedNote> stack = buildAndPerformBasicAssertions(4,0,0,0);
+        NoteStack stack = buildAndPerformBasicAssertions(4,0,0,0);
 
         assertEquals(75, stack.getDynamic().getVelocity());
         assertEquals(Value.EIGHTH,     stack.getNote(Pitch.valueOf("B1")).getValue());
@@ -101,7 +101,7 @@ public class TestStack extends AbstractTest {
                .isStarting(false).velocity(100)                        .add(Pitch.valueOf("F1"))
                                                .value(Value.HALF)      .add(Pitch.valueOf("A1"));
 
-        Stack<TiedNote> stack = buildAndPerformBasicAssertions(2,0,2,0);
+        NoteStack stack = buildAndPerformBasicAssertions(2,0,2,0);
 
         assertEquals(50, stack.getDynamic().getVelocity());
         assertEquals(Value.EIGHTH,     stack.getNote(Pitch.valueOf("B1")).getValue());
@@ -115,17 +115,17 @@ public class TestStack extends AbstractTest {
                .isStarting(false).velocity(100)                        .add(Pitch.valueOf("F1"))
                                                .value(Value.HALF)      .add(Pitch.valueOf("A1"));
 
-        TiedNote b4a = TiedNote.valueOf("G4", Value.WHOLE);
-        TiedNote a   = TiedNote.valueOf("G4", Value.WHOLE);
+        Note b4a = Note.valueOf("G4", Value.WHOLE);
+        Note a   = Note.valueOf("G4", Value.WHOLE);
         b4a.tieTo(a);
         
-        TiedNote b4b = TiedNote.valueOf("Eb3", Value.SIXTEENTH);
-        TiedNote b   = TiedNote.valueOf("Eb3", Value.SIXTEENTH);
+        Note b4b = Note.valueOf("Eb3", Value.SIXTEENTH);
+        Note b   = Note.valueOf("Eb3", Value.SIXTEENTH);
         b4b.tieTo(b);
         
         builder.velocity(50).add(a).isStarting(true).add(b);
         
-        Stack<TiedNote> stack = buildAndPerformBasicAssertions(2,1,2,1);
+        NoteStack stack = buildAndPerformBasicAssertions(2,1,2,1);
 
         assertEquals(50, stack.getDynamic().getVelocity());
         assertEquals(Value.EIGHTH,     stack.getNote(Pitch.valueOf("B1")).getValue());
@@ -171,7 +171,7 @@ public class TestStack extends AbstractTest {
     @Test
     public void missingNote() {
         expect("Stack does not contain a note of pitch \"C3\".");
-        Stack<TiedNote> stack = buildAndPerformBasicAssertions(0,0,0,0);
+        NoteStack stack = buildAndPerformBasicAssertions(0,0,0,0);
         assertTrue(!stack.containsNoteOfPitch(Pitch.valueOf("C3")));
         stack.getNote(Pitch.valueOf("C3"));
     }
@@ -183,18 +183,18 @@ public class TestStack extends AbstractTest {
                .add(Pitch.valueOf("F#7"), Value.HALF,      30, true)
                .add(Pitch.valueOf("Bb1"), Value.HALF,      32, false);
 
-        TiedNote b4a = TiedNote.valueOf("Fb4", Value.QUARTER);
-        TiedNote a   = TiedNote.valueOf("Fb4", Value.QUARTER);
+        Note b4a = Note.valueOf("Fb4", Value.QUARTER);
+        Note a   = Note.valueOf("Fb4", Value.QUARTER);
         b4a.tieTo(a);
         builder.velocity(60).add(a);
         
-        TiedNote bb4b = TiedNote.valueOf("B4", Value.THIRTYSECONTH);
-        TiedNote b4b  = TiedNote.valueOf("B4", Value.THIRTYSECONTH);
-        TiedNote b    = TiedNote.valueOf("B4", Value.THIRTYSECONTH);
+        Note bb4b = Note.valueOf("B4", Value.THIRTYSECONTH);
+        Note b4b  = Note.valueOf("B4", Value.THIRTYSECONTH);
+        Note b    = Note.valueOf("B4", Value.THIRTYSECONTH);
         bb4b.tieTo(b4b).tieTo(b);
         builder.add(b4b);
         
-        Stack<TiedNote> stack = buildAndPerformBasicAssertions(3,2,1,0);
+        NoteStack stack = buildAndPerformBasicAssertions(3,2,1,0);
 
         assertEquals("Ab4qa60+C3sa60+F#7ha60+Fb4-qa60+B4-t-a60", stack.toStaccato());
     }
@@ -202,13 +202,13 @@ public class TestStack extends AbstractTest {
 
     //--------------------------------------- HELPERS --------------------------------------------\\
 
-    private Stack<TiedNote> buildAndPerformBasicAssertions(int numUntiedStartingNotes,
+    private NoteStack buildAndPerformBasicAssertions(int numUntiedStartingNotes,
                                                            int numTiedStartingNotes,
                                                            int numUntiedStartedNotes,
                                                            int numTiedStartedNotes) {
         
         // Build note stack
-        Stack<TiedNote> stack = builder.build();
+        NoteStack stack = builder.build();
 
         // Get sets
         int numStartingNotes = numTiedStartingNotes + numUntiedStartingNotes;

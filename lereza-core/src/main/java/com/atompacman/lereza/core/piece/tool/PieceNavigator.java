@@ -1,18 +1,17 @@
 package com.atompacman.lereza.core.piece.tool;
 
 import com.atompacman.lereza.core.piece.Bar;
-import com.atompacman.lereza.core.piece.TiedNote;
 import com.atompacman.lereza.core.piece.Part;
 import com.atompacman.lereza.core.piece.Piece;
-import com.atompacman.lereza.core.piece.Stack;
+import com.atompacman.lereza.core.piece.NoteStack;
 import com.atompacman.toolkat.exception.Throw;
 import com.atompacman.toolkat.misc.Log;
 
-public class PieceNavigator<T extends Stack<? extends TiedNote>> {
+public class PieceNavigator {
 
     //======================================= FIELDS =============================================\\
 
-    private final Piece<T> piece;
+    private final Piece piece;
 
     private PBT pbt;
     private int noteInBar;
@@ -24,7 +23,7 @@ public class PieceNavigator<T extends Stack<? extends TiedNote>> {
 
     //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-    public PieceNavigator(Piece<T> piece) {
+    public PieceNavigator(Piece piece) {
         if (piece.numParts() == 0) {
             throwExcep("Cannot navigate in a piece with no parts.");
         }
@@ -234,15 +233,15 @@ public class PieceNavigator<T extends Stack<? extends TiedNote>> {
 
     //--------------------------------------- GETTERS --------------------------------------------\\
 
-    public final Part<T> getCurrentPart() {
+    public final Part getCurrentPart() {
         return piece.getPart(pbt.part);
     }
 
-    public final Bar<T> getCurrentBar() {
+    public final Bar getCurrentBar() {
         return getCurrentPart().getBar(pbt.bar);
     }
 
-    public final Stack<? extends TiedNote> getNoteStack() {
+    public final NoteStack getNoteStack() {
         return getCurrentBar().getNoteStack(pbt.timeunit);
     }
 

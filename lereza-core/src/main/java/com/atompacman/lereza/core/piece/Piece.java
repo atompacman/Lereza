@@ -5,11 +5,11 @@ import java.util.List;
 import com.atompacman.lereza.core.midi.sequence.MIDISequence;
 import com.atompacman.lereza.core.solfege.TimeSignature;
 
-public final class Piece<T extends Stack<? extends TiedNote>> implements PieceComponent {
+public final class Piece implements PieceComponent {
 
     //======================================= FIELDS =============================================\\
 
-    private final List<Part<T>> parts;
+    private final List<Part>    parts;
     private final TimeSignature timeSign;
     private final MIDISequence  midiSeq;
 
@@ -19,7 +19,7 @@ public final class Piece<T extends Stack<? extends TiedNote>> implements PieceCo
 
     //---------------------------------- PACKAGE CONSTRUCTOR -------------------------------------\\
 
-    Piece(List<Part<T>> parts, TimeSignature timeSign, MIDISequence midiSeq) {
+    Piece(List<Part> parts, TimeSignature timeSign, MIDISequence midiSeq) {
         this.parts    = parts;
         this.timeSign = timeSign;
         this.midiSeq  = midiSeq;
@@ -28,7 +28,7 @@ public final class Piece<T extends Stack<? extends TiedNote>> implements PieceCo
 
     //--------------------------------------- GETTERS --------------------------------------------\\
 
-    public Part<T> getPart(int index) {
+    public Part getPart(int index) {
         if (index >= parts.size()) {
             throw new IllegalArgumentException("Cannot get part num. " + 
                     index + ": Piece only has " + parts.size() + " parts.");
@@ -53,7 +53,7 @@ public final class Piece<T extends Stack<? extends TiedNote>> implements PieceCo
 
     public int numNotes() {
         int sum = 0;
-        for (Part<T> part : parts) {
+        for (Part part : parts) {
             sum += part.numNotes();
         }
         return sum;

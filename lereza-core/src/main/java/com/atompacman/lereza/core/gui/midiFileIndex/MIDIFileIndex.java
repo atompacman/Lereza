@@ -32,7 +32,7 @@ import com.atompacman.lereza.core.Parameters;
 import com.atompacman.lereza.core.Wizard;
 import com.atompacman.lereza.core.Parameters.Paths.SQL;
 import com.atompacman.lereza.core.db.Database;
-import com.atompacman.lereza.core.resources.context.ContextElementType;
+import com.atompacman.lereza.core.db.context.ContextElementType;
 
 public class MIDIFileIndex {
 

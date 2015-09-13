@@ -23,10 +23,8 @@ import javax.sound.midi.Track;
 
 import org.apache.logging.log4j.Level;
 
-import com.atompacman.lereza.core.piece.TiedNote;
 import com.atompacman.lereza.core.piece.Piece;
 import com.atompacman.lereza.core.piece.PieceBuilder;
-import com.atompacman.lereza.core.piece.Stack;
 import com.atompacman.lereza.core.solfege.CircleOfFifths;
 import com.atompacman.lereza.core.solfege.Key;
 import com.atompacman.lereza.core.solfege.Quality;
@@ -296,7 +294,7 @@ public class MIDIFileReader extends Module {
 
     //---------------------------------------- READ ----------------------------------------------\\
 
-    public Piece<Stack<TiedNote>> read(File midiFile) throws MIDIFileReaderException {
+    public Piece read(File midiFile) throws MIDIFileReaderException {
         // Initialize temporary fields
         seq = new MIDISequence(midiFile);
         track = null;
@@ -621,7 +619,7 @@ public class MIDIFileReader extends Module {
 
     //- - - - - - - - - - - - - - - - - - - BUILD PIECE - - - - - - - - - - - - - - - - - - - - - \\
 
-    private Piece<Stack<TiedNote>> buildPiece(List<Map<Long, Integer>> conversionMaps) {
+    private Piece buildPiece(List<Map<Long, Integer>> conversionMaps) {
         PieceBuilder builder = new PieceBuilder(seq);
         registerSubmodule(builder);
 

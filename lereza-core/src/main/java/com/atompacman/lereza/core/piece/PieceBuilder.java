@@ -7,7 +7,7 @@ import com.atompacman.lereza.core.midi.sequence.MIDISequence;
 import com.atompacman.lereza.core.solfege.Pitch;
 import com.atompacman.lereza.core.solfege.TimeSignature;
 
-public class PieceBuilder extends PieceComponentBuilder<Piece<Stack<TiedNote>>> {
+public class PieceBuilder extends PieceComponentBuilder<Piece> {
 
     //======================================= FIELDS =============================================\\
 
@@ -101,12 +101,12 @@ public class PieceBuilder extends PieceComponentBuilder<Piece<Stack<TiedNote>>> 
 
     //---------------------------------------- BUILD ---------------------------------------------\\
 
-    public Piece<Stack<TiedNote>> buildComponent() {
-        List<Part<Stack<TiedNote>>> parts = new ArrayList<>();
+    public Piece buildComponent() {
+        List<Part> parts = new ArrayList<>();
         for (PartBuilder builder : builders) {
             parts.add(builder.build());
         }
-        return new Piece<Stack<TiedNote>>(parts, timeSign, midiSeq);
+        return new Piece(parts, timeSign, midiSeq);
     }
 
 

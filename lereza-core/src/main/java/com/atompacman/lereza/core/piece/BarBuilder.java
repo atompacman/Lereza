@@ -11,7 +11,7 @@ import com.atompacman.lereza.core.solfege.Value;
 import com.atompacman.toolkat.module.AnomalyDescription;
 import com.atompacman.toolkat.module.AnomalyDescription.Severity;
 
-public class BarBuilder extends PieceComponentBuilder<Bar<Stack<TiedNote>>> {
+public class BarBuilder extends PieceComponentBuilder<Bar> {
 
     //===================================== INNER TYPES ==========================================\\
 
@@ -36,8 +36,8 @@ public class BarBuilder extends PieceComponentBuilder<Bar<Stack<TiedNote>>> {
 
     //======================================= FIELDS =============================================\\
 
-    private final List<StackBuilder> builders;
-    private final TimeSignature      timeSign;
+    private final List<NoteStackBuilder> builders;
+    private final TimeSignature          timeSign;
 
     private int currBegTU;
     private int currLenTU;
@@ -59,11 +59,11 @@ public class BarBuilder extends PieceComponentBuilder<Bar<Stack<TiedNote>>> {
 
         this.currBegTU = 0;
         this.currLenTU = Value.QUARTER.toTimeunit();
-        this.currVelocity = StackBuilder.DEFAULT_VELOCITY;
+        this.currVelocity = NoteStackBuilder.DEFAULT_VELOCITY;
         
         // Initialize stack builders
         for (int i = 0 ; i < timeSign.timeunitsInABar(); ++i) {
-            StackBuilder builder = new StackBuilder();
+            NoteStackBuilder builder = new NoteStackBuilder();
             registerSubmodule(builder);
             builders.add(builder);
         }
@@ -72,7 +72,7 @@ public class BarBuilder extends PieceComponentBuilder<Bar<Stack<TiedNote>>> {
 
     //----------------------------------------- ADD ----------------------------------------------\\
 
-    TiedNote add(Pitch pitch, int velocity, int begTU, int lengthTU, TiedNote beforeTie) {
+    Note add(Pitch pitch, int velocity, int begTU, int lengthTU, Note beforeTie) {
         // Check that note timeunit range is within bar limits
         int endTU = begTU + lengthTU;
         checkTimeunit(begTU, "beginning");
@@ -87,7 +87,7 @@ public class BarBuilder extends PieceComponentBuilder<Bar<Stack<TiedNote>>> {
         // Split note timeunit range into simple values
         for (Value value : splitIntoValues(begTU, endTU)) {
             // Create note
-            TiedNote note = TiedNote.valueOf(pitch, value);
+            Note note = Note.valueOf(pitch, value);
             endTU = begTU + value.toTimeunit();
             
             // Tie note if needed
@@ -197,12 +197,12 @@ public class BarBuilder extends PieceComponentBuilder<Bar<Stack<TiedNote>>> {
 
     //---------------------------------------- BUILD ---------------------------------------------\\
 
-    protected Bar<Stack<TiedNote>> buildComponent() {
-        List<Stack<TiedNote>> noteStacks = new ArrayList<>();
-        for (StackBuilder builder : builders) {
+    protected Bar buildComponent() {
+        List<NoteStack> noteStacks = new ArrayList<>();
+        for (NoteStackBuilder builder : builders) {
             noteStacks.add(builder.build());
         }
-        return new Bar<Stack<TiedNote>>(noteStacks, timeSign);
+        return new Bar(noteStacks, timeSign);
     }
 
 

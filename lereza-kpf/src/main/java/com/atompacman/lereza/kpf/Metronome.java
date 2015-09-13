@@ -32,8 +32,8 @@ public class Metronome {
     
     // State
     private TimeSignature timeSign;
-    private double           bpm;
-    private boolean          isPlaying;
+    private double        bpm;
+    private boolean       isPlaying;
 
 
 

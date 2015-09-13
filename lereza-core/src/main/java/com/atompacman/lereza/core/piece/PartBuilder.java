@@ -6,7 +6,7 @@ import java.util.List;
 import com.atompacman.lereza.core.solfege.Pitch;
 import com.atompacman.lereza.core.solfege.TimeSignature;
 
-public final class PartBuilder extends PieceComponentBuilder<Part<Stack<TiedNote>>> {
+public final class PartBuilder extends PieceComponentBuilder<Part> {
 
     //======================================= FIELDS =============================================\\
 
@@ -50,7 +50,7 @@ public final class PartBuilder extends PieceComponentBuilder<Part<Stack<TiedNote
         }
         
         // Add first untied note
-        TiedNote untiedNote = builderAt(begTU).add(pitch, velocity, barPosTU, actualLen, null);
+        Note untiedNote = builderAt(begTU).add(pitch, velocity, barPosTU, actualLen, null);
         lengthTU -= actualLen;
 
         // Add tied notes
@@ -107,12 +107,12 @@ public final class PartBuilder extends PieceComponentBuilder<Part<Stack<TiedNote
 
     //---------------------------------------- BUILD ---------------------------------------------\\
 
-    public Part<Stack<TiedNote>> buildComponent() {
-        List<Bar<Stack<TiedNote>>> bars = new ArrayList<>();
+    public Part buildComponent() {
+        List<Bar> bars = new ArrayList<>();
         for (BarBuilder builder : builders) {
             bars.add(builder.build());
         }
-        return new Part<Stack<TiedNote>>(bars, timeSign);
+        return new Part(bars, timeSign);
     }
 
 

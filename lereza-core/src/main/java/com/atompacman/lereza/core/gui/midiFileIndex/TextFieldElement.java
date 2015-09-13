@@ -2,7 +2,7 @@ package com.atompacman.lereza.core.gui.midiFileIndex;
 
 import javax.swing.JLabel;
 
-import com.atompacman.lereza.core.resources.context.ContextElementType;
+import com.atompacman.lereza.core.db.context.ContextElementType;
 
 public class TextFieldElement extends NoLabelTextFieldElement {
 

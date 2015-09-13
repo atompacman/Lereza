@@ -2,9 +2,9 @@ package com.atompacman.lereza.rte;
 
 import java.util.Map.Entry;
 
-import com.atompacman.lereza.core.profile.drum.DrumBeat;
-import com.atompacman.lereza.core.profile.drum.PercussionElement;
-import com.atompacman.lereza.core.profile.drum.PercussionPattern;
+import com.atompacman.lereza.pluggin.builtin.drum.DrumBeat;
+import com.atompacman.lereza.pluggin.builtin.drum.PercussionElement;
+import com.atompacman.lereza.pluggin.builtin.drum.PercussionPattern;
 
 public class MIDIPercussionBeatPlayer extends MIDIChannelPlayer {
 
