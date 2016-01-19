@@ -3,7 +3,7 @@ package com.atompacman.lereza.core.generator;
 import java.util.Map;
 
 import com.atompacman.lereza.core.generator.advisor.Council;
-import com.atompacman.lereza.core.piece.Piece;
+import com.atompacman.lereza.core.piece.AbstractPiece;
 
 public class Generator {
 
@@ -30,7 +30,7 @@ public class Generator {
     
     //-------------------------------------- GENERATE --------------------------------------------\\
     
-    public Piece generate() {
+    public AbstractPiece generate() {
         return null;
     }
 }   

@@ -9,8 +9,7 @@ import org.junit.Test;
 
 import com.atompacman.lereza.core.Wizard;
 import com.atompacman.lereza.core.midi.sequence.MIDIFileReader;
-import com.atompacman.lereza.core.piece.Note;
-import com.atompacman.lereza.core.piece.Piece;
+import com.atompacman.lereza.core.piece.AbstractPiece;
 import com.atompacman.lereza.core.piece.NoteStack;
 import com.atompacman.lereza.kpf.LRTFKWindow;
 import com.atompacman.lereza.pluggin.builtin.key.KeyChangeAnalyzer;
@@ -38,7 +37,7 @@ public class TestKeyPathFinder {
         TextInputBasedTest.launchTestsWithExpectedOutput(TEST_LIST_FILE, 
                 input -> {
                     try {
-                        Piece piece = reader.read(new File(input));
+                        AbstractPiece<NoteStack> piece = reader.read(new File(input));
                         return detector.detect(piece.getPart(0)).toString();
                     } catch (Exception e) {
                         fail(e.getMessage());

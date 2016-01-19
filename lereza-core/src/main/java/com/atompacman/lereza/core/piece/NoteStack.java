@@ -1,154 +1,75 @@
 package com.atompacman.lereza.core.piece;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.atompacman.lereza.core.solfege.Dynamic;
 import com.atompacman.lereza.core.solfege.Pitch;
+import com.atompacman.toolkat.collections.BiDoubleMap;
 
-public class NoteStack implements PieceComponent {
+public final class NoteStack extends AbstractNoteStack {
 
-    //===================================== INNER TYPES ==========================================\\
-
-    public enum NoteStatus {
-        STARTING_AND_TIED,
-        STARTING_AND_UNTIED,
-        STARTED_AND_TIED,
-        STARTED_AND_UNTIED,
-    }
-    
-    
-    
     //======================================= FIELDS =============================================\\
-
-    protected final Map<NoteStatus, Set<Note>> notesByStatus;
-    protected final Map<Pitch, Note>           notesByPitch;
-    protected final Dynamic                    dynamic;
-
-
-
+    
+    protected final Map<Pitch, Note>                     notesByPitch;
+    protected final BiDoubleMap<NoteStatus, Pitch, Note> notesByStatusByPitch;
+    
+    
+    
     //======================================= METHODS ============================================\\
 
-    //--------------------------------- PROTECTED CONSTRUCTOR ------------------------------------\\
+    //------------------------------------- CONSTRUCTORS -----------------------------------------\\
 
-    protected NoteStack(Map<NoteStatus, Set<Note>> notesByStatus, Dynamic dynamic) {
-        this.notesByStatus = notesByStatus;
-        this.notesByPitch  = new HashMap<>();
-        this.dynamic       = dynamic;
+    protected NoteStack(BiDoubleMap<NoteStatus,Pitch,Note> notesByStatusByPitch, Dynamic dynamic) {
+        super(dynamic);
         
-        for (Set<Note> noteSet : notesByStatus.values()) {
-            for (Note note : noteSet) {
+        this.notesByPitch         = new LinkedHashMap<>();
+        this.notesByStatusByPitch = notesByStatusByPitch;
+        
+        for (Map<Pitch, Note> submap : notesByStatusByPitch.getSubMaps()) {
+            for (Note note : submap.values()) {
                 if (notesByPitch.put(note.getPitch(), note) != null) {
-                    throw new IllegalArgumentException("Cannot build a note "
-                            + "stack with many notes of the same pitch");
+                    throw new IllegalArgumentException("Cannot have multiple note for same pitch");
                 }
             }
         }
     }
-
-
-    //--------------------------------------- GETTERS --------------------------------------------\\
-
-    public Set<Note> getStartingUntiedNotes() {
-        return getNotesOfStatus(NoteStatus.STARTING_AND_UNTIED);
-    }
     
-    public Set<Note> getStartingNotes() {
-        return getNotesOfStatus(NoteStatus.STARTING_AND_UNTIED, NoteStatus.STARTING_AND_TIED);
+    
+    //--------------------------------------- GETTERS --------------------------------------------\\
+    
+    public Note getNoteOfPitch(Pitch pitch) {
+        return notesByPitch.get(pitch);
     }
 
-    public Set<Note> getStartedNotes() {
-        return getNotesOfStatus(NoteStatus.STARTED_AND_UNTIED, NoteStatus.STARTED_AND_TIED);
-    }
-
-    public Set<Note> getPlayingNotes() {
-        return getNotesOfStatus(NoteStatus.STARTED_AND_TIED,  NoteStatus.STARTED_AND_UNTIED, 
-                                NoteStatus.STARTING_AND_TIED, NoteStatus.STARTING_AND_UNTIED);
-    }
-
-    private Set<Note> getNotesOfStatus(NoteStatus...statusList) {
-        Set<Note> notes = new LinkedHashSet<>();
+    public List<Note> getNotesOfStatus(NoteStatus...statusList) {
+        List<Note> notes = new LinkedList<>(); 
         for (NoteStatus status : statusList) {
-            notes.addAll(notesByStatus.get(status));
+            notes.addAll(notesByStatusByPitch.getSubMap(status).values());
         }
         return notes;
     }
     
-    public Note getNote(Pitch pitch) {
-        Note note = notesByPitch.get(pitch);
-        if (note == null) {
-            throw new IllegalArgumentException("Stack does not contain "
-                    + "a note of pitch \"" + pitch.toString() + "\".");
-        }
-        return note;
-    }
-
-    public Dynamic getDynamic() {
-        if (dynamic == null) {
-            throw new IllegalStateException("Cannot get dynamic of a stack with no starting notes");
-        }
-        return dynamic;
-    }
-
-
-    //---------------------------------------- COUNT ---------------------------------------------\\
-
-    public int countStartingUntiedNotes() {
-        return getStartingUntiedNotes().size();
-    }
-    
-    public int countStartingNotes() {
-        return getStartingNotes().size();
-    }
-
-    public int countStartedNotes() {
-        return getStartedNotes().size();
-    }
-
-    public int countPlayingNotes() {
-        return getPlayingNotes().size();
-    }
-
     
     //---------------------------------------- STATE ---------------------------------------------\\
 
-    public boolean containsNoteOfPitch(Pitch pitch) {
-        return notesByPitch.containsKey(pitch);
-    }
-
-    public boolean hasStartingUntiedNotes() {
-        return getStartingUntiedNotes().size() != 0;
-    }
-    
-    public boolean hasStartingNotes() {
-        return getStartingNotes().size() != 0;
-    }
-
-    public boolean hasStartedNotes() {
-        return getStartedNotes().size() != 0;
-    }
-
-    public boolean hasPlayingNotes() {
-        return getPlayingNotes().size() != 0;
-    }
-    
-    
-    //-------------------------------------- TO STRING -------------------------------------------\\
-
-    public String toStaccato() {
-        Set<Note> startingNotes = getStartingNotes();
-        if (startingNotes.isEmpty()) {
-            return "";
+    public boolean hasNoteOfPitch(Pitch...pitches) {
+        for (Pitch pitch : pitches) {
+            if (notesByPitch.containsKey(pitch)) {
+                return true;
+            }
         }
-        StringBuilder sb = new StringBuilder();
-        Iterator<Note> it = startingNotes.iterator();
-        sb.append(it.next().toStaccato((byte) dynamic.getVelocity()));
-        while (it.hasNext()) {
-            sb.append('+').append(it.next().toStaccato((byte) dynamic.getVelocity()));
+        return false;
+    }
+
+    public boolean hasNotesOfStatus(NoteStatus...statusList) {
+        for (NoteStatus status : statusList) {
+            if (!notesByStatusByPitch.getSubMap(status).isEmpty()) {
+                return true;
+            }
         }
-        return sb.toString();
+        return false;
     }
 }

@@ -1,5 +1,5 @@
 package com.atompacman.lereza.core.piece;
 
-interface PieceComponent {
+public interface PieceComponent {
 
 }

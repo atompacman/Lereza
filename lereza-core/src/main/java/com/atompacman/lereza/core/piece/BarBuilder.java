@@ -3,12 +3,11 @@ package com.atompacman.lereza.core.piece;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.Level;
-
 import com.atompacman.lereza.core.solfege.Pitch;
 import com.atompacman.lereza.core.solfege.TimeSignature;
 import com.atompacman.lereza.core.solfege.Value;
 import com.atompacman.toolkat.module.AnomalyDescription;
+import com.atompacman.toolkat.module.BaseModule;
 import com.atompacman.toolkat.module.AnomalyDescription.Severity;
 
 public class BarBuilder extends PieceComponentBuilder<Bar> {
@@ -18,17 +17,20 @@ public class BarBuilder extends PieceComponentBuilder<Bar> {
     private enum Anomaly {
 
         @AnomalyDescription (
-                name         = "Timeunit outside bar limits",
-                description  = "A note beginning or ending timeunit was outside bar limits",
-                consequences = "Timeunit is brought back within the limits", 
-                severity     = Severity.MODERATE)
+                name          = "Timeunit outside bar limits",
+                detailsFormat = "A %s timeunit (%d) that was greater than bar "
+                                 + "length (%d) was brought down to end of bar",
+                description   = "A note beginning or ending timeunit was outside bar limits",
+                consequences  = "Timeunit is brought back within the limits", 
+                severity      = Severity.MODERATE)
         TIMEUNIT_OUTSIDE_BAR_LIMITS,
         
         @AnomalyDescription (
-                name         = "Tied note not added at bar's beginning",
-                description  = "A tied note was added elsewhere than bar's beginning",
-                consequences = "Note is not tied", 
-                severity     = Severity.MODERATE)
+                name          = "Tied note not added at bar's beginning",
+                detailsFormat = "A negative %s timeunit (%d) was set back to 0",
+                description   = "A tied note was added elsewhere than bar's beginning",
+                consequences  = "Note is not tied", 
+                severity      = Severity.MODERATE)
         TIED_NOTE_NOT_AT_BEG_OF_BAR;
     }
 
@@ -36,9 +38,13 @@ public class BarBuilder extends PieceComponentBuilder<Bar> {
 
     //======================================= FIELDS =============================================\\
 
+    // Sub-builders
     private final List<NoteStackBuilder> builders;
-    private final TimeSignature          timeSign;
+    
+    // Lifetime
+    private final int lengthTU;
 
+    // Builder parameters
     private int currBegTU;
     private int currLenTU;
     private int currVelocity;
@@ -50,25 +56,31 @@ public class BarBuilder extends PieceComponentBuilder<Bar> {
     //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
     public BarBuilder() {
-        this(TimeSignature.STANDARD_4_4);
+        this(TimeSignature.STANDARD_4_4.timeunitsInABar(), null);
     }
 
-    public BarBuilder(TimeSignature timeSign) {
-        this.builders = new ArrayList<>();
-        this.timeSign = timeSign;
+    public BarBuilder(int lengthTU) {
+        this(lengthTU, null);
+    }
 
+    public BarBuilder(int lengthTU, BaseModule parentModule) {
+        // Sub-builders
+        this.builders = new ArrayList<>();
+        
+        // Lifetime
+        this.lengthTU = lengthTU;
+
+        // Builder parameters
         this.currBegTU = 0;
         this.currLenTU = Value.QUARTER.toTimeunit();
         this.currVelocity = NoteStackBuilder.DEFAULT_VELOCITY;
         
         // Initialize stack builders
-        for (int i = 0 ; i < timeSign.timeunitsInABar(); ++i) {
-            NoteStackBuilder builder = new NoteStackBuilder();
-            registerSubmodule(builder);
-            builders.add(builder);
+        for (int i = 0 ; i < lengthTU; ++i) {
+            builders.add(new NoteStackBuilder(this));
         }
     }
-
+    
 
     //----------------------------------------- ADD ----------------------------------------------\\
 
@@ -96,8 +108,8 @@ public class BarBuilder extends PieceComponentBuilder<Bar> {
             }
 
             // Log
-            log(Level.TRACE, "Adding note %-16s from timeunit %4d to %4d", 
-                    note.toStaccato((byte)velocity), begTU, endTU);
+            log("%48s | Beg: %4d | End: %4d | %8s %s", "", begTU, endTU, 
+                    beforeTie == null ? "(Untied)" : " (Tied) ", value.name());
             
             // Add starting note to the first note stack
             builders.get(begTU).add(note, velocity, true);
@@ -147,15 +159,12 @@ public class BarBuilder extends PieceComponentBuilder<Bar> {
 
     private int checkTimeunit(int timeunit, String tuName) {
         if (timeunit < 0) {
-            signal(Anomaly.TIMEUNIT_OUTSIDE_BAR_LIMITS, "A negative "
-                    + "%s timeunit (%d) was set back to 0", tuName, timeunit);
+            signal(Anomaly.TIMEUNIT_OUTSIDE_BAR_LIMITS, tuName, timeunit);
             return 0;
         }
-        if (timeunit > timeSign.timeunitsInABar()) {
-            signal(Anomaly.TIMEUNIT_OUTSIDE_BAR_LIMITS, "A %s timeunit "
-                    + "(%d) that was greater than bar length (%d) was brought down to "
-                    + "end of bar", tuName, timeunit, timeSign.timeunitsInABar());
-            return timeSign.timeunitsInABar();
+        if (timeunit > lengthTU) {
+            signal(Anomaly.TIMEUNIT_OUTSIDE_BAR_LIMITS, tuName, timeunit, lengthTU);
+            return lengthTU;
         }
         return timeunit;
     }
@@ -202,7 +211,7 @@ public class BarBuilder extends PieceComponentBuilder<Bar> {
         for (NoteStackBuilder builder : builders) {
             noteStacks.add(builder.build());
         }
-        return new Bar(noteStacks, timeSign);
+        return new Bar(noteStacks);
     }
 
 

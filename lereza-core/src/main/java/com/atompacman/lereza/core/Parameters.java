@@ -9,12 +9,14 @@ import com.atompacman.lereza.core.solfege.Value;
 public enum Parameters implements StrictParam {;
 
     public static class Paths {
+        
         public static final String LEREZA_PACKAGE  = "com.atompacman.lereza";
-        public static final String ASSETS_ROOT_DIR = "assets/";
-        public static final String MIDI_ROOT_DIR   = "midi/";
-
-        public static final String SQL_ROOT_DIR    = "sql/";
-
+        
+        public static final String ASSETS_ROOT_DIR = "assets";
+        public static final String MIDI_ROOT_DIR   = "midi";
+        public static final String SQL_ROOT_DIR    = "sql";
+        public static final String LIB_ROOT_DIR    = "lib";
+        
         public static class Assets {
             public static final String LOGIN_ICON = ASSETS_ROOT_DIR + "title_connections.png";
         }

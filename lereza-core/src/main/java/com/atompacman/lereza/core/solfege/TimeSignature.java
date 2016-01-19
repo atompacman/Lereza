@@ -8,7 +8,7 @@ public final class TimeSignature {
 
     public static final TimeSignature STANDARD_4_4 = new TimeSignature(4,4, Grouping.DUPLETS);
 
-
+            
 
     //======================================= FIELDS =============================================\\
 
@@ -61,7 +61,11 @@ public final class TimeSignature {
     }
 
     public int timeunitsInABar() {
-        return meterNum * Value.QUARTER.toTimeunit();
+        double tu = ((double)meterNum / (double)meterDen) * Value.WHOLE.toTimeunit();
+        if (tu != (int)tu) {
+            throw new IllegalStateException("Invalid time signature");
+        }
+        return (int)tu;
     }
 
 

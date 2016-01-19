@@ -1,33 +1,33 @@
 package com.atompacman.lereza.core.analysis.profile;
 
-import com.atompacman.lereza.core.analysis.profile.PieceStructuralScope.HorizontalScope;
-import com.atompacman.lereza.core.analysis.profile.PieceStructuralScope.VerticalScope;
+import com.atompacman.lereza.core.analysis.profile.PieceStructuralScope.PartSubstructure;
+import com.atompacman.lereza.core.analysis.profile.PieceStructuralScope.PartGrouping;
 
 public class TargetPieceStructure {
 
     //====================================== CONSTANTS ===========================================\\
 
     public static final TargetPieceStructure WHOLE_PIECE = new TargetPieceStructure(
-            new PieceStructuralScope(HorizontalScope.PIECE,  VerticalScope.PIECE), 0, 0);
+            new PieceStructuralScope(PartSubstructure.PART,  PartGrouping.ALL), 0, 0);
     
     
     
     //======================================= FIELDS =============================================\\
 
     private final PieceStructuralScope scope;
-    private final int                  horiIdx;
-    private final int                  vertIdx;
+    private final int                  partGroupIdx;
+    private final int                  substructureIdx;
 
 
 
     //======================================= METHODS ============================================\\
 
-    //--------------------------------- PUBLIC CONSTRUCTORS --------------------------------------\\
+    //------------------------------------- CONSTRUCTORS -----------------------------------------\\
 
-    public TargetPieceStructure(PieceStructuralScope scope, int horiIdx, int vertIdx) {
-        this.scope   = scope;
-        this.horiIdx = horiIdx;
-        this.vertIdx = vertIdx;
+    public TargetPieceStructure(PieceStructuralScope scope, int partGroupIdx, int substructureIdx) {
+        this.scope           = scope;
+        this.partGroupIdx    = partGroupIdx;
+        this.substructureIdx = substructureIdx;
     }
     
     
@@ -37,12 +37,12 @@ public class TargetPieceStructure {
         return scope;
     }
 
-    public int getHorizontalIndex() {
-        return horiIdx;
+    public int getPartGroupIndex() {
+        return partGroupIdx;
     }
 
-    public int getVerticalIndex() {
-        return vertIdx;
+    public int getSubstructureIndex() {
+        return substructureIdx;
     }
 
 
@@ -51,9 +51,9 @@ public class TargetPieceStructure {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + horiIdx;
+        result = prime * result + partGroupIdx;
         result = prime * result + ((scope == null) ? 0 : scope.hashCode());
-        result = prime * result + vertIdx;
+        result = prime * result + substructureIdx;
         return result;
     }
 
@@ -65,23 +65,23 @@ public class TargetPieceStructure {
         if (getClass() != obj.getClass())
             return false;
         TargetPieceStructure other = (TargetPieceStructure) obj;
-        if (horiIdx != other.horiIdx)
+        if (partGroupIdx != other.partGroupIdx)
             return false;
         if (scope == null) {
             if (other.scope != null)
                 return false;
         } else if (!scope.equals(other.scope))
             return false;
-        if (vertIdx != other.vertIdx)
+        if (substructureIdx != other.substructureIdx)
             return false;
         return true;
     }
 
 
-    //-------------------------------------- TO STRING -------------------------------------------\\
+    //------------------------------------ SERIALIZATION -----------------------------------------\\
 
     public String toString() {
-        return new StringBuilder().append(scope).append(" (").append(horiIdx)
-                .append(',').append(vertIdx).append(")").toString();
+        return new StringBuilder().append(scope).append(" (").append(partGroupIdx)
+                .append(',').append(substructureIdx).append(")").toString();
     }
 }

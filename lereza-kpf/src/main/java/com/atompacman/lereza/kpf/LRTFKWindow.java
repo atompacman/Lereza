@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 
 import com.atompacman.lereza.core.midi.device.MIDIDeviceException;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceInfo;
-import com.atompacman.lereza.core.midi.device.MIDIDeviceManager;
+import com.atompacman.lereza.core.midi.device.MIDIDeviceProvider;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceType;
 import com.atompacman.lereza.core.midi.realtime.PlayingTonesListener;
 import com.atompacman.lereza.core.midi.realtime.RealTimeMIDIProcessor;
@@ -92,7 +92,7 @@ public class LRTFKWindow extends CenteredJFrame {
     //======================================= FIELDS =============================================\\
 
     // MIDI device manager
-    private MIDIDeviceManager deviceManager;
+    private MIDIDeviceProvider deviceManager;
     private MIDIDeviceInfo    controller;
     private JPanel            tonesLabel;
 
@@ -117,7 +117,7 @@ public class LRTFKWindow extends CenteredJFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Get device manager
-        deviceManager = MIDIDeviceManager.getInstance();
+        deviceManager = MIDIDeviceProvider.getInstance();
 
         // Create main panel
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));

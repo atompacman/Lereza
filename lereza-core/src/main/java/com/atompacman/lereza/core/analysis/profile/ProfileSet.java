@@ -11,57 +11,58 @@ public class ProfileSet {
     //======================================= FIELDS =============================================\\
 
     private final BiDoubleMap<TargetPieceStructure, Class<? extends Profile>, Profile> profiles;
-
-
-
+    
+    
+    
     //======================================= METHODS ============================================\\
 
-    //--------------------------------- PUBLIC CONSTRUCTORS --------------------------------------\\
+    //------------------------------------- CONSTRUCTORS -----------------------------------------\\
 
     public ProfileSet() {
         this.profiles = new BiDoubleHashMap<>();
     }
-
-
+    
+    
     //----------------------------------------- ADD ----------------------------------------------\\
 
-    protected void addProfile(Profile profile, TargetPieceStructure tps) {
-        if (profiles.put(tps, profile.getClass(), profile) != null) {
+    @SuppressWarnings("unchecked")
+    public void addProfile(Profile profile, TargetPieceStructure tps) {
+        if (this.profiles.put(tps, (Class<Profile>) profile.getClass(), profile) != null) {
             throw new IllegalArgumentException("A " + profile.getClass().getSimpleName() + 
-                    " was already added to current study.");
+                    " was already added to current piece.");
         }
     }
-
-
+    
+    
     //--------------------------------------- GETTERS --------------------------------------------\\
 
     public Profile getProfile(Class<? extends Profile> profileClass, TargetPieceStructure tps) {
-        Profile profile = profiles.get(tps, profileClass);
-        if (profile == null) {
+        Profile elem = profiles.get(tps, profileClass);
+        if (elem == null) {
             throw new IllegalArgumentException("No " + profileClass.getSimpleName() + 
                     " found for target \"" + tps +"\".");
         }
-        return profile;
+        return elem;
     }
-
-    public Map<Class<? extends Profile>, Profile> getProfilesCovering(TargetPieceStructure target) {
+    
+    public Map<Class<? extends Profile>, Profile> getProfileCovering(TargetPieceStructure target) {
         return profiles.getSubMap(target);
     }
-
-    public Map<TargetPieceStructure, Profile> getProfiles(Class<? extends Profile> profileClass) {
-        return profiles.getAlternativeSubMap(profileClass);
+    
+    public Map<TargetPieceStructure, Profile> getProfiles(Class<? extends Profile> dataClass) {
+        return profiles.getAlternativeSubMap(dataClass);
     }
-
-    public Profile getProfile(Class<? extends Profile> profileClass) {
-        Map<TargetPieceStructure, Profile> choices = profiles.getAlternativeSubMap(profileClass);
+    
+    public Profile getProfile(Class<? extends Profile> dataClass) {
+        Map<TargetPieceStructure, Profile> choices = profiles.getAlternativeSubMap(dataClass);
 
         if (choices.isEmpty()) {
-            throw new IllegalArgumentException("No " + profileClass.getSimpleName() +  " found.");
+            throw new IllegalArgumentException("No " + dataClass.getSimpleName() + " found.");
         }
         Entry<TargetPieceStructure, Profile> entry = choices.entrySet().iterator().next();
         if (choices.size() > 1 || !entry.getKey().equals(TargetPieceStructure.WHOLE_PIECE)) {
-            throw new IllegalArgumentException(profileClass.getSimpleName() + 
-                    " is not a profile targeting only the whole piece");
+            throw new IllegalArgumentException(dataClass.getSimpleName() + 
+                    " is not a data class targeting only the whole piece");
         }
         return entry.getValue();
     }

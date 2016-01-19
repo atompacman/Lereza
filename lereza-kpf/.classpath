@@ -32,19 +32,5 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/core.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/desktop.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/layout.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/musicxml.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/musicxml-in.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/renderer.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/renderer-awt.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/utils.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/converter.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/demos.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/midi-out.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/player.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/renderer-javafx.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Utilisateur/Documents/eclipse_workspace/local_libs/zong/test.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

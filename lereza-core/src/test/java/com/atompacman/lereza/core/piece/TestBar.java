@@ -34,17 +34,17 @@ public class TestBar {
 
     //--------------------------------------- HELPERS --------------------------------------------\\
 
-    private Bar buildAndPerformBasicAssertions(int numStartingUntiedNotes, 
+    private AbstractBar buildAndPerformBasicAssertions(int numStartingUntiedNotes, 
                                                                 int numStartingTiedNotes) {
         
         // Build bar
-        Bar bar = builder.build();
+        AbstractBar bar = builder.build();
 
         // State
         assertEquals(numStartingUntiedNotes == 0, bar.isEmpty());
         assertEquals(numStartingUntiedNotes, bar.getNumStartingUntiedNotes());
         assertEquals(numStartingUntiedNotes + numStartingTiedNotes, bar.getNumStartingNotes());
-        assertEquals(64, bar.numTimeunits());
+        assertEquals(64, bar.getLengthTU());
 
         return bar;
     }

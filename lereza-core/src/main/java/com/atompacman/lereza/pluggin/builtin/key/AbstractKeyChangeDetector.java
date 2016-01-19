@@ -9,11 +9,11 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.stat.StatUtils;
 
-import com.atompacman.lereza.core.analysis.Analyzer;
+import com.atompacman.lereza.core.analysis.OLDAnalyzer;
 import com.atompacman.lereza.core.solfege.Semitones;
 import com.atompacman.toolkat.math.Interval;
 
-public abstract class AbstractKeyChangeDetector<T> extends Analyzer {
+public abstract class AbstractKeyChangeDetector<T> extends OLDAnalyzer {
 
     //===================================== INNER TYPES ==========================================\\
 

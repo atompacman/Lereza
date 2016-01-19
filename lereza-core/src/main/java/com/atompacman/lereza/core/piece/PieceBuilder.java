@@ -3,18 +3,24 @@ package com.atompacman.lereza.core.piece;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atompacman.lereza.core.midi.sequence.MIDISequence;
+import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
 import com.atompacman.lereza.core.solfege.Pitch;
 import com.atompacman.lereza.core.solfege.TimeSignature;
+import com.atompacman.toolkat.misc.Log;
+import com.atompacman.toolkat.misc.StringHelper;
+import com.atompacman.toolkat.module.BaseModule;
 
 public class PieceBuilder extends PieceComponentBuilder<Piece> {
 
     //======================================= FIELDS =============================================\\
 
+    // Sub-builders
     private final List<PartBuilder> builders;
-    private final TimeSignature     timeSign;
-    private final MIDISequence      midiSeq;
-
+    
+    // Lifetime
+    private final TimeunitToBarConverter tuToBar;
+    
+    // Builder parameters
     private int  currPart;
     private int  currBegTU;
     private int  currLenTU;
@@ -26,23 +32,24 @@ public class PieceBuilder extends PieceComponentBuilder<Piece> {
 
     //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
 
-    public PieceBuilder() {
-        this(null, TimeSignature.STANDARD_4_4);
+    public PieceBuilder(int pieceLengthTU) {
+        this(new TimeunitToBarConverter(pieceLengthTU), null);
     }
 
-    public PieceBuilder(TimeSignature timeSignature) {
-        this(null, timeSignature);
+    public PieceBuilder(TimeSignature firstTimeSign, int pieceLengthTU) {
+        this(new TimeunitToBarConverter(firstTimeSign, pieceLengthTU), null);
     }
+    
+    public PieceBuilder(TimeunitToBarConverter tuToBar, BaseModule parentModule) {
+        super(parentModule);
+        
+        // Sub-builders
+        this.builders = new ArrayList<>();
+        
+        // Lifetime
+        this.tuToBar = tuToBar;
 
-    public PieceBuilder(MIDISequence midiSeq) {
-        this(midiSeq, midiSeq.getTimeSignature());
-    }
-
-    private PieceBuilder(MIDISequence midiSeq, TimeSignature timeSign) {
-        this.builders     = new ArrayList<>();
-        this.timeSign     = timeSign;
-        this.midiSeq      = midiSeq;
-
+        // Builder parameters
         this.currPart     = 0;
         this.currBegTU    = 0;
         this.currLenTU    = 32;
@@ -54,11 +61,16 @@ public class PieceBuilder extends PieceComponentBuilder<Piece> {
 
     public PieceBuilder add(Pitch pitch, byte velocity, int part, int begTU, int lengthTU) {
         while (part >= builders.size()) {
-            PartBuilder partBuilder = new PartBuilder(timeSign);
-            registerSubmodule(partBuilder);
-            builders.add(partBuilder);
+            builders.add(new PartBuilder(tuToBar, this));
         }
+        
+        log("Pitch: %3s | Velocity: %3d | Part: %2d | %8s | Beg: %4d | End: %4d |", 
+                pitch, (int) velocity, part, "", begTU, begTU + lengthTU);
+        
         builders.get(part).add(pitch, velocity, begTU, lengthTU);
+        
+        Log.trace(StringHelper.title(""));
+        
         return this;
     }
 
@@ -106,7 +118,7 @@ public class PieceBuilder extends PieceComponentBuilder<Piece> {
         for (PartBuilder builder : builders) {
             parts.add(builder.build());
         }
-        return new Piece(parts, timeSign, midiSeq);
+        return new Piece(parts);
     }
 
 

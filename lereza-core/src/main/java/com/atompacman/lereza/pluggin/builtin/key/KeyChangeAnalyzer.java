@@ -4,12 +4,12 @@ import java.io.File;
 
 import com.atompacman.lereza.core.analysis.profile.Profile;
 import com.atompacman.lereza.core.analysis.profile.ProfileSet;
-import com.atompacman.lereza.core.piece.Bar;
+import com.atompacman.lereza.core.piece.AbstractBar;
+import com.atompacman.lereza.core.piece.AbstractPart;
 import com.atompacman.lereza.core.piece.Note;
-import com.atompacman.lereza.core.piece.Part;
 import com.atompacman.lereza.core.piece.NoteStack;
 
-public class KeyChangeAnalyzer extends AbstractKeyChangeDetector<Part> {
+public class KeyChangeAnalyzer extends AbstractKeyChangeDetector<AbstractPart> {
 
     //======================================= METHODS ============================================\\
 
@@ -24,26 +24,26 @@ public class KeyChangeAnalyzer extends AbstractKeyChangeDetector<Part> {
 
     //--------------------------------------- ANALYSIS -------------------------------------------\\
 
-    public Profile analyzePart(Part part, ProfileSet dependencies) {
+    public Profile analyzePart(AbstractPart part, ProfileSet dependencies) {
         detect(part);
         return null;
     }
     
     //------------------------------------ TU LENGTH OF ------------------------------------------\\
 
-    protected int timeunitLengthOf(Part part) {
+    protected int timeunitLengthOf(AbstractPart part) {
         return part.finalTimeunit();
     }
 
 
     //-------------------------------------- ADD NOTE --------------------------------------------\\
 
-    protected void addNotes(Part part) {
+    protected void addNotes(AbstractPart part) {
         int timeunit = 0;
 
         for (int i = 0; i < part.numBars(); ++i) {
-            Bar bar = part.getBar(i);
-            for (int j = 0; j < bar.numTimeunits(); ++j) {
+            AbstractBar bar = part.getBar(i);
+            for (int j = 0; j < bar.getLengthTU(); ++j) {
                 NoteStack stack = bar.getNoteStack(j);
                 for (Note note : stack.getPlayingNotes()) {
                     addNote(timeunit, timeunit + 1, note.getPitch().getTone().semitoneValue());

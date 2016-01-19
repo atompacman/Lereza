@@ -45,5 +45,20 @@
             <artifactId>jfugue</artifactId>
             <version>5.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.grame</groupId>
+            <artifactId>guido</artifactId>
+            <version>1.23</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.0.22</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
     </dependencies>
 </project>

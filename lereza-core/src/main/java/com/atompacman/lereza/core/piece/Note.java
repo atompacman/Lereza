@@ -15,7 +15,7 @@ public class Note extends BasicNote implements PieceComponent {
 
     //======================================= METHODS ============================================\\
 
-    //------------------------------ PUBLIC STATIC CONSTRUCTOR -----------------------------------\\
+    //------------------------------------- CONSTRUCTORS -----------------------------------------\\
 
     public static Note valueOf(Pitch pitch, Value value) {
         return new Note(pitch, value);
@@ -29,17 +29,14 @@ public class Note extends BasicNote implements PieceComponent {
         return new Note(Pitch.valueOf(pitch), value);
     }
 
-
-    //--------------------------------- PROTECTED CONSTRUCTOR ------------------------------------\\
-
-    protected Note(Pitch pitch, Value value) {
+    private Note(Pitch pitch, Value value) {
         super(pitch, value);
     }
 
 
     //--------------------------------------- SETTERS --------------------------------------------\\
 
-    Note tieTo(Note next) {
+    public Note tieTo(Note next) {
         if (this == next) {
             throw new IllegalArgumentException("Cannot tie a note to itself");
         }
