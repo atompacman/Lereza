@@ -13,7 +13,6 @@ import com.atompacman.lereza.core.midi.sequence.MIDIFileReader;
 import com.atompacman.toolkat.test.AbstractTest;
 import com.atompacman.toolkat.test.TextInputBasedTest;
 
-
 public class TestMIDIFileReader extends AbstractTest {
 
     //================================== FUNCTIONNAL TESTS =======================================\\

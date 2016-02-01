@@ -1,8 +1,10 @@
 package com.atompacman.lereza.core.piece;
 
-import com.atompacman.toolkat.module.Module;
+import org.apache.logging.log4j.Level;
 
-abstract class PieceComponentBuilder<T extends PieceComponent> extends Module {
+import com.atompacman.toolkat.module.BaseModule;
+
+abstract class PieceComponentBuilder<T extends PieceComponent> extends BaseModule {
 
     //=================================== ABSTRACT METHODS =======================================\\
 
@@ -14,6 +16,17 @@ abstract class PieceComponentBuilder<T extends PieceComponent> extends Module {
 
     //======================================= METHODS ============================================\\
 
+    //------------------------------------- CONSTRUCTORS -----------------------------------------\\
+
+    protected PieceComponentBuilder() {
+        super(Level.TRACE);
+    }
+    
+    protected PieceComponentBuilder(BaseModule parentModule) {
+        super(Level.TRACE, parentModule);
+    }
+    
+    
     //---------------------------------------- BUILD ---------------------------------------------\\
 
     final T build() {

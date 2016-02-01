@@ -6,7 +6,7 @@ import java.awt.Dimension;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import com.atompacman.lereza.core.resources.context.ContextElementType;
+import com.atompacman.lereza.core.db.context.ContextElementType;
 
 public class NoLabelTextFieldElement extends IndexElement {
 	

@@ -4,8 +4,8 @@ import java.awt.Component;
 
 import javax.swing.JLabel;
 
-import com.atompacman.lereza.core.resources.context.ContextElementType;
-import com.atompacman.lereza.core.resources.context.ContextElementType.DatabaseStatus;
+import com.atompacman.lereza.core.db.context.ContextElementType;
+import com.atompacman.lereza.core.db.context.ContextElementType.DatabaseStatus;
 
 public abstract class IndexElement {
 	

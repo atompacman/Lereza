@@ -21,8 +21,8 @@ import org.apache.commons.io.FileUtils;
 import com.atompacman.lereza.core.Wizard;
 import com.atompacman.lereza.core.Parameters.Paths.SQL;
 import com.atompacman.lereza.core.db.Database;
-import com.atompacman.lereza.core.resources.context.ContextElementType;
-import com.atompacman.lereza.core.resources.context.ContextElementType.DatabaseStatus;
+import com.atompacman.lereza.core.db.context.ContextElementType;
+import com.atompacman.lereza.core.db.context.ContextElementType.DatabaseStatus;
 
 public class ComboBoxElement extends IndexElement {
 

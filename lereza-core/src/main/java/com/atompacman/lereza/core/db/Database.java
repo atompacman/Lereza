@@ -9,9 +9,9 @@ import com.atompacman.lereza.core.Parameters.Paths.Assets;
 import com.atompacman.toolkat.exception.Throw;
 import com.atompacman.toolkat.gui.Login;
 import com.atompacman.toolkat.gui.LoginDialog;
-import com.atompacman.toolkat.module.Module;
+import com.atompacman.toolkat.module.BaseModule;
 
-public class Database extends Module {
+public class Database extends BaseModule {
 	
 	//====================================== SINGLETON ===========================================\\
 

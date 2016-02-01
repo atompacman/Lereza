@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MIDITrack {
+import com.atompacman.lereza.core.piece.PieceSubstructureModel;
+
+public final class MIDITrack implements PieceSubstructureModel {
 
     //======================================= FIELDS =============================================\\
 

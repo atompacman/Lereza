@@ -16,7 +16,7 @@ import com.atompacman.configuana.Settings;
 import com.atompacman.configuana.StrictParam;
 import com.atompacman.toolkat.misc.Log;
 import com.atompacman.toolkat.misc.StringHelper;
-import com.atompacman.toolkat.module.Module;
+import com.atompacman.toolkat.module.BaseModule;
 
 public class Wizard extends App {
 
@@ -24,7 +24,7 @@ public class Wizard extends App {
 
     private static App app;
     private static Settings currSettings;
-    private static Map<Class<? extends Module>, Module> modules;
+    private static Map<Class<? extends BaseModule>, BaseModule> modules;
 
 
 
@@ -64,14 +64,14 @@ public class Wizard extends App {
         if (!manualInit) {
             Wizard.currSettings = app.getDefaultProfile();
         }
-        Wizard.modules = new HashMap<Class<? extends Module>, Module>();
+        Wizard.modules = new HashMap<Class<? extends BaseModule>, BaseModule>();
     }
 
 
     //-------------------------------------- GET MODULE ------------------------------------------\\
 
     @SuppressWarnings("unchecked")
-    public static <T extends Module> T getModule(Class<T> moduleClass) {
+    public static <T extends BaseModule> T getModule(Class<T> moduleClass) {
         assertInit();
         T module = (T) modules.get(moduleClass);
 

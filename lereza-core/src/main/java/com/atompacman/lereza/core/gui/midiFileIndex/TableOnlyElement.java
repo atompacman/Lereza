@@ -4,7 +4,7 @@ import java.awt.Component;
 
 import javax.swing.JLabel;
 
-import com.atompacman.lereza.core.resources.context.ContextElementType;
+import com.atompacman.lereza.core.db.context.ContextElementType;
 
 public class TableOnlyElement extends IndexElement {
 	

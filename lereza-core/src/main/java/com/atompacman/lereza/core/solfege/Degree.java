@@ -1,6 +1,5 @@
 package com.atompacman.lereza.core.solfege;
 
-
 public class Degree {
 
 	private ScaleDegree degreeOnScale;
