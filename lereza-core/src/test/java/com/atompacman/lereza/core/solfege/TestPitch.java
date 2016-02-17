@@ -4,11 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Accidental;
-import com.atompacman.lereza.core.solfege.NoteLetter;
-import com.atompacman.lereza.core.solfege.Octave;
-import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.Accidental;
+import com.atompacman.lereza.core.theory.NoteLetter;
+import com.atompacman.lereza.core.theory.Octave;
+import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.Tone;
 
 public class TestPitch {
 
@@ -23,7 +23,7 @@ public class TestPitch {
 	
 	@Test
 	public void staticConstructorsEquivalence() {
-		Pitch a = Pitch.valueOf(Tone.valueOf("Bb"), Octave.FIVE);
+		Pitch a = Pitch.of(Tone.valueOf("Bb"), Octave.FIVE);
 		Pitch b = Pitch.valueOf(NoteLetter.B, Accidental.FLAT, Octave.FIVE);
 		Pitch c = Pitch.valueOf("Bb5");
 		Pitch d = Pitch.thatIsMoreCommonForHexValue((byte) 82);

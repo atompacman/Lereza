@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
-import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.TimeSignature;
+import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.module.BaseModule;
 
 public final class PartBuilder extends PieceComponentBuilder<Part> {

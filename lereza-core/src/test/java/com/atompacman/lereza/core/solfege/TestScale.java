@@ -8,10 +8,11 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Key;
-import com.atompacman.lereza.core.solfege.Scale;
-import com.atompacman.lereza.core.solfege.ScaleType;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.Key;
+import com.atompacman.lereza.core.theory.Quality;
+import com.atompacman.lereza.core.theory.Scale;
+import com.atompacman.lereza.core.theory.ScaleType;
+import com.atompacman.lereza.core.theory.Tone;
 
 public class TestScale {
 
@@ -22,13 +23,13 @@ public class TestScale {
 		Scale a = Scale.valueOf(Tone.valueOf("G"), ScaleType.MAJOR);
 		assertEquals(a.getTone(), Tone.valueOf("G"));
 		assertEquals(a.getType(), ScaleType.MAJOR);
-		assertEquals(a.getKey(), Key.valueOf(Tone.valueOf("G"), Quality.MAJOR));
+		assertEquals(a.getKey(), Key.of(Tone.valueOf("G"), Quality.MAJOR));
 		assertEquals(a.getQuality(), Quality.MAJOR);
 		
 		a = Scale.valueOf(Tone.valueOf("Bb"), ScaleType.HARMONIC_MINOR);
 		assertEquals(a.getTone(), Tone.valueOf("Bb"));
 		assertEquals(a.getType(), ScaleType.HARMONIC_MINOR);
-		assertEquals(a.getKey(), Key.valueOf(Tone.valueOf("Bb"), Quality.MINOR));
+		assertEquals(a.getKey(), Key.of(Tone.valueOf("Bb"), Quality.MINOR));
 		assertEquals(a.getQuality(), Quality.MINOR);
 	}
 

@@ -3,8 +3,8 @@ package com.atompacman.lereza.core.piece;
 import java.util.Iterator;
 import java.util.List;
 
-import com.atompacman.lereza.core.solfege.Dynamic;
-import com.atompacman.lereza.core.solfege.Pitch;
+import com.atompacman.lereza.core.theory.Dynamic;
+import com.atompacman.lereza.core.theory.Pitch;
 
 public abstract class AbstractNoteStack implements PieceComponent {
 

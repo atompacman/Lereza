@@ -15,11 +15,11 @@ import javax.sound.midi.Track;
 
 import org.apache.logging.log4j.Level;
 
-import com.atompacman.lereza.core.solfege.CircleOfFifths;
-import com.atompacman.lereza.core.solfege.Key;
-import com.atompacman.lereza.core.solfege.Quality;
-import com.atompacman.lereza.core.solfege.TimeSignature;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.CircleOfFifths;
+import com.atompacman.lereza.core.theory.Key;
+import com.atompacman.lereza.core.theory.Quality;
+import com.atompacman.lereza.core.theory.TimeSignature;
+import com.atompacman.lereza.core.theory.Tone;
 import com.atompacman.toolkat.misc.Log;
 import com.atompacman.toolkat.module.AnomalyDescription;
 import com.atompacman.toolkat.module.AnomalyDescription.Severity;
@@ -326,9 +326,9 @@ public class MIDIFileReader extends Module {
         case KEY_SIGNATURE:
             Tone tone = CircleOfFifths.toneAtPosition(data[0]);
             Quality quality = (data[1] == 0x00) ? Quality.MAJOR : Quality.MINOR;
-            content.addKeyChange(Key.valueOf(tone, quality), tick);
+            content.addKeyChange(Key.of(tone, quality), tick);
             break;
-            
+
         default:
             ignored = true;
             break;

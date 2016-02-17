@@ -16,7 +16,7 @@ import com.atompacman.lereza.core.midi.device.MIDIDeviceException;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceInfo;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceProvider;
 import com.atompacman.lereza.core.midi.realtime.RealTimeMIDIProcessor;
-import com.atompacman.lereza.core.solfege.TimeSignature;
+import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.misc.Log;
 
 public class RealTimeTempoDetector extends RealTimeMIDIProcessor {

@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Value;
+import com.atompacman.lereza.core.theory.Value;
 import com.atompacman.toolkat.test.AbstractTest;
 
 public class TestNote extends AbstractTest {

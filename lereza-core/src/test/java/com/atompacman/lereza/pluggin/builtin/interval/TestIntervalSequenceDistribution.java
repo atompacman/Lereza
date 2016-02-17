@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Degree;
+import com.atompacman.lereza.core.theory.Degree;
 import com.atompacman.lereza.pluggin.builtin.interval.IntervalSequenceDistribution;
 import com.atompacman.toolkat.test.AbstractTest;
 
@@ -21,23 +21,23 @@ public class TestIntervalSequenceDistribution extends AbstractTest {
         
         LinkedList<Degree> list = new LinkedList<>();
         
-        list.add(Degree.valueOf("I"));
-        list.add(Degree.valueOf("ii"));
+        list.add(Degree.of("I"));
+        list.add(Degree.of("ii"));
         isd.addIntervalSequence(list);
         list.clear();
         
-        list.add(Degree.valueOf("iii"));
-        list.add(Degree.valueOf("IV"));
+        list.add(Degree.of("iii"));
+        list.add(Degree.of("IV"));
         isd.addIntervalSequence(list);
         list.clear();
         
-        list.add(Degree.valueOf("I"));
-        list.add(Degree.valueOf("iii"));
+        list.add(Degree.of("I"));
+        list.add(Degree.of("iii"));
         isd.addIntervalSequence(list);
         list.clear();
         
-        list.add(Degree.valueOf("iii"));
-        list.add(Degree.valueOf("IV"));
+        list.add(Degree.of("iii"));
+        list.add(Degree.of("IV"));
         isd.addIntervalSequence(list);
         list.clear();
         
@@ -77,7 +77,7 @@ public class TestIntervalSequenceDistribution extends AbstractTest {
     private static List<Degree> createList(String...degrees) {
         LinkedList<Degree> list = new LinkedList<>();
         for (String degreeStr : degrees) {
-            list.add(Degree.valueOf(degreeStr));
+            list.add(Degree.of(degreeStr));
         }
         return list;
     }

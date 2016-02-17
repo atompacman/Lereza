@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import com.atompacman.lereza.core.solfege.Key;
-import com.atompacman.lereza.core.solfege.NoteLetter;
-import com.atompacman.lereza.core.solfege.TimeSignature;
+import com.atompacman.lereza.core.theory.Key;
+import com.atompacman.lereza.core.theory.NoteLetter;
+import com.atompacman.lereza.core.theory.TimeSignature;
 
 public class MIDISequenceContent {
 

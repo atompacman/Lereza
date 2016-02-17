@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
-import com.atompacman.lereza.core.solfege.TimeSignature;
+import com.atompacman.lereza.core.theory.TimeSignature;
+
+import java.util.TreeMap;
 
 public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
     

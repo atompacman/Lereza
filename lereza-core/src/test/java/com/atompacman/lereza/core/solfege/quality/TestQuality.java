@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.AdvancedQuality;
-import com.atompacman.lereza.core.solfege.Quality;
+import com.atompacman.lereza.core.theory.AdvancedQuality;
+import com.atompacman.lereza.core.theory.Quality;
 
 public class TestQuality {
 	

@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.atompacman.lereza.core.solfege.Dynamic;
-import com.atompacman.lereza.core.solfege.Pitch;
+import com.atompacman.lereza.core.theory.Dynamic;
+import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.toolkat.collections.BiDoubleMap;
 
 public final class NoteStack extends AbstractNoteStack {

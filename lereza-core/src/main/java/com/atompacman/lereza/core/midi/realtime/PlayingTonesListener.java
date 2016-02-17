@@ -3,8 +3,8 @@ package com.atompacman.lereza.core.midi.realtime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.atompacman.lereza.core.solfege.Semitones;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.Semitones;
+import com.atompacman.lereza.core.theory.Tone;
 
 public abstract class PlayingTonesListener extends PressedKeysListener {
 

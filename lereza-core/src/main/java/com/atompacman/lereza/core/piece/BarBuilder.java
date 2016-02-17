@@ -3,9 +3,9 @@ package com.atompacman.lereza.core.piece;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.TimeSignature;
-import com.atompacman.lereza.core.solfege.Value;
+import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.TimeSignature;
+import com.atompacman.lereza.core.theory.Value;
 import com.atompacman.toolkat.module.AnomalyDescription;
 import com.atompacman.toolkat.module.BaseModule;
 import com.atompacman.toolkat.module.AnomalyDescription.Severity;

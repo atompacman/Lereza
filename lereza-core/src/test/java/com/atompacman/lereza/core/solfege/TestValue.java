@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Value;
+import com.atompacman.lereza.core.theory.Value;
 
 public class TestValue {
 	

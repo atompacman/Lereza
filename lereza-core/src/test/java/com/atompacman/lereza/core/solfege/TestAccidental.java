@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Accidental;
+import com.atompacman.lereza.core.theory.Accidental;
 
 public class TestAccidental {
 	

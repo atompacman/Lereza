@@ -1,10 +1,10 @@
 package com.atompacman.lereza.core.piece;
 
-import com.atompacman.lereza.core.solfege.BasicNote;
-import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.Value;
+import com.atompacman.lereza.core.theory.Note;
+import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.Value;
 
-public class Note extends BasicNote implements PieceComponent {
+public class Note extends Note implements PieceComponent {
 
     //======================================= FIELDS =============================================\\
 

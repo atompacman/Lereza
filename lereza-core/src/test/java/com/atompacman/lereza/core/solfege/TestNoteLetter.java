@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.NoteLetter;
+import com.atompacman.lereza.core.theory.NoteLetter;
 
 public class TestNoteLetter {
 

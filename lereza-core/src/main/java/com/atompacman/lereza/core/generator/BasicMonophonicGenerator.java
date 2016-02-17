@@ -2,7 +2,7 @@ package com.atompacman.lereza.core.generator;
 
 import com.atompacman.lereza.core.piece.AbstractPiece;
 import com.atompacman.lereza.core.piece.PieceBuilder;
-import com.atompacman.lereza.core.solfege.TimeSignature;
+import com.atompacman.lereza.core.theory.TimeSignature;
 
 public class BasicMonophonicGenerator {
 

@@ -4,7 +4,7 @@ import java.io.File;
 
 import com.atompacman.configuana.Param;
 import com.atompacman.configuana.StrictParam;
-import com.atompacman.lereza.core.solfege.Value;
+import com.atompacman.lereza.core.theory.Value;
 
 public enum Parameters implements StrictParam {;
 

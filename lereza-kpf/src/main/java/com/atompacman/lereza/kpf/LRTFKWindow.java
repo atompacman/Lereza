@@ -22,7 +22,7 @@ import com.atompacman.lereza.core.midi.device.MIDIDeviceProvider;
 import com.atompacman.lereza.core.midi.device.MIDIDeviceType;
 import com.atompacman.lereza.core.midi.realtime.PlayingTonesListener;
 import com.atompacman.lereza.core.midi.realtime.RealTimeMIDIProcessor;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.Tone;
 import com.atompacman.lereza.pluggin.builtin.key.RealTimeKeyChangeDetector;
 import com.atompacman.toolkat.IO;
 import com.atompacman.toolkat.gui.CenteredJFrame;

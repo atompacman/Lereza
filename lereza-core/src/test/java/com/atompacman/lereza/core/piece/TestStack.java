@@ -9,8 +9,8 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.Value;
+import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.Value;
 import com.atompacman.toolkat.test.AbstractTest;
 
 public class TestStack extends AbstractTest {

@@ -4,11 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Accidental;
-import com.atompacman.lereza.core.solfege.CircleOfFifths;
-import com.atompacman.lereza.core.solfege.Key;
-import com.atompacman.lereza.core.solfege.NoteLetter;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.Accidental;
+import com.atompacman.lereza.core.theory.CircleOfFifths;
+import com.atompacman.lereza.core.theory.Key;
+import com.atompacman.lereza.core.theory.NoteLetter;
+import com.atompacman.lereza.core.theory.Quality;
+import com.atompacman.lereza.core.theory.Tone;
 
 public class TestCircleOfFifth {
 
@@ -19,10 +20,10 @@ public class TestCircleOfFifth {
 		Key key = Key.valueOf(Tone.valueOf("Bb"));
 		assertEquals(CircleOfFifths.accidentalOfKey(key), Accidental.FLAT);
 		
-		key = Key.valueOf(Tone.valueOf("E"), Quality.MINOR);
+		key = Key.of(Tone.valueOf("E"), Quality.MINOR);
 		assertEquals(CircleOfFifths.accidentalOfKey(key), Accidental.SHARP);
 		
-		key = Key.valueOf(Tone.valueOf("A"), Quality.MINOR);
+		key = Key.of(Tone.valueOf("A"), Quality.MINOR);
 		assertEquals(CircleOfFifths.accidentalOfKey(key), Accidental.NONE);
 	}
 	
@@ -31,10 +32,10 @@ public class TestCircleOfFifth {
 		Key key = Key.valueOf(Tone.valueOf("Bb"));
 		assertEquals(CircleOfFifths.nbAccidentalsOfKey(key), 2);
 		
-		key = Key.valueOf(Tone.valueOf("E"), Quality.MINOR);
+		key = Key.of(Tone.valueOf("E"), Quality.MINOR);
 		assertEquals(CircleOfFifths.nbAccidentalsOfKey(key), 1);
 		
-		key = Key.valueOf(Tone.valueOf("A"), Quality.MINOR);
+		key = Key.of(Tone.valueOf("A"), Quality.MINOR);
 		assertEquals(CircleOfFifths.nbAccidentalsOfKey(key), 0);
 	}
 	

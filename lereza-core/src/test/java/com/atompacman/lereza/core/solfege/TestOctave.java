@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Octave;
+import com.atompacman.lereza.core.theory.Octave;
 
 public class TestOctave {
 

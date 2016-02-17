@@ -2,7 +2,7 @@ package com.atompacman.lereza.core.piece.timeline;
 
 import java.util.TreeMap;
 
-import com.atompacman.lereza.core.solfege.Key;
+import com.atompacman.lereza.core.theory.Key;
 
 public class MIDIKeyTimeline extends PiecePropertyTimeline<Key> {
 

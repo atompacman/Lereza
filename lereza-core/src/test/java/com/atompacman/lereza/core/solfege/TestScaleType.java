@@ -4,12 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.ChordType;
-import com.atompacman.lereza.core.solfege.Degree;
-import com.atompacman.lereza.core.solfege.Interval;
-import com.atompacman.lereza.core.solfege.IntervalRange;
-import com.atompacman.lereza.core.solfege.ScaleDegree;
-import com.atompacman.lereza.core.solfege.ScaleType;
+import com.atompacman.lereza.core.theory.ChordType;
+import com.atompacman.lereza.core.theory.Degree;
+import com.atompacman.lereza.core.theory.Interval;
+import com.atompacman.lereza.core.theory.IntervalRange;
+import com.atompacman.lereza.core.theory.Quality;
+import com.atompacman.lereza.core.theory.ScaleDegree;
+import com.atompacman.lereza.core.theory.ScaleType;
 
 public class TestScaleType {
 
@@ -26,15 +27,15 @@ public class TestScaleType {
 
 	@Test
 	public void testIntervalFromRootTo() {
-		Interval a = Interval.valueOf(Quality.MAJOR, IntervalRange.THIRD);
+		Interval a = Interval.of(Quality.MAJOR, IntervalRange.THIRD);
 		Interval b = ScaleType.MAJOR.intervalFromRootTo(ScaleDegree.III);
 		assertEquals(a, b);
 		
-		a = Interval.valueOf(Quality.MINOR, IntervalRange.SIXTH);
+		a = Interval.of(Quality.MINOR, IntervalRange.SIXTH);
 		b = ScaleType.NATURAL_MINOR.intervalFromRootTo(ScaleDegree.VI);
 		assertEquals(a, b);
 		
-		a = Interval.valueOf(Quality.MAJOR, IntervalRange.SEVENTH);
+		a = Interval.of(Quality.MAJOR, IntervalRange.SEVENTH);
 		b = ScaleType.HARMONIC_MINOR.intervalFromRootTo(ScaleDegree.VII);
 		assertEquals(a, b);
 	}
@@ -45,19 +46,19 @@ public class TestScaleType {
 	@Test
  	public void testDegrees() {
 		Degree scaleDegree = ScaleType.MAJOR.getDegree(ScaleDegree.III);
-		Degree expected = Degree.valueOf(ScaleDegree.III, ChordType.valueOf("m"));
+		Degree expected = Degree.of(ScaleDegree.III, ChordType.of("m"));
 		assertEquals(scaleDegree, expected);
 		
 		scaleDegree = ScaleType.NATURAL_MINOR.getDegree(ScaleDegree.II);
-		expected = Degree.valueOf(ScaleDegree.II, ChordType.valueOf("dim"));
+		expected = Degree.of(ScaleDegree.II, ChordType.of("dim"));
 		assertEquals(scaleDegree, expected);
 		
 		scaleDegree = ScaleType.MAJOR.getDegree(ScaleDegree.I);
-		expected = Degree.valueOf(ScaleDegree.I, ChordType.valueOf(""));
+		expected = Degree.of(ScaleDegree.I, ChordType.of(""));
 		assertEquals(scaleDegree, expected);
 		
 		scaleDegree = ScaleType.HARMONIC_MINOR.getDegree(ScaleDegree.IV);
-		expected = Degree.valueOf(ScaleDegree.IV, ChordType.valueOf("m"));
+		expected = Degree.of(ScaleDegree.IV, ChordType.of("m"));
 		assertEquals(scaleDegree, expected);
 	}
 }

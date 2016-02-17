@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.atompacman.lereza.core.solfege.Degree;
+import com.atompacman.lereza.core.theory.Degree;
 
 public class IntervalSequenceDistribution {
 

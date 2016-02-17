@@ -7,12 +7,14 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Accidental;
-import com.atompacman.lereza.core.solfege.Direction;
-import com.atompacman.lereza.core.solfege.Interval;
-import com.atompacman.lereza.core.solfege.IntervalRange;
-import com.atompacman.lereza.core.solfege.NoteLetter;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.Accidental;
+import com.atompacman.lereza.core.theory.AdvancedQuality;
+import com.atompacman.lereza.core.theory.Direction;
+import com.atompacman.lereza.core.theory.Interval;
+import com.atompacman.lereza.core.theory.IntervalRange;
+import com.atompacman.lereza.core.theory.NoteLetter;
+import com.atompacman.lereza.core.theory.Quality;
+import com.atompacman.lereza.core.theory.Tone;
 
 public class TestTone {
 
@@ -71,12 +73,12 @@ public class TestTone {
 	@Test
 	public void testSwitchAlteration() {
 		Tone a = Tone.valueOf(NoteLetter.G, Accidental.SHARP);
-		a.switchAlteration();
+		a.withSwitchedAlteration();
 		Tone b = Tone.valueOf(NoteLetter.A, Accidental.FLAT);
 		assertEquals("Error switching alteration", a, b);
 		
 		Tone c = Tone.valueOf(NoteLetter.C, Accidental.FLAT);
-		c.switchAlteration();
+		c.withSwitchedAlteration();
 		Tone d = Tone.valueOf(NoteLetter.B, Accidental.SHARP);
 		assertEquals("Error switching alteration", c, d);
 	}
@@ -91,13 +93,13 @@ public class TestTone {
 		assertEquals(b, Tone.valueOf(NoteLetter.G));
 	
 		a = Tone.valueOf(NoteLetter.E, Accidental.FLAT);
-		b = a.afterInterval(Interval.valueOf(Quality.MINOR, IntervalRange.THIRD));
+		b = a.afterInterval(Interval.of(Quality.MINOR, IntervalRange.THIRD));
 		assertEquals(b, Tone.valueOf(NoteLetter.G, Accidental.FLAT));
 		
 		a = Tone.valueOf(NoteLetter.B, Accidental.FLAT);
-		b = a.afterInterval(Interval.valueOf(AdvancedQuality.AUGMENTED, IntervalRange.FIFTH));
+		b = a.afterInterval(Interval.of(AdvancedQuality.AUGMENTED, IntervalRange.FIFTH));
 		assertEquals(b, Tone.valueOf(NoteLetter.F, Accidental.SHARP));
-		b = a.afterInterval(Interval.valueOf(Quality.MINOR, IntervalRange.SIXTH));
+		b = a.afterInterval(Interval.of(Quality.MINOR, IntervalRange.SIXTH));
 		assertEquals(b, Tone.valueOf(NoteLetter.G, Accidental.FLAT));
 		
 		a = Tone.valueOf(NoteLetter.F);

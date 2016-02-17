@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Direction;
-import com.atompacman.lereza.core.solfege.Interval;
-import com.atompacman.lereza.core.solfege.IntervalRange;
-import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.AdvancedQuality;
+import com.atompacman.lereza.core.theory.Direction;
+import com.atompacman.lereza.core.theory.Interval;
+import com.atompacman.lereza.core.theory.IntervalRange;
+import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.Quality;
+import com.atompacman.lereza.core.theory.Tone;
 
 public class TestInterval {
 
@@ -18,7 +20,7 @@ public class TestInterval {
 
 	@Test (expected=IllegalArgumentException.class)
 	public void testQualityTypeVerification() {
-		Interval.valueOf(Quality.MAJOR, IntervalRange.FIFTH);
+		Interval.of(Quality.MAJOR, IntervalRange.FIFTH);
 	}
 
 	@Test (expected=IllegalArgumentException.class)
@@ -30,12 +32,12 @@ public class TestInterval {
 	public void testWithSemitoneValue() {
 		List<Interval> a = Interval.withSemitoneValue(10);
 		assertEquals(a.size(), 1);
-		assertEquals(a.get(0), Interval.valueOf(Quality.MINOR, IntervalRange.SEVENTH));
+		assertEquals(a.get(0), Interval.of(Quality.MINOR, IntervalRange.SEVENTH));
 		
 		a = Interval.withSemitoneValue(6);
 		assertEquals(a.size(), 2);
-		assertEquals(a.get(0), Interval.valueOf(AdvancedQuality.AUGMENTED, IntervalRange.FOURTH));
-		assertEquals(a.get(1), Interval.valueOf(AdvancedQuality.DIMINISHED, IntervalRange.FIFTH));
+		assertEquals(a.get(0), Interval.of(AdvancedQuality.AUGMENTED, IntervalRange.FOURTH));
+		assertEquals(a.get(1), Interval.of(AdvancedQuality.DIMINISHED, IntervalRange.FIFTH));
 		
 		a = Interval.withSemitoneValue(12);
 		assertEquals(a.size(), 1);
@@ -71,12 +73,12 @@ public class TestInterval {
 	public void testBetweenPitches() {
 		Pitch a = Pitch.valueOf("A5");
 		Pitch b = Pitch.valueOf("B5");
-		Interval expected = Interval.valueOf(Quality.MAJOR, IntervalRange.SECOND);
+		Interval expected = Interval.of(Quality.MAJOR, IntervalRange.SECOND);
 		assertEquals(Interval.between(a, b), expected);
 		
 		a = Pitch.valueOf("Gb3");
 		b = Pitch.valueOf("D4");
-		expected = Interval.valueOf(AdvancedQuality.AUGMENTED, IntervalRange.FIFTH);
+		expected = Interval.of(AdvancedQuality.AUGMENTED, IntervalRange.FIFTH);
 		assertEquals(Interval.between(a, b), expected);
 		
 		a = Pitch.valueOf("F#6");
@@ -98,7 +100,7 @@ public class TestInterval {
 
 		a = Tone.valueOf("D");
 		b = Tone.valueOf("A#");
-		expected = Interval.valueOf(AdvancedQuality.AUGMENTED, IntervalRange.FIFTH);
+		expected = Interval.of(AdvancedQuality.AUGMENTED, IntervalRange.FIFTH);
 		assertEquals(Interval.between(a, Direction.ASCENDING, b), expected);
 		expected = Interval.valueOf(Direction.DESCENDING, 
 				AdvancedQuality.DIMINISHED, IntervalRange.FOURTH);

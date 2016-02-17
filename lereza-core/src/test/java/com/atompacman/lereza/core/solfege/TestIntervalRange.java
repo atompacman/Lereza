@@ -7,7 +7,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.IntervalRange;
+import com.atompacman.lereza.core.theory.AdvancedQuality;
+import com.atompacman.lereza.core.theory.IntervalRange;
+import com.atompacman.lereza.core.theory.Quality;
 
 public class TestIntervalRange {
 

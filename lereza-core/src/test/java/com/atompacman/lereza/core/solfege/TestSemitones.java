@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Direction;
-import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.Semitones;
-import com.atompacman.lereza.core.solfege.Tone;
+import com.atompacman.lereza.core.theory.Direction;
+import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.Semitones;
+import com.atompacman.lereza.core.theory.Tone;
 
 public class TestSemitones {
 

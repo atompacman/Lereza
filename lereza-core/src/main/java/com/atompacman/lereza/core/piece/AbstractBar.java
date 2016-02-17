@@ -2,7 +2,7 @@ package com.atompacman.lereza.core.piece;
 
 import java.util.List;
 
-import com.atompacman.lereza.core.solfege.Value;
+import com.atompacman.lereza.core.theory.Value;
 
 public abstract class AbstractBar<T extends AbstractNoteStack> implements PieceComponent {
 

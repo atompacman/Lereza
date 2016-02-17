@@ -2,7 +2,7 @@ package com.atompacman.lereza.core.piece.timeline;
 
 import java.util.TreeMap;
 
-import com.atompacman.lereza.core.solfege.TimeSignature;
+import com.atompacman.lereza.core.theory.TimeSignature;
 
 public final class TimeSignatureTimeline extends BarBasedPiecePropertyTimeline<TimeSignature>{
 

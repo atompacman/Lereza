@@ -4,9 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.atompacman.lereza.core.piece.AbstractNoteStack.NoteStatus;
-import com.atompacman.lereza.core.solfege.Dynamic;
-import com.atompacman.lereza.core.solfege.Pitch;
-import com.atompacman.lereza.core.solfege.Value;
+import com.atompacman.lereza.core.theory.Dynamic;
+import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.Value;
 import com.atompacman.toolkat.module.AnomalyDescription;
 import com.atompacman.toolkat.module.BaseModule;
 import com.atompacman.toolkat.module.AnomalyDescription.Severity;
@@ -131,7 +131,7 @@ extends PieceComponentBuilder<T> {
                 velocitySum += velocity;
             }
             double avg = (double) velocitySum / (double) velocities.size();
-            dynamic = Dynamic.valueOf((byte) Math.rint(avg));
+            dynamic = Dynamic.of((byte) Math.rint(avg));
         }
         
         // Create definitive stack data structure

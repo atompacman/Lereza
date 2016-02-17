@@ -7,9 +7,11 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.ChordType;
-import com.atompacman.lereza.core.solfege.Interval;
-import com.atompacman.lereza.core.solfege.IntervalRange;
+import com.atompacman.lereza.core.theory.AdvancedQuality;
+import com.atompacman.lereza.core.theory.ChordType;
+import com.atompacman.lereza.core.theory.Interval;
+import com.atompacman.lereza.core.theory.IntervalRange;
+import com.atompacman.lereza.core.theory.Quality;
 
 public class TestChordType {
 	
@@ -19,9 +21,9 @@ public class TestChordType {
 	public void testValueOfIntervals() {
 		List<Interval> intervals = new ArrayList<Interval>();
 		intervals.add(Interval.valueOf(				  IntervalRange.UNISON));
-		intervals.add(Interval.valueOf(Quality.MINOR, IntervalRange.THIRD));
+		intervals.add(Interval.of(Quality.MINOR, IntervalRange.THIRD));
 		intervals.add(Interval.valueOf(				  IntervalRange.FIFTH));
-		ChordType a = ChordType.valueOf(intervals);
+		ChordType a = ChordType.of(intervals);
 		
 		assertEquals(a.getIntervals(), intervals);
 		
@@ -33,44 +35,44 @@ public class TestChordType {
 	public void testValueOfRepresentation() {
 		List<Interval> intervals = new ArrayList<Interval>();
 		intervals.add(Interval.valueOf(				  IntervalRange.UNISON));
-		intervals.add(Interval.valueOf(Quality.MINOR, IntervalRange.THIRD));
+		intervals.add(Interval.of(Quality.MINOR, IntervalRange.THIRD));
 		intervals.add(Interval.valueOf(				  IntervalRange.FIFTH));
-		ChordType a = ChordType.valueOf("m");
+		ChordType a = ChordType.of("m");
 		assertEquals(a.getIntervals(), intervals);
 		
 		intervals.clear();
 		intervals.add(Interval.valueOf(				  IntervalRange.UNISON));
-		intervals.add(Interval.valueOf(Quality.MAJOR, IntervalRange.THIRD));
+		intervals.add(Interval.of(Quality.MAJOR, IntervalRange.THIRD));
 		intervals.add(Interval.valueOf(				  IntervalRange.FIFTH));
-		intervals.add(Interval.valueOf(Quality.MINOR, IntervalRange.SEVENTH));
-		a = ChordType.valueOf("7");
+		intervals.add(Interval.of(Quality.MINOR, IntervalRange.SEVENTH));
+		a = ChordType.of("7");
 		assertEquals(a.getIntervals(), intervals);
 			
 		intervals.clear();
 		intervals.add(Interval.valueOf(				  IntervalRange.UNISON));
 		intervals.add(Interval.valueOf(				  IntervalRange.FOURTH));
 		intervals.add(Interval.valueOf(				  IntervalRange.FIFTH));
-		intervals.add(Interval.valueOf(Quality.MINOR, IntervalRange.SEVENTH));
-		a = ChordType.valueOf("m7sus4");
+		intervals.add(Interval.of(Quality.MINOR, IntervalRange.SEVENTH));
+		a = ChordType.of("m7sus4");
 		assertEquals(a.getIntervals(), intervals);
 		
 		intervals.clear();
 		intervals.add(Interval.valueOf(				  			  IntervalRange.UNISON));
-		intervals.add(Interval.valueOf(Quality.MAJOR, 			  IntervalRange.THIRD));
-		intervals.add(Interval.valueOf(AdvancedQuality.AUGMENTED, IntervalRange.FIFTH));
-		intervals.add(Interval.valueOf(Quality.MAJOR, 			  IntervalRange.NINTH));
-		a = ChordType.valueOf("augadd9");
+		intervals.add(Interval.of(Quality.MAJOR, 			  IntervalRange.THIRD));
+		intervals.add(Interval.of(AdvancedQuality.AUGMENTED, IntervalRange.FIFTH));
+		intervals.add(Interval.of(Quality.MAJOR, 			  IntervalRange.NINTH));
+		a = ChordType.of("augadd9");
 		assertEquals(a.getIntervals(), intervals);
 		
 		intervals.clear();
 		intervals.add(Interval.valueOf(				  IntervalRange.UNISON));
-		intervals.add(Interval.valueOf(Quality.MINOR, IntervalRange.THIRD));
+		intervals.add(Interval.of(Quality.MINOR, IntervalRange.THIRD));
 		intervals.add(Interval.valueOf(				  IntervalRange.FIFTH));
-		intervals.add(Interval.valueOf(Quality.MAJOR, IntervalRange.SEVENTH));
-		intervals.add(Interval.valueOf(Quality.MAJOR, IntervalRange.NINTH));
+		intervals.add(Interval.of(Quality.MAJOR, IntervalRange.SEVENTH));
+		intervals.add(Interval.of(Quality.MAJOR, IntervalRange.NINTH));
 		intervals.add(Interval.valueOf(				  IntervalRange.ELEVENTH));
-		intervals.add(Interval.valueOf(Quality.MAJOR, IntervalRange.THIRTEENTH));
-		a = ChordType.valueOf("mM7add13");
+		intervals.add(Interval.of(Quality.MAJOR, IntervalRange.THIRTEENTH));
+		a = ChordType.of("mM7add13");
 		assertEquals(a.getIntervals(), intervals);
 	}
 
@@ -80,7 +82,7 @@ public class TestChordType {
 		intervals.add(Interval.valueOf(				  IntervalRange.UNISON));
 		intervals.add(Interval.valueOf(				  IntervalRange.FOURTH));
 		intervals.add(Interval.valueOf(				  IntervalRange.FIFTH));
-		intervals.add(Interval.valueOf(Quality.MINOR, IntervalRange.SEVENTH));
-		ChordType.valueOf("sus4M7");
+		intervals.add(Interval.of(Quality.MINOR, IntervalRange.SEVENTH));
+		ChordType.of("sus4M7");
 	}
 }

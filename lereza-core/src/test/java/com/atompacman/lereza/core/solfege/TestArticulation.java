@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.atompacman.lereza.core.solfege.Articulation;
+import com.atompacman.lereza.core.theory.Articulation;
 
 public class TestArticulation {
 
