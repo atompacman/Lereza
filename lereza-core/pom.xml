@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<name>Lereza - Core Library</name>
-	<description>The core library behind the application</description>
+	<name>Lereza - Core</name>
+	<description>TODO</description>
 
 	<artifactId>lereza-core</artifactId>
 	<packaging>jar</packaging>
@@ -16,39 +16,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.atompacman.atomlibs</groupId>
-			<artifactId>atomlibs-configuana</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atompacman.atomlibs</groupId>
-			<artifactId>atomlibs-nrstep</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atompacman.atomlibs</groupId>
-			<artifactId>atomlibs-toolkat</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.34</version>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jfugue</groupId>
-			<artifactId>jfugue</artifactId>
-			<version>5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-utils</artifactId>
-			<version>3.0.22</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
