@@ -5,46 +5,43 @@ import static com.google.common.base.Preconditions.checkElementIndex;
 import java.util.List;
 
 import com.atompacman.lereza.core.theory.RythmnValue;
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 
-@AutoValue
-public abstract class Bar<T extends NoteNode<T>> {
+abstract class Bar<T extends BarSlice<?>> {
 
     //
     //  ~  FIELDS  ~  //
     //
 
-    public abstract ImmutableList<BarSlice<T>> getSlices();
-    
-    
+    private final ImmutableList<T> slices;
+
+
     //
     //  ~  INIT  ~  //
     //
 
-    Bar<T> of(List<BarSlice<T>> slices) {
-        return new AutoValue_Bar<T>(ImmutableList.copyOf(slices));
+    protected Bar(List<T> slices) {
+        this.slices = ImmutableList.copyOf(slices);
     }
-    
-    
+
+
     //
     //  ~  GETTERS  ~  //
     //
 
-    public BarSlice<T> getSlice(int timeunit) {
-        ImmutableList<BarSlice<T>> slices = getSlices();
-        checkElementIndex(timeunit, slices.size(), "Cannot access bar slices at "
-                + "timeunit \"" + timeunit + "\": bar is only " + slices.size() + " timunits long");
+    public T getSlice(int timeunit) {
+        checkElementIndex(timeunit, slices.size(), "Cannot access bar slices at timeunit "
+                + "\"" + timeunit + "\": bar is only " + slices.size() + " timunits long");
         return slices.get(timeunit);
     }
-    
-    
+
+
     //
     //  ~  STATE  ~  //
     //
 
     public boolean hasPlayingNote() {
-        for (BarSlice<T> slice : getSlices()) {
+        for (T slice : slices) {
             if (!slice.isRest()) {
                 return false;
             }
@@ -53,19 +50,19 @@ public abstract class Bar<T extends NoteNode<T>> {
     }
 
     public boolean hasBeginningNote() {
-        for (BarSlice<T> slice : getSlices()) {
+        for (T slice : slices) {
             if (slice.hasBeginningNote()) {
                 return true;
             }
         }
         return false;
     }
-    
+
     public int getTimeunitLength() {
-        return getSlices().size();
+        return slices.size();
     }
-    
-    
+
+
     //
     //  ~  SERIALIZATION  ~  //
     //
@@ -73,8 +70,8 @@ public abstract class Bar<T extends NoteNode<T>> {
     public String toStaccato() {
         StringBuilder sb = new StringBuilder();
         int rests = 0;
-        
-        for (BarSlice<T> slice : getSlices()) {
+
+        for (T slice : slices) {
             if (slice.hasBeginningNote()) {
                 if (rests > 0) {
                     sb.append('R');

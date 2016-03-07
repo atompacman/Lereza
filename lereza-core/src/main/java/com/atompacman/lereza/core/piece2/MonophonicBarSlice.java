@@ -13,13 +13,13 @@ public abstract class MonophonicBarSlice extends BarSlice<MonophonicNoteNode> {
 
     public    abstract MonophonicNoteNode getNoteNode();
     protected abstract boolean            isBeginning();
-    
+
 
     //
     //  ~  INIT  ~  //
     //
 
-    public static MonophonicBarSlice of(MonophonicNoteNode node, boolean isBeginning) {
+    static MonophonicBarSlice of(MonophonicNoteNode node, boolean isBeginning) {
         return new AutoValue_MonophonicBarSlice(node, isBeginning);
     }
 
@@ -27,12 +27,12 @@ public abstract class MonophonicBarSlice extends BarSlice<MonophonicNoteNode> {
     //
     //  ~  GETTERS  ~  //
     //
-    
+
     @Implement
     public ImmutableSet<MonophonicNoteNode> getBeginningNoteNodes() {
         return isBeginning() ? ImmutableSet.of(getNoteNode()) : ImmutableSet.of();
     }
-    
+
     @Implement
     public ImmutableSet<MonophonicNoteNode> getPlayingNoteNodes() {
         return isRest() ? ImmutableSet.of() : ImmutableSet.of(getNoteNode());

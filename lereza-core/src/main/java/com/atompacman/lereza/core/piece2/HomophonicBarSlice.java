@@ -15,18 +15,18 @@ public abstract class HomophonicBarSlice extends BarSlice<HomophonicNoteNode> {
 
     public    abstract ImmutableSet<HomophonicNoteNode> getNoteNodes();
     protected abstract boolean                          areBeginning();
-    
+
 
     //
     //  ~  INIT  ~  //
     //
 
-    public static HomophonicBarSlice of(HomophonicNoteNode node, boolean isBeginning) {
+    static HomophonicBarSlice of(HomophonicNoteNode node, boolean isBeginning) {
         return new AutoValue_HomophonicBarSlice(ImmutableSet.of(node), isBeginning);
 
     }
-    
-    public static HomophonicBarSlice of(Set<HomophonicNoteNode> nodes, boolean areBeginning) {
+
+    static HomophonicBarSlice of(Set<HomophonicNoteNode> nodes, boolean areBeginning) {
         return new AutoValue_HomophonicBarSlice(ImmutableSet.copyOf(nodes), areBeginning);
     }
 
@@ -34,12 +34,12 @@ public abstract class HomophonicBarSlice extends BarSlice<HomophonicNoteNode> {
     //
     //  ~  GETTERS  ~  //
     //
-    
+
     @Implement
     public ImmutableSet<HomophonicNoteNode> getBeginningNoteNodes() {
         return areBeginning() ? getNoteNodes() : ImmutableSet.of();
     }
-    
+
     @Implement
     public ImmutableSet<HomophonicNoteNode> getPlayingNoteNodes() {
         return isRest() ? ImmutableSet.of() : getNoteNodes();

@@ -10,18 +10,18 @@ import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.toolkat.annotations.DerivableFrom;
 import com.google.common.collect.ImmutableSet;
 
-public abstract class BarSlice<T extends NoteNode<T>> {
+abstract class BarSlice<T extends NoteNode> {
 
     //
     //  ~  FIELDS  ~  //
     //
-    
+
     @DerivableFrom("getBeginningNoteNodes()")
     private final boolean isRest;
     @DerivableFrom("getBeginningNoteNodes()")
     private final boolean hasBeginningNotes;
 
-    
+
     //
     //  ~  INIT  ~  //
     //
@@ -35,7 +35,7 @@ public abstract class BarSlice<T extends NoteNode<T>> {
 
         Set<Pitch> pitches = new HashSet<>();
         int numRests = 0;
-        
+
         for (T node : beginningNotes) {
             if (node.isRest()) {
                 ++numRests;
@@ -52,25 +52,25 @@ public abstract class BarSlice<T extends NoteNode<T>> {
                         "Cannot contain multiple notes with the same pitch");
             }
         }
-        
+
         checkArgument(numRests <= 1, "Cannot have multiple rest nodes");
         checkArgument(numRests == 0 || (beginningNotes.size() + playingNotes.size()) == 1,
                 "Cannot have both a rest and notes");
-        
+
         this.isRest            = numRests == 1;
         this.hasBeginningNotes = !beginningNotes.isEmpty();
     }
 
-    
+
     //
     //  ~  GETTERS  ~  //
     //
 
     public abstract ImmutableSet<T> getBeginningNoteNodes();
-    
+
     public abstract ImmutableSet<T> getPlayingNoteNodes();
-    
-    
+
+
     //
     //  ~  STATE  ~  //
     //
@@ -82,8 +82,8 @@ public abstract class BarSlice<T extends NoteNode<T>> {
     public boolean isRest() {
         return isRest;
     }
-    
-    
+
+
     //
     //  ~  SERIALIZATION  ~  //
     //
@@ -92,7 +92,7 @@ public abstract class BarSlice<T extends NoteNode<T>> {
     public String toString() {
         return toStaccato();
     }
-    
+
     public String toStaccato() {
         if (!hasBeginningNote()) {
             return "";

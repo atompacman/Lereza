@@ -10,27 +10,28 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
 
 @AutoValue
-public abstract class PolyphonicBarSlice extends BarSlice<PolyphonicNoteNode> {
+public abstract class PolyphonicBarSlice extends BarSlice<NoteNode> {
 
     //
     //  ~  FIELDS  ~  //
     //
 
     @Implement
-    public abstract ImmutableSet<PolyphonicNoteNode> getBeginningNoteNodes();
+    public abstract ImmutableSet<NoteNode> getBeginningNoteNodes();
     @Implement
-    public abstract ImmutableSet<PolyphonicNoteNode> getPlayingNoteNodes();
-    
+    public abstract ImmutableSet<NoteNode> getPlayingNoteNodes();
+
 
     //
     //  ~  INIT  ~  //
     //
 
-    public static PolyphonicBarSlice of(Set<PolyphonicNoteNode> beginningNodes,
-                                        Set<PolyphonicNoteNode> begunNodes) {
-        Set<PolyphonicNoteNode> playingNotes = new HashSet<>();
+    static PolyphonicBarSlice of(Set<GraphNoteNode> beginningNodes,
+            Set<GraphNoteNode> begunNodes) {
+
+        Set<GraphNoteNode> playingNotes = new HashSet<>();
         playingNotes.addAll(beginningNodes);
-        for (PolyphonicNoteNode node : begunNodes) {
+        for (GraphNoteNode node : begunNodes) {
             checkArgument(playingNotes.add(node));
         }
         return new AutoValue_PolyphonicBarSlice(ImmutableSet.copyOf(beginningNodes), 
