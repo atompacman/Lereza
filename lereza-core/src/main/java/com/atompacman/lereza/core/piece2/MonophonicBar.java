@@ -2,13 +2,24 @@ package com.atompacman.lereza.core.piece2;
 
 import java.util.List;
 
-public final class MonophonicBar extends Bar<MonophonicBarSlice> {
+public final class MonophonicBar extends HomophonicBar {
 
     //
     //  ~  INIT  ~  //
     //
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     MonophonicBar(List<MonophonicBarSlice> slices) {
-        super(slices);
+        super((List<HomophonicBarSlice>) (List) slices);
+    }
+    
+    
+    //
+    //  ~  GETTERS  ~  //
+    //
+
+    @Override
+    public MonophonicBarSlice getSlice(int timeunit) {
+        return (MonophonicBarSlice) super.getSlice(timeunit);
     }
 }

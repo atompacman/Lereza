@@ -8,29 +8,30 @@ import java.util.Set;
 
 import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.toolkat.annotations.DerivableFrom;
-import com.google.common.collect.ImmutableSet;
+import com.atompacman.toolkat.annotations.Implement;
 
-abstract class BarSlice<T extends NoteNode> {
+abstract class AbstractBarSlice implements PolyphonicBarSlice {
 
     //
     //  ~  FIELDS  ~  //
     //
 
     @DerivableFrom("getBeginningNoteNodes()")
-    private final boolean isRest;
+    private boolean isRest;
     @DerivableFrom("getBeginningNoteNodes()")
-    private final boolean hasBeginningNotes;
+    private boolean hasBeginningNotes;
 
 
     //
     //  ~  INIT  ~  //
     //
 
-    protected BarSlice() {
-        ImmutableSet<T> beginningNotes = getBeginningNoteNodes();
-        ImmutableSet<T> playingNotes   = getPlayingNoteNodes();
-
-        checkArgument(playingNotes.containsAll(beginningNotes), 
+    @SuppressWarnings("unchecked")
+    protected <T extends PolyphonicNoteNode> void initStatus() {
+        NoteNodeSet<T> beginningNotes = (NoteNodeSet<T>) getBeginningNoteNodes();
+        NoteNodeSet<T> playingNotes   = (NoteNodeSet<T>) getPlayingNoteNodes();
+        
+        checkArgument(playingNotes.nodes.values().containsAll(beginningNotes.nodes.values()), 
                 "Playing notes must contain all beginning notes");
 
         Set<Pitch> pitches = new HashSet<>();
@@ -54,31 +55,24 @@ abstract class BarSlice<T extends NoteNode> {
         }
 
         checkArgument(numRests <= 1, "Cannot have multiple rest nodes");
-        checkArgument(numRests == 0 || (beginningNotes.size() + playingNotes.size()) == 1,
+        checkArgument(numRests == 0 || (beginningNotes.numNodes() + playingNotes.numNodes()) == 1,
                 "Cannot have both a rest and notes");
 
         this.isRest            = numRests == 1;
         this.hasBeginningNotes = !beginningNotes.isEmpty();
     }
-
-
-    //
-    //  ~  GETTERS  ~  //
-    //
-
-    public abstract ImmutableSet<T> getBeginningNoteNodes();
-
-    public abstract ImmutableSet<T> getPlayingNoteNodes();
-
+    
 
     //
     //  ~  STATE  ~  //
     //
 
+    @Implement
     public boolean hasBeginningNote() {
         return hasBeginningNotes;
     }
 
+    @Implement
     public boolean isRest() {
         return isRest;
     }
@@ -93,6 +87,7 @@ abstract class BarSlice<T extends NoteNode> {
         return toStaccato();
     }
 
+    @Implement
     public String toStaccato() {
         if (!hasBeginningNote()) {
             return "";
@@ -101,7 +96,7 @@ abstract class BarSlice<T extends NoteNode> {
             return "R" + getPlayingNoteNodes().iterator().next().getRythmnValue().toStaccato();
         }
         StringBuilder sb = new StringBuilder();
-        Iterator<T> it = getBeginningNoteNodes().iterator();
+        Iterator<? extends PolyphonicNoteNode> it = getBeginningNoteNodes().iterator();
         sb.append(it.next().toStaccato());
         while (it.hasNext()) {
             sb.append('+').append(it.next().toStaccato());

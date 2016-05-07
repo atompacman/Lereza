@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.piece.timeline;
+package com.atompacman.lereza.core.piece2.timeline;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,27 +11,35 @@ import java.util.TreeMap;
 
 public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
     
-    //======================================= FIELDS =============================================\\
+    //
+    //  ~  FIELDS  ~  //
+    //
 
+    
     private final List<Integer> barToTu;
     
-    
-    
-    //======================================= METHODS ============================================\\
 
-    //------------------------------------- CONSTRUCTORS -----------------------------------------\\
+    //
+    //  ~  INIT  ~  //
+    //
 
-    public TimeunitToBarConverter(int pieceLengthTU) {
-        this(TimeSignature.STANDARD_4_4, pieceLengthTU);
+    public static TimeunitToBarConverter of(int pieceLengthTU) {
+        return of(TimeSignature.STANDARD_4_4, pieceLengthTU);
     }
     
     @SuppressWarnings("serial")
-    public TimeunitToBarConverter(TimeSignature timeSign, int pieceLengthTU) {
-        this(new TreeMap<Integer, TimeSignature>(){{ put(0, timeSign); }}, pieceLengthTU);
+    public static TimeunitToBarConverter of(TimeSignature timeSign, int pieceLengthTU) {
+        return of(new TreeMap<Integer, TimeSignature>(){{ put(0, timeSign); }}, pieceLengthTU);
     }
     
-    public TimeunitToBarConverter(TreeMap<Integer, TimeSignature> timeSignChangesTU,
-                                  int                             pieceLengthTU) {
+    public static TimeunitToBarConverter of(TreeMap<Integer, TimeSignature> timeSignChangesTU,
+                                            int                             pieceLengthTU) {
+        
+        return new TimeunitToBarConverter(timeSignChangesTU, pieceLengthTU);
+    }
+    
+    protected TimeunitToBarConverter(TreeMap<Integer, TimeSignature> timeSignChangesTU,
+                                     int                             pieceLengthTU) {
         
         super(pieceLengthTU);
         
@@ -71,7 +79,9 @@ public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
     }
     
     
-    //--------------------------------------- CONVERT --------------------------------------------\\
+    //
+    //  ~  CONVERT  ~  //
+    //
 
     public int convertTuToBar(int tu) {
         return getValueAtTimeunit(tu);
@@ -85,7 +95,9 @@ public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
     }
     
     
-    //---------------------------------------- STATE ---------------------------------------------\\
+    //
+    //  ~  STATE  ~  //
+    //
 
     public boolean isABarBeginning(int tu) {
         return propertyChanges.get(tu) != null;

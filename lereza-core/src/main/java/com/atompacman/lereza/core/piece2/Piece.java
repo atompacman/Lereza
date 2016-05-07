@@ -1,43 +1,48 @@
 package com.atompacman.lereza.core.piece2;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-abstract class Piece<T extends Part<?>> {
+public final class Piece implements MusicalStructure, Iterable<PolyphonicPart> {
 
     //
     //  ~  FIELDS  ~  //
     //
 
-    private final ImmutableList<T> parts;
-
-
+    private final ImmutableList<PolyphonicPart> parts;
+    
+    
     //
     //  ~  INIT  ~  //
     //
 
-    protected Piece(List<T> parts) {
+    Piece(List<PolyphonicPart> parts) {
         this.parts = ImmutableList.copyOf(parts);
     }
-
-
+    
+    
     //
     //  ~  GETTERS  ~  //
     //
 
-    public ImmutableList<T> getParts() {
-        return parts;
+    public PolyphonicPart getPart(int part) {
+        return parts.get(part);
+    }
+    
+    public Iterator<PolyphonicPart> iterator() {
+        return parts.iterator();
     }
 
-
+    
     //
     //  ~  STATE  ~  //
     //
 
     public boolean hasBeginningNote() {
-        for (T bar : parts) {
-            if (bar.hasBeginningNote()) {
+        for (int i = 0; i < numParts(); ++i) {
+            if (getPart(i).hasBeginningNote()) {
                 return true;
             }
         }
@@ -55,8 +60,8 @@ abstract class Piece<T extends Part<?>> {
 
     public String toStaccato() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < parts.size(); ++i) {
-            sb.append('V').append(i).append(' ').append(parts.get(i).toStaccato()).append(' ');
+        for (int i = 0; i < numParts(); ++i) {
+            sb.append('V').append(i).append(' ').append(getPart(i).toStaccato()).append(' ');
         }
         return sb.toString();
     }

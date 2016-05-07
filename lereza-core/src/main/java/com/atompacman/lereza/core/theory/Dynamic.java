@@ -28,7 +28,7 @@ public abstract class Dynamic {
         //
 
         private final String  repres;
-        private final int     minVelocity;
+        private final byte    minVelocity;
 
 
         //
@@ -48,9 +48,18 @@ public abstract class Dynamic {
 
         private Marker(String repres, int minVelocity) {
             this.repres      = repres;
-            this.minVelocity = minVelocity;
+            this.minVelocity = (byte) minVelocity;
         }
 
+        
+        //
+        //  ~  GETTERS  ~  //
+        //
+
+        public byte getMinimumVelocity() {
+            return minVelocity;
+        }
+        
         
         //
         //  ~  SERIALIZATION  ~  //

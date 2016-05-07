@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.piece2;
+package com.atompacman.lereza.core;
 
 import java.util.Optional;
 
@@ -31,7 +31,7 @@ public abstract class Builder<T> {
 
     protected abstract T buildImpl();
 
-    protected abstract void reset();
+    public abstract void reset();
 
     public final T build() {
         T t = buildImpl();

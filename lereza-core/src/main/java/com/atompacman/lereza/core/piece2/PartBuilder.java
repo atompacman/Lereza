@@ -1,27 +1,37 @@
 package com.atompacman.lereza.core.piece2;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
+import com.atompacman.lereza.core.Builder;
+import com.atompacman.lereza.core.piece2.timeline.InfiniteTimeunitToBarConverter;
+import com.atompacman.lereza.core.piece2.timeline.TimeunitToBarConverter;
+import com.atompacman.lereza.core.theory.Dynamic;
+import com.atompacman.lereza.core.theory.Note;
 import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.RythmnValue;
+import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.annotations.Implement;
+import com.atompacman.toolkat.task.Anomaly.Description;
 import com.atompacman.toolkat.task.TaskLogger;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
-public abstract class PartBuilder<T extends Part<K>, K extends Bar<?>> 
-    extends Builder<T> {
-
+public final class PartBuilder extends Builder<PolyphonicPart> {
+    
     //
     //  ~  FIELDS  ~  //
     //
 
-    // Sub-builders
-    private final List<BarBuilder<K,?>> builders;
-
     // Lifetime
     private final TimeunitToBarConverter tuToBar;
+
+    // Data for build
+    private final Multimap<Integer, NoteEntry> entries;
 
     // Temporary builder parameters
     private int  currBegTU;
@@ -33,14 +43,34 @@ public abstract class PartBuilder<T extends Part<K>, K extends Bar<?>>
     //  ~  INIT  ~  //
     //
 
-    protected PartBuilder(TimeunitToBarConverter tuToBar, Optional<TaskLogger> taskLogger) {
+    public static PartBuilder of() {
+        return of(InfiniteTimeunitToBarConverter.of());
+    }
+    
+    public static PartBuilder of(TimeSignature timeSign) {
+        return of(InfiniteTimeunitToBarConverter.of(timeSign));
+    }
+    
+    public static PartBuilder of(int pieceLengthTU) {
+        return of(TimeunitToBarConverter.of(pieceLengthTU));
+    }
+    
+    public static PartBuilder of(TimeunitToBarConverter tuToBar) {
+        return new PartBuilder(tuToBar, Optional.empty());
+    }
+    
+    public static PartBuilder of(TimeunitToBarConverter tuToBar, TaskLogger taskLogger) {
+        return new PartBuilder(tuToBar, Optional.of(taskLogger));
+    }
+    
+    private PartBuilder(TimeunitToBarConverter tuToBar, Optional<TaskLogger> taskLogger) {
         super(taskLogger);
-
-        // Sub-builders
-        this.builders = new ArrayList<>();
 
         // Lifetime
         this.tuToBar = tuToBar;
+
+        // Data for build
+        this.entries = ArrayListMultimap.create();
 
         // Temporary builder parameters
         reset();
@@ -51,101 +81,160 @@ public abstract class PartBuilder<T extends Part<K>, K extends Bar<?>>
     //  ~  ADD  ~  //
     //
 
-    public PartBuilder<T,K> add(Pitch pitch, byte velocity, int begTU, int lengthTU) {
-        int tuInBar = tuToBar.getBarLengthTU(begTU);
-        int barPosTU = begTU - tuToBar.convertBarToTu(tuToBar.convertTuToBar(begTU));
-        int actualLen = lengthTU;
+    public PartBuilder add(Pitch pitch, byte velocity, int begTU, int lengthTU) {
+        entries.put(begTU, new NoteEntry(pitch, velocity, lengthTU));
+        return this;
+    }
+    
+    public PartBuilder add(Pitch pitch, int begTU, int lengthTU) {
+        return add(pitch, currVelocity, begTU, lengthTU);
+    }
 
-        // Check if note spans more than one bar
-        if (barPosTU + lengthTU > tuInBar) {
-            actualLen = tuInBar - barPosTU;
+    public PartBuilder add(Pitch pitch, int begTU) {
+        return add(pitch, currVelocity, begTU, currLenTU);
+    }
+
+    public PartBuilder add(Pitch pitch) {
+        return add(pitch, currVelocity, currBegTU, currLenTU);
+    }
+
+    public PartBuilder pos(int timeunit) {
+        this.currBegTU = timeunit;
+        return this;
+    }
+
+    public PartBuilder length(int noteLenTU) {
+        this.currLenTU = noteLenTU;
+        return this;
+    }
+
+    public PartBuilder velocity(byte velocity) {
+        this.currVelocity = velocity;
+        return this;
+    }
+
+    
+    //
+    //  ~  BUILD  ~  //
+    //
+
+    @Implement
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected PolyphonicPart buildImpl() {
+        ComplexityHierarchyRank minComplex = ComplexityHierarchyRank.MONOPHONIC;
+        
+        List<PolyphonicBar> bars = new LinkedList<>();
+        for (BarBuilder builder : builders) {
+            PolyphonicBar bar = builder.build();
+            
+            ComplexityHierarchyRank rank = bar.getComplexityHierarchyRank();
+            if (rank.ordinal() < minComplex.ordinal()) {
+                minComplex = rank;
+            }
+            
+            bars.add(bar);
         }
+        
+        switch (minComplex) {
+        case POLYPHONIC: return new PolyphonicPart(bars);
+        case HOMOPHONIC: return new HomophonicPart((List<HomophonicBar>) (List) bars);
+        case MONOPHONIC: return new MonophonicPart((List<MonophonicBar>) (List) bars);
+        default: throw new RuntimeException(); 
+        }
+    }
+    
 
-        // Add first untied note
-        log(begTU, actualLen);
-        Note untiedNote = builderAt(begTU).add(pitch, velocity, barPosTU, actualLen, null);
+    public PartBuilder add2(Pitch pitch, byte velocity, int begTU, int lengthTU) {
+        // Number of timeunits in the bar this note starts in
+        int tuInBar = tuToBar.getBarLengthTU(begTU);
+        
+        // Timeunit position of note start in bar
+        int barPosTU = begTU - tuToBar.convertBarToTu(tuToBar.convertTuToBar(begTU));
+        
+        // Timeunit length of note in bar (a note can span more than one bar)
+        int actualLen = barPosTU + lengthTU > tuInBar ? tuInBar - barPosTU : lengthTU;
+
+        // Add notes in first covered bar
+        addNoteInBar(pitch, velocity, barPosTU, actualLen);
+        
+        // Add note in additional bars
         lengthTU -= actualLen;
-
-        // Add tied notes
         while (lengthTU != 0) {
             begTU += actualLen;
             tuInBar = tuToBar.getBarLengthTU(begTU);
-            if (lengthTU > tuInBar) {
-                actualLen = tuInBar;
-            } else {
-                actualLen = lengthTU;
-            }
-            log(begTU, actualLen);
-            untiedNote = builderAt(begTU).add(pitch, velocity, 0, actualLen, untiedNote);
+            actualLen = lengthTU > tuInBar ? tuInBar : lengthTU;
+            addNoteInBar(pitch, velocity, 0, actualLen);
             lengthTU -= actualLen;
         }
 
         return this;
     }
-
-    public PartBuilder<T,K> add(Pitch pitch, int begTU, int lengthTU) {
-        return add(pitch, currVelocity, begTU, lengthTU);
-    }
-
-    public PartBuilder<T,K> add(Pitch pitch, int begTU) {
-        return add(pitch, currVelocity, begTU, currLenTU);
-    }
-
-    public PartBuilder<T,K> add(Pitch pitch) {
-        return add(pitch, currVelocity, currBegTU, currLenTU);
-    }
-
-    public PartBuilder<T,K> pos(int timeunit) {
-        this.currBegTU = timeunit;
-        return this;
-    }
-
-    public PartBuilder<T,K> length(int noteLenTU) {
-        this.currLenTU = noteLenTU;
-        return this;
-    }
-
-    public PartBuilder<T,K> velocity(byte velocity) {
-        this.currVelocity = velocity;
-        return this;
-    }
-
-    private BarBuilder<K,?> builderAt(int timeunit) {
-        int bar = tuToBar.convertTuToBar(timeunit);
-        for (int i = builders.size(); i <= bar; ++i) {
-            builders.add(instantiateSubBuilder(tuToBar.getBarLengthTUFromBar(i), taskLogger));
+    
+    private void addNoteInBar(Pitch pitch, byte velocity, int begTU, int lengthTU) {
+        boolean isTied = false;
+        
+        Dynamic dynamic = Dynamic.of(velocity);
+        
+        // For each rythmic value
+        for (RythmnValue value : splitIntoRythmicValues(begTU, lengthTU)) {
+            // Create note
+            Note note = Note.of(pitch, value, dynamic);
+            
+            // Add note entry
+            entries.put(begTU, new TieableNote(note, isTied));
+            
+            // Progress to next note beginning
+            begTU += value.toTimeunit();
+            
+            // All other notes are tied to the first one
+            isTied = true;
         }
-        return builders.get(bar);
     }
+    
+    public static List<RythmnValue> splitIntoRythmicValues(int begTU, int lengthTU) {
+        List<RythmnValue> values = new ArrayList<>();
 
-    protected abstract BarBuilder<K,?> instantiateSubBuilder(int barLengthTU,TaskLogger taskLogger);
+        for (int i = RythmnValue.values().length - 1; i >= 0; --i) {
+            RythmnValue value = RythmnValue.values()[i];
+            int valueLength = value.toTimeunit();
+
+            if (valueLength > lengthTU) {
+                continue;
+            }
+            int valueStart = 0;
+            while (valueStart < begTU) {
+                valueStart += valueLength;
+            }
+            int valueEnd = valueStart + valueLength;
+
+            if (valueEnd > lengthTU) {
+                continue;
+            }
+            if (begTU < valueStart) {
+                values.addAll(splitIntoRythmicValues(begTU, valueStart));
+            }
+            values.add(value);
+
+            if (valueEnd < lengthTU) {
+                values.addAll(splitIntoRythmicValues(valueEnd, lengthTU));
+            }
+            break;
+        }
+
+        return values;
+    }
 
     private void log(int begTU, int lengthTU) {
         taskLogger.log(1, "%37s | Bar: %3d | Beg: %4d | End: %4d |", "", 
                 tuToBar.convertTuToBar(begTU), begTU, begTU + lengthTU);
     }
 
-
-    //
-    //  ~  BUILD  ~  //
-    //
-
     @Implement
-    public T buildStructure() {
-        List<K> bars = new LinkedList<>();
-        for (BarBuilder<K, ?> builder : builders) {
-            bars.add(builder.build());
-        }
-        return instantiateStructure(bars);
-    }
-
-    protected abstract T instantiateStructure(List<K> bars);
-
-    @Implement
-    protected void reset() {
+    public void reset() {
+        entries.clear();
+        
         currBegTU    = 0;
-        currLenTU    = 32;
-        currVelocity = 100;
-        builders.clear();
+        currLenTU    = RythmnValue.QUARTER.toTimeunit();
+        currVelocity = Dynamic.Marker.FORTE.getMinimumVelocity();
     }
 }

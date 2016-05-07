@@ -13,7 +13,7 @@ public final class TestNoteNode {
     public void lol() {
         GraphNoteNode a = new GraphNoteNode(Note.of("C#3", RythmnValue.QUARTER));
         GraphNoteNode b = new GraphNoteNode(Note.of("Db3", RythmnValue.HALF));
-        a.connectTo(TemporalRelationship.RIGHT_AFTER, b);
+        a.connectToImpl(TemporalRelationship.RIGHT_AFTER, b);
         
         ImmutableSet<HomophonicNoteNode> nbb = a.getNodesEndingAfter();
         

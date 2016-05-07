@@ -3,7 +3,7 @@ package com.atompacman.lereza.core.piece;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
+import com.atompacman.lereza.core.piece2.timeline.TimeunitToBarConverter;
 import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.module.BaseModule;
