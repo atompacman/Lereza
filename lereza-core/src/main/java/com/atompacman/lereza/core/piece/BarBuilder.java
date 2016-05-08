@@ -1,145 +1,172 @@
 package com.atompacman.lereza.core.piece;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.TreeSet;
 
+import com.atompacman.lereza.core.piece.PolyphonicNoteNode.TiedNoteStatus;
+import com.atompacman.lereza.core.theory.Dynamic;
+import com.atompacman.lereza.core.theory.Note;
 import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.RythmnValue;
 import com.atompacman.lereza.core.theory.TimeSignature;
-import com.atompacman.lereza.core.theory.Value;
-import com.atompacman.toolkat.module.AnomalyDescription;
-import com.atompacman.toolkat.module.BaseModule;
-import com.atompacman.toolkat.module.AnomalyDescription.Severity;
+import com.atompacman.toolkat.Builder;
+import com.atompacman.toolkat.annotations.Implement;
+import com.atompacman.toolkat.task.Anomaly.Description;
+import com.atompacman.toolkat.task.Anomaly.Severity;
+import com.atompacman.toolkat.task.TaskLogger;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Range;
 
-public class BarBuilder extends PieceComponentBuilder<Bar> {
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-    //===================================== INNER TYPES ==========================================\\
+public final class BarBuilder extends Builder<PolyphonicBar> {
+
+    //
+    //  ~  INNER TYPES  ~  //
+    //
+
+    private enum NoteSection {
+        BEGINNING,
+        MIDDLE,
+        END;
+    }
+    
+    private static final class NoteEntry {
+        
+        //
+        //  ~  FIELDS  ~  //
+        //
+
+        public final Pitch pitch; 
+        public final byte  velocity;
+        public final int   lengthTU;
+
+        
+        //
+        //  ~  INIT  ~  //
+        //
+
+        public NoteEntry(Pitch pitch, byte velocity, int lengthTU) {
+            this.pitch    = pitch;
+            this.velocity = velocity;
+            this.lengthTU = lengthTU;
+        }
+    }
+    
+    private static class LayoutEntry {
+        
+        //
+        //  ~  FIELDS  ~  //
+        //
+        
+        public final NoteSection section;
+        public final NoteEntry   noteEntry;
+        
+        
+        //
+        //  ~  INIT  ~  //
+        //
+        
+        public LayoutEntry(NoteSection section, NoteEntry noteEntry) {
+            this.section   = section;
+            this.noteEntry = noteEntry;
+        }
+    }
 
     private enum Anomaly {
-
-        @AnomalyDescription (
-                name          = "Timeunit outside bar limits",
-                detailsFormat = "A %s timeunit (%d) that was greater than bar "
-                                 + "length (%d) was brought down to end of bar",
-                description   = "A note beginning or ending timeunit was outside bar limits",
-                consequences  = "Timeunit is brought back within the limits", 
-                severity      = Severity.MODERATE)
-        TIMEUNIT_OUTSIDE_BAR_LIMITS,
         
-        @AnomalyDescription (
-                name          = "Tied note not added at bar's beginning",
-                detailsFormat = "A negative %s timeunit (%d) was set back to 0",
-                description   = "A tied note was added elsewhere than bar's beginning",
-                consequences  = "Note is not tied", 
-                severity      = Severity.MODERATE)
-        TIED_NOTE_NOT_AT_BEG_OF_BAR;
+        @Description (name          = "Note is out of bar scope", 
+                      detailsFormat = "Beg: %d, End: %d ",
+                      consequences  = "Ignoring note",
+                      severity      = Severity.MODERATE)
+        NOTE_OUT_OF_SCOPE,
+        
+        @Description (name          = "Note timeunit length is not positive", 
+                      detailsFormat = "Length: %d",
+                      consequences  = "Ignoring note",
+                      severity      = Severity.MODERATE)
+        NOTE_LENGTH_NOT_POSITIVE,
+
+        @Description (name = "Simultaneous notes with the same pitch")
+        SIMULTANEOUS_NOTES_WITH_SAME_PITCH;
     }
-
-
-
-    //======================================= FIELDS =============================================\\
-
-    // Sub-builders
-    private final List<NoteStackBuilder> builders;
     
+    
+    //
+    //  ~  FIELDS  ~  //
+    //
+
     // Lifetime
-    private final int lengthTU;
+    private final TimeSignature timeSig;
+    
+    // Data for build
+    private Multimap<Integer, NoteEntry> entries;
 
-    // Builder parameters
-    private int currBegTU;
-    private int currLenTU;
-    private int currVelocity;
+    // Temporary builder parameters
+    private int  currBegTU;
+    private int  currLenTU;
+    private byte currVelocity;
 
 
+    //
+    //  ~  INIT  ~  //
+    //
 
-    //======================================= METHODS ============================================\\
-
-    //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
-
-    public BarBuilder() {
-        this(TimeSignature.STANDARD_4_4.timeunitsInABar(), null);
+    public static BarBuilder of() {
+        return new BarBuilder(TimeSignature.STANDARD_4_4, Optional.empty());
     }
-
-    public BarBuilder(int lengthTU) {
-        this(lengthTU, null);
+    
+    public static BarBuilder of(TimeSignature timeSig) {
+        return new BarBuilder(timeSig, Optional.empty());
     }
-
-    public BarBuilder(int lengthTU, BaseModule parentModule) {
-        // Sub-builders
-        this.builders = new ArrayList<>();
+    
+    public static BarBuilder of(TimeSignature timeSig, TaskLogger taskLogger) {
+        return new BarBuilder(timeSig, Optional.of(taskLogger));
+    }
+    
+    private BarBuilder(TimeSignature timeSig, Optional<TaskLogger> taskLogger) {
+        super(taskLogger);
         
         // Lifetime
-        this.lengthTU = lengthTU;
-
-        // Builder parameters
-        this.currBegTU = 0;
-        this.currLenTU = Value.QUARTER.toTimeunit();
-        this.currVelocity = NoteStackBuilder.DEFAULT_VELOCITY;
+        this.timeSig = timeSig;
         
-        // Initialize stack builders
-        for (int i = 0 ; i < lengthTU; ++i) {
-            builders.add(new NoteStackBuilder(this));
-        }
-    }
-    
+        // Data for build
+        this.entries = LinkedListMultimap.create();
 
-    //----------------------------------------- ADD ----------------------------------------------\\
-
-    Note add(Pitch pitch, int velocity, int begTU, int lengthTU, Note beforeTie) {
-        // Check that note timeunit range is within bar limits
-        int endTU = begTU + lengthTU;
-        checkTimeunit(begTU, "beginning");
-        checkTimeunit(endTU, "ending");
-
-        // Check that a tied note is always at the beginning of the bar
-        if (beforeTie != null && begTU != 0) {
-            signal(Anomaly.TIED_NOTE_NOT_AT_BEG_OF_BAR);
-            beforeTie = null;
-        }
-        
-        // Split note timeunit range into simple values
-        for (Value value : splitIntoValues(begTU, endTU)) {
-            // Create note
-            Note note = Note.valueOf(pitch, value);
-            endTU = begTU + value.toTimeunit();
-            
-            // Tie note if needed
-            if (beforeTie != null) {
-                beforeTie.tieTo(note);
-            }
-
-            // Log
-            log("%48s | Beg: %4d | End: %4d | %8s %s", "", begTU, endTU, 
-                    beforeTie == null ? "(Untied)" : " (Tied) ", value.name());
-            
-            // Add starting note to the first note stack
-            builders.get(begTU).add(note, velocity, true);
-
-            // Add started note to the other stacks
-            for (int i = begTU + 1; i < endTU; ++i) {
-                builders.get(i).add(note, velocity, false);
-            }
-            
-            // Update note beginning timeunit and note before tie
-            begTU += value.toTimeunit();
-            beforeTie = note;
-        }
-
-        return beforeTie;
+        // Temporary builder parameters
+        reset();
     }
 
-    public BarBuilder add(Pitch pitch, int velocity, int begTU, int lengthTU) {
-        add(pitch, velocity, begTU, lengthTU, null);
+
+    //
+    //  ~  ADD  ~  //
+    //
+
+    public BarBuilder add(Pitch pitch, byte velocity, int begTU, int lengthTU) {
+        entries.put(begTU, new NoteEntry(pitch, velocity, lengthTU));
         return this;
+    }
+
+    public BarBuilder add(byte hexNote, byte velocity, int begTU, int lengthTU) {
+        return add(Pitch.thatIsMoreCommonForHexValue(hexNote), velocity, begTU, lengthTU);
+    }
+
+    public BarBuilder add(Pitch pitch, int begTU, int lengthTU) {
+        return add(pitch, currVelocity, begTU, lengthTU);
+    }
+
+    public BarBuilder add(Pitch pitch, int begTU) {
+        return add(pitch, currVelocity, begTU, currLenTU);
     }
 
     public BarBuilder add(Pitch pitch) {
-        add(pitch, currVelocity, currBegTU, currLenTU, null);
-        return this;
-    }
-
-    public BarBuilder add(String pitch) {
-        add(Pitch.valueOf(pitch), currVelocity, currBegTU, currLenTU, null);
-        return this;
+        return add(pitch, currVelocity, currBegTU, currLenTU);
     }
 
     public BarBuilder pos(int timeunit) {
@@ -152,72 +179,264 @@ public class BarBuilder extends PieceComponentBuilder<Bar> {
         return this;
     }
 
-    public BarBuilder velocity(int velocity) {
+    public BarBuilder velocity(byte velocity) {
         this.currVelocity = velocity;
         return this;
     }
 
-    private int checkTimeunit(int timeunit, String tuName) {
-        if (timeunit < 0) {
-            signal(Anomaly.TIMEUNIT_OUTSIDE_BAR_LIMITS, tuName, timeunit);
-            return 0;
+
+    //
+    //  ~  BUILD  ~  //
+    //
+
+    @Implement
+    protected PolyphonicBar buildImpl() {
+        // Determine timeunit range of added notes (they can begin / end outside the bar)
+        Range<Integer> tuRange = determineTimeunitRange();
+        
+        // Determine note sections layout
+        List<List<LayoutEntry>> layout = determineLayout(tuRange);
+        
+        // Find if bar is mono/homo/polyphonic (if timeunit range is unbounded, then bar is empty)
+        ComplexityHierarchyRank rank = tuRange.hasLowerBound() 
+                ? findComplexityRank(layout, tuRange.lowerEndpoint()) 
+                : ComplexityHierarchyRank.MONOPHONIC;
+                
+        // Build with appropriate complexity
+        switch (rank) {
+        case MONOPHONIC : return buildMonophonicBar();
+        case HOMOPHONIC : return buildHomophonicBar(layout);
+        case POLYPHONIC : return buildPolyphonicBar(layout);
+        default:          return null;
         }
-        if (timeunit > lengthTU) {
-            signal(Anomaly.TIMEUNIT_OUTSIDE_BAR_LIMITS, tuName, timeunit, lengthTU);
-            return lengthTU;
-        }
-        return timeunit;
     }
 
-    private static List<Value> splitIntoValues(int noteStart, int noteEnd) {
-        List<Value> values = new ArrayList<>();
-        int noteLength = noteEnd - noteStart;
-
-        for (int i = Value.values().length - 1; i >= 0; --i) {
-            Value value = Value.values()[i];
-            int valueLength = value.toTimeunit();
-
-            if (valueLength > noteLength) {
+    private Range<Integer> determineTimeunitRange() {
+        // Timeunit range in bar
+        Range<Integer> barRange = Range.closed(0, timeSig.timeunitsInABar());
+        
+        // Total timeunit range 
+        Range<Integer> tuRange = Range.all();
+        
+        // Cleaned entries
+        Multimap<Integer, NoteEntry> cleaned = LinkedListMultimap.create();
+        
+        // Extend total range with each note
+        for (Entry<Integer, NoteEntry> e : entries.entries()) {
+            // Current note range
+            int beg = e.getKey();
+            int len = e.getValue().lengthTU;
+            int end = beg + len;
+            Range<Integer> range = Range.closed(beg, end);
+            
+            // Signal anomalies
+            if (!barRange.isConnected(range)) {
+                taskLogger.signal(Anomaly.NOTE_OUT_OF_SCOPE, beg, end);
                 continue;
             }
-            int valueStart = 0;
-            while (valueStart < noteStart) {
-                valueStart += valueLength;
-            }
-            int valueEnd = valueStart + valueLength;
-
-            if (valueEnd > noteEnd) {
+            if (len < 1) {
+                taskLogger.signal(Anomaly.NOTE_LENGTH_NOT_POSITIVE, len);
                 continue;
             }
-            if (noteStart < valueStart) {
-                values.addAll(splitIntoValues(noteStart, valueStart));
+            
+            // Extend total range
+            tuRange = tuRange.span(range);
+            
+            // Save entry with correct range
+            cleaned.put(e.getKey(), e.getValue());
+        }
+        
+        entries = cleaned;
+        
+        return tuRange;
+    }
+    
+    private List<List<LayoutEntry>> determineLayout(Range<Integer> tuRange) {
+        // Create empty layout
+        List<List<LayoutEntry>> layout = new ArrayList<>();
+        int min = tuRange.hasLowerBound() ? tuRange.lowerEndpoint() : 0;
+        int max = tuRange.hasUpperBound() ? tuRange.upperEndpoint() : timeSig.timeunitsInABar();
+        for (int i = min; i < max; ++i) {
+            layout.add(new ArrayList<>());
+        }
+        
+        // Fill layout
+        for (Entry<Integer, NoteEntry> e : entries.entries()) {
+            int beg = e.getKey();
+            int len = e.getValue().lengthTU;
+            int end = beg + len;
+            
+            layout.get(beg - min).add(new LayoutEntry(NoteSection.BEGINNING, e.getValue()));
+            
+            LayoutEntry middle = new LayoutEntry(NoteSection.MIDDLE, e.getValue());
+            for (int i = beg + 1; i < end - 1; ++i) {
+                layout.get(beg - min).add(middle);
             }
-            values.add(value);
+            
+            layout.get(end - 1 - min).add(new LayoutEntry(NoteSection.END, e.getValue()));
+        }
+        
+        return layout;
+    }
+    
+    private ComplexityHierarchyRank findComplexityRank(List<List<LayoutEntry>> layout,
+                                                       int                     tuRangeBeg) {
+        boolean isMonophonic = true;
+        
+        for (int i = 0; i < timeSig.timeunitsInABar(); ++i) {
+            List<LayoutEntry> slice = layout.get(i - tuRangeBeg);
+            if (slice.size() < 2) {
+                isMonophonic &= true;
+                continue;
+            }
+            isMonophonic = false;
+            
+            NoteSection section = slice.get(0).section;
+            for (int j = 1; j < slice.size(); ++j) {
+                if (slice.get(j).section != section) {
+                    return ComplexityHierarchyRank.POLYPHONIC;
+                }
+            }
+        }
+        
+        return isMonophonic ? ComplexityHierarchyRank.MONOPHONIC
+                            : ComplexityHierarchyRank.HOMOPHONIC;
+    }
+    
+    private MonophonicBar buildMonophonicBar() {
+        // A bar is just a list of bar slice of the corresponding complexity rank
+        List<MonophonicBarSlice> slices = new LinkedList<>();
+        
+        // Sort note beginning timeunits
+        Iterator<Integer> begTUs = new TreeSet<>(entries.keySet()).iterator();
+                
+        // Last node to be added
+        MonophonicNoteNode node = null;
+        int prevEndTU = 0;
+        int begTU = begTUs.hasNext() ? begTUs.next() : 0;
+        
+        while (begTUs.hasNext()) {
+            // Add rest to fill bar between notes
+            if (prevEndTU != begTU) {
+                node = addMonophonicEntry(prevEndTU, 
+                                          begTU, 
+                                          Optional.empty(), 
+                                          Optional.ofNullable(node), 
+                                          slices);
+            }
+            
+            // Add note
+            NoteEntry entry = entries.get(begTU).iterator().next();
+            int endTU = begTU + entry.lengthTU;
+            node = addMonophonicEntry(begTU, 
+                                      endTU, 
+                                      Optional.of(entry), 
+                                      Optional.ofNullable(node), 
+                                      slices);
+            // Go to next note
+            prevEndTU = endTU;
+            begTU = begTUs.next();
+        }
+        
+        // Add last rest if needed
+        if (prevEndTU < timeSig.timeunitsInABar()) {
+            addMonophonicEntry(prevEndTU, 
+                               timeSig.timeunitsInABar(), 
+                               Optional.empty(), 
+                               Optional.ofNullable(node), 
+                               slices);
+        }
+        
+        return new MonophonicBar(slices);
+    }
 
-            if (valueEnd < noteEnd) {
-                values.addAll(splitIntoValues(valueEnd, noteEnd));
+    private MonophonicNoteNode addMonophonicEntry(int                          begTU, 
+                                                  int                          endTU,
+                                                  Optional<NoteEntry>          entry,
+                                                  Optional<MonophonicNoteNode> prevNode,
+                                                  List<MonophonicBarSlice>     slices) {
+        
+        // Clamp timeunits to fit them in bars
+        begTU = Math.max(0, begTU);
+        endTU = Math.min(timeSig.timeunitsInABar(), endTU);
+        
+        MonophonicNoteNode prev = prevNode.orElse(null); 
+        MonophonicNoteNode curr = null;
+        
+        // Split timeunit interval into rythmic values
+        for (RythmnValue value : splitIntoRythmicValues(begTU, endTU - begTU)) {
+            if (entry.isPresent()) {
+                // Crate note node
+                Note note = Note.of(entry.get().pitch, value, Dynamic.of(entry.get().velocity));
+                curr = new MonophonicNoteNode(note);
+            } else {
+                // Create rest node
+                curr = new MonophonicNoteNode(value);
+            }
+            
+            // Create slices
+            for (int i = 0; i < value.toTimeunit(); ++i) {
+                slices.add(new MonophonicBarSlice.Impl(curr, i == 0));
+            }
+            
+            // Connect if possible
+            if (prev != null) {
+                MonophonicNoteNode.Neighbourhood.Impl.connect(prev, curr, 
+                        TiedNoteStatus.AS_SEPARATE_NOTES, true);
+            }
+            prev = curr;
+        }
+        
+        return curr;
+    }
+    
+    private HomophonicBar buildHomophonicBar(List<List<LayoutEntry>> layout) {
+        throw new NotImplementedException();
+    }
+    
+    private PolyphonicBar buildPolyphonicBar(List<List<LayoutEntry>> layout) {
+        throw new NotImplementedException();
+    }
+
+    public static List<RythmnValue> splitIntoRythmicValues(int begTU, int lenTU) {
+        List<RythmnValue> values = new ArrayList<>();
+
+        for (int i = RythmnValue.values().length - 1; i >= 0; --i) {
+            RythmnValue val = RythmnValue.values()[i];
+            int valLen = val.toTimeunit();
+
+            if (valLen > lenTU) {
+                continue;
+            }
+            int valBeg = 0;
+            while (valBeg < begTU) {
+                valBeg += valLen;
+            }
+            int valEnd = valBeg + valLen;
+
+            if (valEnd > lenTU) {
+                continue;
+            }
+            if (begTU < valBeg) {
+                values.addAll(splitIntoRythmicValues(begTU, valBeg));
+            }
+            values.add(val);
+
+            if (valEnd < lenTU) {
+                values.addAll(splitIntoRythmicValues(valEnd, lenTU));
             }
             break;
         }
 
         return values;
     }
-
-
-    //---------------------------------------- BUILD ---------------------------------------------\\
-
-    protected Bar buildComponent() {
-        List<NoteStack> noteStacks = new ArrayList<>();
-        for (NoteStackBuilder builder : builders) {
-            noteStacks.add(builder.build());
-        }
-        return new Bar(noteStacks);
-    }
-
-
-    //---------------------------------------- RESET ---------------------------------------------\\
-
-    protected void reset() {
-        builders.clear();
+    
+    @Implement
+    public void reset() {
+        entries.clear();
+        
+        currBegTU    = 0;
+        currLenTU    = PolyphonicNoteNode.DEFAULT_VALUE.toTimeunit();
+        currVelocity = PolyphonicNoteNode.DEFAULT_DYNAMIC_MARKER.getMinimumVelocity();
     }
 }

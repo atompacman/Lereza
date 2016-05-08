@@ -1,76 +1,94 @@
 package com.atompacman.lereza.core.piece;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
-import com.atompacman.lereza.core.piece2.timeline.TimeunitToBarConverter;
+import com.atompacman.lereza.core.piece.timeline.InfiniteTimeunitToBarConverter;
+import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
+import com.atompacman.lereza.core.theory.Dynamic;
 import com.atompacman.lereza.core.theory.Pitch;
+import com.atompacman.lereza.core.theory.RythmnValue;
 import com.atompacman.lereza.core.theory.TimeSignature;
-import com.atompacman.toolkat.misc.Log;
-import com.atompacman.toolkat.misc.StringHelper;
-import com.atompacman.toolkat.module.BaseModule;
+import com.atompacman.toolkat.Builder;
+import com.atompacman.toolkat.annotations.Implement;
+import com.atompacman.toolkat.task.TaskLogger;
 
-public class PieceBuilder extends PieceComponentBuilder<Piece> {
+public final class PieceBuilder extends Builder<Piece> {
 
-    //======================================= FIELDS =============================================\\
+    //
+    //  ~  FIELDS  ~  //
+    //
 
-    // Sub-builders
-    private final List<PartBuilder> builders;
-    
     // Lifetime
     private final TimeunitToBarConverter tuToBar;
-    
-    // Builder parameters
+
+    // Data for build
+    private final List<PartBuilder> builders;
+
+    // Temporary builder parameters
     private int  currPart;
     private int  currBegTU;
     private int  currLenTU;
     private byte currVelocity;
 
 
+    //
+    //  ~  INIT  ~  //
+    //
 
-    //======================================= METHODS ============================================\\
-
-    //---------------------------------- PUBLIC CONSTRUCTOR --------------------------------------\\
-
-    public PieceBuilder(int pieceLengthTU) {
-        this(new TimeunitToBarConverter(pieceLengthTU), null);
-    }
-
-    public PieceBuilder(TimeSignature firstTimeSign, int pieceLengthTU) {
-        this(new TimeunitToBarConverter(firstTimeSign, pieceLengthTU), null);
+    public static PieceBuilder of() {
+        return of(InfiniteTimeunitToBarConverter.of());
     }
     
-    public PieceBuilder(TimeunitToBarConverter tuToBar, BaseModule parentModule) {
-        super(parentModule);
-        
-        // Sub-builders
-        this.builders = new ArrayList<>();
-        
+    public static PieceBuilder of(TimeSignature timeSign) {
+        return of(InfiniteTimeunitToBarConverter.of(timeSign));
+    }
+    
+    public static PieceBuilder of(int pieceLengthTU) {
+        return of(TimeunitToBarConverter.of(pieceLengthTU));
+    }
+    
+    public static PieceBuilder of(TimeunitToBarConverter tuToBar) {
+        return new PieceBuilder(tuToBar, Optional.empty());
+    }
+    
+    public static PieceBuilder of(TimeunitToBarConverter tuToBar, TaskLogger taskLogger) {
+        return new PieceBuilder(tuToBar, Optional.of(taskLogger));
+    }
+    
+    private PieceBuilder(TimeunitToBarConverter tuToBar, Optional<TaskLogger> taskLogger) {
+        super(taskLogger);
+
         // Lifetime
         this.tuToBar = tuToBar;
 
-        // Builder parameters
-        this.currPart     = 0;
-        this.currBegTU    = 0;
-        this.currLenTU    = 32;
-        this.currVelocity = 100;
+        // Data for build
+        this.builders = new ArrayList<>();
+
+        // Temporary builder parameters
+        reset();
     }
 
 
-    //----------------------------------------- ADD ----------------------------------------------\\
+    //
+    //  ~  ADD  ~  //
+    //
 
     public PieceBuilder add(Pitch pitch, byte velocity, int part, int begTU, int lengthTU) {
+        // Create missing part builders
         while (part >= builders.size()) {
-            builders.add(new PartBuilder(tuToBar, this));
+            builders.add(PartBuilder.of(tuToBar, taskLogger));
         }
-        
-        log("Pitch: %3s | Velocity: %3d | Part: %2d | %8s | Beg: %4d | End: %4d |", 
+
+        // Log info
+        taskLogger.log("Pitch: %3s | Velocity: %3d | Part: %2d | %8s | Beg: %4d | End: %4d |", 
                 pitch, (int) velocity, part, "", begTU, begTU + lengthTU);
-        
+
+        // Redirect note to a part builder
         builders.get(part).add(pitch, velocity, begTU, lengthTU);
-        
-        Log.trace(StringHelper.title(""));
-        
+
         return this;
     }
 
@@ -111,20 +129,30 @@ public class PieceBuilder extends PieceComponentBuilder<Piece> {
     }
 
 
-    //---------------------------------------- BUILD ---------------------------------------------\\
+    //
+    //  ~  BUILD  ~  //
+    //
 
-    public Piece buildComponent() {
-        List<Part> parts = new ArrayList<>();
+    @Implement
+    protected Piece buildImpl() {
+        List<PolyphonicPart> parts = new LinkedList<>();
+        
+        // Build each part separately 
+        // (this means they can be of different ranks in the complexity hierarchy)
         for (PartBuilder builder : builders) {
             parts.add(builder.build());
         }
+        
         return new Piece(parts);
     }
 
-
-    //---------------------------------------- RESET ---------------------------------------------\\
-
-    protected void reset() {
+    @Implement
+    public void reset() {
         builders.clear();
+        
+        currPart     = 0;
+        currBegTU    = 0;
+        currLenTU    = RythmnValue.QUARTER.toTimeunit();
+        currVelocity = Dynamic.Marker.FORTE.getMinimumVelocity();
     }
 }
