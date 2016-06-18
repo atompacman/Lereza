@@ -2,13 +2,13 @@ package com.atompacman.lereza.core.piece;
 
 import java.util.List;
 
-public class Part extends AbstractPart<Bar> {
+public class MultiBar extends AbstractBar<MultiNoteStack> {
 
     //======================================= METHODS ============================================\\
 
     //------------------------------------- CONSTRUCTORS -----------------------------------------\\
 
-    Part(List<Bar> bars) {
-        super(bars);
+    MultiBar(List<MultiNoteStack> noteStacks) {
+        super(noteStacks);
     }
 }
