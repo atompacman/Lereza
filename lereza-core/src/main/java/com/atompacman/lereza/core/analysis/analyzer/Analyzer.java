@@ -1,16 +1,14 @@
 package com.atompacman.lereza.core.analysis.analyzer;
 
-import com.atompacman.lereza.core.analysis.Analysis;
 import com.atompacman.lereza.core.analysis.MusicalStructure;
-import com.atompacman.lereza.core.analysis.output.AnalysisResult;
+import com.atompacman.lereza.core.analysis.study.DependentStudySet;
+import com.atompacman.lereza.core.analysis.study.Study;
 
-public abstract class Analyzer<A extends Analysis, 
-                               O extends AnalysisResult<A>, 
-                               M extends MusicalStructure> {
+public abstract class Analyzer<M extends MusicalStructure, S extends Study> {
 
-    public boolean isStructureSupported(M structure) {
-        return true;
-    }
+    //
+    //  ~  ANALYZE  ~  //
+    //
     
-    public abstract O analyze(M structure);
+    public abstract S analyze(M structure, DependentStudySet dependencies);
 }

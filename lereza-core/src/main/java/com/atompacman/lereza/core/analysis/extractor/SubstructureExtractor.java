@@ -1,12 +1,16 @@
 package com.atompacman.lereza.core.analysis.extractor;
 
-import com.atompacman.lereza.core.analysis.Analysis;
 import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.study.Study;
 
-public interface SubstructureExtractor<M extends MusicalStructure, 
-                                       N extends MusicalStructure,
-                                       A extends Analysis,
-                                       B extends Analysis> {
+public interface SubstructureExtractor<M1 extends MusicalStructure, 
+                                       M2 extends MusicalStructure,
+                                       S1 extends Study,
+                                       S2 extends Study> {
 
-    ExtractionResult<N, A, B> extract(M structure);
+    //
+    //  ~  EXTRACT  ~  //
+    //
+    
+    ExtractionResult<M2, S1, S2> extract(M1 structure);
 }

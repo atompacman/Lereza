@@ -1,7 +1,5 @@
 package com.atompacman.lereza.core.piece;
 
-import com.atompacman.lereza.core.analysis.MusicalStructure;
-
-public class PolyphonicNoteNode implements MusicalStructure {
+public interface PolyphonicNoteNode extends NoteNode<PolyphonicNoteNode> {
 
 }

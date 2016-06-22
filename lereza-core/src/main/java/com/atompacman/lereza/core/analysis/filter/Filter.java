@@ -1,12 +1,17 @@
 package com.atompacman.lereza.core.analysis.filter;
 
-import com.atompacman.lereza.core.analysis.MusicalStructure;
+import java.util.Set;
 
-public interface Filter<M extends MusicalStructure> {
+import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.study.PieceStudySet;
+
+public interface Filter<A> {
 
     //
     //  ~  APPLY  ~  //
     //
 
-    boolean apply(M structure);
+    <M extends MusicalStructure> Set<M> apply(Set<M>        structures, 
+                                              PieceStudySet studies, 
+                                              A             annotationData);
 }

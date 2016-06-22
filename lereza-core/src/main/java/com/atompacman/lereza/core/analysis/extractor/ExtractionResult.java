@@ -2,30 +2,32 @@ package com.atompacman.lereza.core.analysis.extractor;
 
 import java.util.Set;
 
-import com.atompacman.lereza.core.analysis.Analysis;
-import com.atompacman.lereza.core.analysis.AnalyzedStructure;
 import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.study.StudyStructurePair;
+import com.atompacman.lereza.core.analysis.study.Study;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
-public abstract class ExtractionResult<M extends MusicalStructure, 
-                                       A extends Analysis, 
-                                       B extends Analysis> {
+public abstract class ExtractionResult<M  extends MusicalStructure, 
+                                       S1 extends Study, 
+                                       S2 extends Study> {
 
     //
     //  ~  FIELDS  ~  //
     //
     
-    public abstract Set<AnalyzedStructure<M, A>> getExtractedSubstructures();
-    public abstract B                            getExtractionAnalysis();
+    public abstract Set<StudyStructurePair<M, S1>> getExtractedSubstructures();
+    public abstract S2                             getExtractionAnalysis();
     
     
     //
     //  ~  INIT  ~  //
     //
     
-    public static <M extends MusicalStructure, A extends Analysis, B extends Analysis> 
-    ExtractionResult<M, A, B> of(Set<AnalyzedStructure<M, A>> extractSubstruct, B extractAnalysis) {
-        return new AutoValue_ExtractionResult<M, A, B>(extractSubstruct, extractAnalysis);
+    public static <M extends MusicalStructure, S1 extends Study, S2 extends Study> 
+    ExtractionResult<M, S1, S2> of(Set<StudyStructurePair<M, S1>> extractionSubstructures, 
+                                   S2                             extractionAnalysis) {
+        
+        return new AutoValue_ExtractionResult<M,S1,S2>(extractionSubstructures, extractionAnalysis);
     }
 }

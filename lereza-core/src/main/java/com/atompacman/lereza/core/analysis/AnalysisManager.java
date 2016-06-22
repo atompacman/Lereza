@@ -1,53 +1,50 @@
 package com.atompacman.lereza.core.analysis;
 
 import java.io.IOException;
-import java.util.EnumMap;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.atompacman.lereza.core.piece.Piece;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
 public final class AnalysisManager {
 
     //
-    //  ~  ANALYZE  ~  //
+    // ~ FIELDS ~ //
     //
-    
-    public void analyze(Piece piece) {
-        
-    }
-    
-    public Map<AnalysisComponentType, Set<Class<?>>> detect() throws IOException {
-        ClassPath cp = ClassPath.from(Thread.currentThread().getContextClassLoader());
-        
-        Map<AnalysisComponentType, Set<Class<?>>> analysisClasses 
-            = new EnumMap<>(AnalysisComponentType.class);
-        
-        for (AnalysisComponentType act : AnalysisComponentType.values()) {
-            Set<Class<?>> actClasses = new HashSet<>();
-            for (ClassInfo classInfo : cp.getTopLevelClasses(act.basePackageName())) {
-                Class<?> clazz = classInfo.load();
-                if (act.isComponentTypeOf(clazz)) {
-                    actClasses.add(clazz);
-                }
-            }
-            analysisClasses.put(act, actClasses);
-        }
 
-        return analysisClasses;
-    }
+    private final AnalysisComponentSet components;
+
     
-    public static void main(String[] args) throws IOException {
-        for (Entry<AnalysisComponentType, Set<Class<?>>> entry : new AnalysisManager().detect().entrySet()) {
-            System.out.println(entry.getKey());
-            for (Class<?> clazz : entry.getValue()) {
-                System.out.println(clazz.getName());
-            }
-            System.out.println();
-        }
+    //
+    // ~ INIT ~ //
+    //
+
+    private AnalysisManager() throws IOException {
+        this.components = loadAnalysisComponents(new HashSet<>());
+    }
+
+    private static AnalysisComponentSet loadAnalysisComponents(Set<URL> plugginJarURLs) 
+                                                                                throws IOException {
+        ClassLoader currCL = Thread.currentThread().getContextClassLoader();
+        URLClassLoader urlCL = new URLClassLoader((URL[]) plugginJarURLs.toArray(), currCL);
+        ImmutableSet<ClassInfo> classes = ClassPath.from(urlCL).getAllClasses();
+        AnalysisComponentSet components = new AnalysisComponentSet();
+        classes.stream().forEach(c -> components.addIfValid(c.load()));
+        return components;
+    }
+
+
+    //
+    // ~ ANALYZE ~ //
+    //
+
+    public void analyze(Piece piece) throws MalformedURLException {
+
     }
 }
