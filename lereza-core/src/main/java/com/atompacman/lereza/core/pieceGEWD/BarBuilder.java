@@ -1,8 +1,8 @@
-package com.atompacman.lereza.core.piece;
+package com.atompacman.lereza.core.pieceGEWD;
 
 import java.util.Optional;
 
-import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
+import com.atompacman.lereza.core.pieceGEWD.timeline.TimeunitToBarConverter;
 import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.Builder;

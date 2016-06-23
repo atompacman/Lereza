@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.piece;
+package com.atompacman.lereza.core.pieceGEWD;
 
 import java.util.Set;
 

@@ -11,7 +11,13 @@ import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.atompacman.lereza.core.piece.PolyphonicNoteNode.TiedNoteStatus;
+import com.atompacman.lereza.core.pieceGEWD.BarBuilder;
+import com.atompacman.lereza.core.pieceGEWD.MonophonicBar;
+import com.atompacman.lereza.core.pieceGEWD.MonophonicBarSlice;
+import com.atompacman.lereza.core.pieceGEWD.MonophonicNoteNode;
+import com.atompacman.lereza.core.pieceGEWD.PartBuilder;
+import com.atompacman.lereza.core.pieceGEWD.PolyphonicBar;
+import com.atompacman.lereza.core.pieceGEWD.PolyphonicNoteNode.TiedNoteStatus;
 import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.lereza.core.theory.TimeSignature;

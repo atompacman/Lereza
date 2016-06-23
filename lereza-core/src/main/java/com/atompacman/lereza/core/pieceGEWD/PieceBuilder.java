@@ -1,12 +1,12 @@
-package com.atompacman.lereza.core.piece;
+package com.atompacman.lereza.core.pieceGEWD;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import com.atompacman.lereza.core.piece.timeline.InfiniteTimeunitToBarConverter;
-import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
+import com.atompacman.lereza.core.pieceGEWD.timeline.InfiniteTimeunitToBarConverter;
+import com.atompacman.lereza.core.pieceGEWD.timeline.TimeunitToBarConverter;
 import com.atompacman.lereza.core.theory.Dynamic;
 import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.lereza.core.theory.RhythmValue;

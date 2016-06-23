@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.piece.timeline;
+package com.atompacman.lereza.core.pieceGEWD.timeline;
 
 import com.atompacman.lereza.core.theory.TimeSignature;
 

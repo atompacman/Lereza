@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.piece;
+package com.atompacman.lereza.core.pieceGEWD;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -10,10 +10,10 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeSet;
 
-import com.atompacman.lereza.core.piece.MonophonicNoteNode.Neighbourhood;
-import com.atompacman.lereza.core.piece.PolyphonicNoteNode.TiedNoteStatus;
-import com.atompacman.lereza.core.piece.timeline.InfiniteTimeunitToBarConverter;
-import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
+import com.atompacman.lereza.core.pieceGEWD.MonophonicNoteNode.Neighbourhood;
+import com.atompacman.lereza.core.pieceGEWD.PolyphonicNoteNode.TiedNoteStatus;
+import com.atompacman.lereza.core.pieceGEWD.timeline.InfiniteTimeunitToBarConverter;
+import com.atompacman.lereza.core.pieceGEWD.timeline.TimeunitToBarConverter;
 import com.atompacman.lereza.core.theory.Dynamic;
 import com.atompacman.lereza.core.theory.Note;
 import com.atompacman.lereza.core.theory.Pitch;
