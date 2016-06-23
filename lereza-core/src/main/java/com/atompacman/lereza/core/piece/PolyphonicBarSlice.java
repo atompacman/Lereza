@@ -33,14 +33,17 @@ public interface PolyphonicBarSlice extends MusicalStructure {
         //
     
         protected void postInit() {
-            checkArgument(getPlayingNodes()  .notes.values().containsAll(
-                          getBeginningNodes().notes.values()), 
-                    "Playing notes must contain all beginning notes");
+            final NoteNodeSet<PolyphonicNoteNode> playing   = getPlayingNodes();
+            final NoteNodeSet<PolyphonicNoteNode> beginning = getBeginningNodes();
+            
+            checkArgument(playing  .notes.values().containsAll(
+                          beginning.notes.values()), 
+                          "Playing notes must contain all beginning notes");
     
             Set<Pitch> pitches = new HashSet<>();
             int numRests = 0;
     
-            for (PolyphonicNoteNode node : getPlayingNodes()) {
+            for (PolyphonicNoteNode node : playing) {
                 if (node.isRest()) {
                     ++numRests;
                 } else {
@@ -49,15 +52,15 @@ public interface PolyphonicBarSlice extends MusicalStructure {
                 }
             }
     
-            checkArgument(numRests <= 1, "Stacks cannot have multiple rest nodes");
+            checkArgument(numRests <= 1, "Slices cannot have multiple rest nodes");
 
             this.isRest = numRests == 1;
 
             if (isRest) {
-                checkArgument(getPlayingNodes().numNodes()==1, "Cannot have both a rest and notes");
+                checkArgument(playing.numNodes()==1, "Cannot have both a rest and notes");
             }
     
-            this.hasBeginningNotes = !getBeginningNodes().isEmpty();
+            this.hasBeginningNotes = !beginning.isEmpty();
         }
         
     
@@ -91,7 +94,7 @@ public interface PolyphonicBarSlice extends MusicalStructure {
                 return "";
             }
             if (isRest()) {
-                return "R" + getPlayingNodes().iterator().next().getRythmnValue().toStaccato();
+                return "R" + getPlayingNodes().iterator().next().getRhythmValue().toStaccato();
             }
             StringBuilder sb = new StringBuilder();
             Iterator<? extends PolyphonicNoteNode> it = getBeginningNodes().iterator();

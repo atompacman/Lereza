@@ -9,7 +9,7 @@ import com.atompacman.lereza.core.piece.timeline.InfiniteTimeunitToBarConverter;
 import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
 import com.atompacman.lereza.core.theory.Dynamic;
 import com.atompacman.lereza.core.theory.Pitch;
-import com.atompacman.lereza.core.theory.RythmnValue;
+import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.Builder;
 import com.atompacman.toolkat.annotations.Implement;
@@ -152,7 +152,7 @@ public final class PieceBuilder extends Builder<Piece> {
         
         currPart     = 0;
         currBegTU    = 0;
-        currLenTU    = RythmnValue.QUARTER.toTimeunit();
+        currLenTU    = RhythmValue.QUARTER.toTimeunit();
         currVelocity = Dynamic.Marker.FORTE.getMinimumVelocity();
     }
 }

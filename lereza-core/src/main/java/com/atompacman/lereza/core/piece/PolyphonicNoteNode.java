@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 import com.atompacman.lereza.core.theory.Dynamic;
 import com.atompacman.lereza.core.theory.Note;
-import com.atompacman.lereza.core.theory.RythmnValue;
+import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.toolkat.annotations.DerivableFrom;
 import com.atompacman.toolkat.annotations.Implement;
 
@@ -21,7 +21,7 @@ public class PolyphonicNoteNode implements MusicalStructure {
     //
 
     public static final Dynamic.Marker DEFAULT_DYNAMIC_MARKER = Dynamic.Marker.FORTE;
-    public static final RythmnValue    DEFAULT_VALUE          = RythmnValue.QUARTER;
+    public static final RhythmValue    DEFAULT_VALUE          = RhythmValue.QUARTER;
 
     
     //
@@ -144,28 +144,23 @@ public class PolyphonicNoteNode implements MusicalStructure {
             //
            
             @Implement
-            @SuppressWarnings({ "unchecked", "rawtypes" })
             public NoteNodeSet<PolyphonicNoteNode> getNodes(TemporalRelationship relationship) {
-                return (NoteNodeSet<PolyphonicNoteNode>)(NoteNodeSet) 
-                                                                neighbouringNodes.get(relationship);
+                return neighbouringNodes.get(relationship);
             }
         
             @Implement
-            @SuppressWarnings({ "unchecked", "rawtypes" })
             public NoteNodeSet<PolyphonicNoteNode> getNodesBeginningBefore() {
-                return (NoteNodeSet<PolyphonicNoteNode>)(NoteNodeSet) nodesBeginningBefore; 
+                return nodesBeginningBefore; 
             }
         
             @Implement
-            @SuppressWarnings({ "unchecked", "rawtypes" })
             public NoteNodeSet<PolyphonicNoteNode> getNodesEndingAfter() {
-                return (NoteNodeSet<PolyphonicNoteNode>)(NoteNodeSet) nodesEndingAfter; 
+                return nodesEndingAfter; 
             }
         
             @Implement
-            @SuppressWarnings({ "unchecked", "rawtypes" })
             public NoteNodeSet<PolyphonicNoteNode> getCompletelyOrPartiallyOverlappingNodes() {
-                return (NoteNodeSet<PolyphonicNoteNode>)(NoteNodeSet) overlappingNotes; 
+                return overlappingNotes; 
             }
         }
 
@@ -192,7 +187,7 @@ public class PolyphonicNoteNode implements MusicalStructure {
     private final Optional<Note> note;
     
     /** Note or rest duration */
-    private final RythmnValue value;
+    private final RhythmValue value;
 
     protected Optional<PolyphonicNoteNode> prevTiedNote;
     protected Optional<PolyphonicNoteNode> nextTiedNote;
@@ -207,12 +202,12 @@ public class PolyphonicNoteNode implements MusicalStructure {
 
     protected PolyphonicNoteNode(Note note) {
         this(Optional.of(note), 
-             note.getRythmnValue(), 
+             note.getRhythmValue(), 
              new Neighbourhood.Impl(), 
              new Neighbourhood.Impl());
     }
     
-    protected PolyphonicNoteNode(RythmnValue value) {
+    protected PolyphonicNoteNode(RhythmValue value) {
         this(Optional.empty(), 
              value, 
              new Neighbourhood.Impl(), 
@@ -224,12 +219,12 @@ public class PolyphonicNoteNode implements MusicalStructure {
                                  Neighbourhood neighbourhoodMerged) {
         
         this(Optional.of(note), 
-             note.getRythmnValue(), 
+             note.getRhythmValue(), 
              neighbourhoodSeparated, 
              neighbourhoodMerged);
     }
     
-    protected PolyphonicNoteNode(RythmnValue   value,
+    protected PolyphonicNoteNode(RhythmValue   value,
                                  Neighbourhood neighbourhoodSeparated,
                                  Neighbourhood neighbourhoodMerged) {
         
@@ -240,7 +235,7 @@ public class PolyphonicNoteNode implements MusicalStructure {
     }
 
     private PolyphonicNoteNode(Optional<Note> note, 
-                               RythmnValue    value, 
+                               RhythmValue    value, 
                                Neighbourhood  neighbourhoodSeparated,
                                Neighbourhood  neighbourhoodMerged) {
         this.note  = note;
@@ -266,7 +261,7 @@ public class PolyphonicNoteNode implements MusicalStructure {
         Optional<PolyphonicNoteNode> node = isRest() ? set.getRest() 
                                                      : set.getNode(note.get().getPitch());
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        Optional<PolyphonicNoteNode> nextNode = (Optional<PolyphonicNoteNode>)(Optional) node;
+        Optional<PolyphonicNoteNode> nextNode = (Optional) node;
         checkArgument(nextNode.isPresent());
 
         // Must not be already connected
@@ -287,7 +282,7 @@ public class PolyphonicNoteNode implements MusicalStructure {
         return note;
     }
 
-    public RythmnValue getRythmnValue() {
+    public RhythmValue getRhythmValue() {
         return value;
     }
 
@@ -317,14 +312,14 @@ public class PolyphonicNoteNode implements MusicalStructure {
         int length = value.toTimeunit();
         Optional<PolyphonicNoteNode> other=prevTiedNote;
         while (other.isPresent()) {
-            PolyphonicNoteNode node =  other.get();
-            length += node.getRythmnValue().toTimeunit();
+            PolyphonicNoteNode node = other.get();
+            length += node.getRhythmValue().toTimeunit();
             other = Optional.ofNullable(node.getPreviousTiedNode());
         }
         other = nextTiedNote;
         while (other.isPresent()) {
-            PolyphonicNoteNode node =  other.get();
-            length += node.getRythmnValue().toTimeunit();
+            PolyphonicNoteNode node = other.get();
+            length += node.getRhythmValue().toTimeunit();
             other = Optional.ofNullable(node.getNextTiedNode());
         }
         return length;
@@ -346,22 +341,15 @@ public class PolyphonicNoteNode implements MusicalStructure {
     public String toStaccato() {
         StringBuilder sb = new StringBuilder();
         if (note.isPresent()) {
-            sb.append(note.get().toStaccato());
-        } else {
-            sb.append('R');
-        }
-        if (prevTiedNote.isPresent()) {
-            sb.append('-');
-        }
-        sb.append(value.toStaccato());
-        if (nextTiedNote.isPresent()) {
-            sb.append('-');
-        }
-        if (note.isPresent()) {
-            Optional<Dynamic> dynamic = note.get().getDynamic();
-            if (dynamic.isPresent()) {
-                sb.append('a').append(dynamic.get().getVelocity());
+            if (isTied()) {
+                sb.append('(');
             }
+            sb.append(note.get().toStaccato());
+            if (isTied()) {
+                sb.append(')');
+            }
+        } else {
+            sb.append('R').append(value.toStaccato());;
         }
         return sb.toString();
     }

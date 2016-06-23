@@ -3,7 +3,7 @@ package com.atompacman.lereza.core.piece;
 import javax.annotation.Nullable;
 
 import com.atompacman.lereza.core.theory.Note;
-import com.atompacman.lereza.core.theory.RythmnValue;
+import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.toolkat.annotations.Implement;
 
 public class HomophonicNoteNode extends PolyphonicNoteNode {
@@ -65,11 +65,11 @@ public class HomophonicNoteNode extends PolyphonicNoteNode {
             @SuppressWarnings({ "unchecked", "rawtypes" })
             public NoteNodeSet<PolyphonicNoteNode> getNodes(TemporalRelationship relationship) {
                 if        (relationship == TemporalRelationship.RIGHT_AFTER) {
-                    return (NoteNodeSet<PolyphonicNoteNode>) (NoteNodeSet) nextNodes;
+                    return (NoteNodeSet) nextNodes;
                 } else if (relationship == TemporalRelationship.RIGHT_BEFORE) {
-                    return (NoteNodeSet<PolyphonicNoteNode>) (NoteNodeSet) prevNodes;
+                    return (NoteNodeSet) prevNodes;
                 } else if (relationship == TemporalRelationship.COMPLETELY_OVERLAPPING){
-                    return (NoteNodeSet<PolyphonicNoteNode>) (NoteNodeSet) simultaneousNodes;
+                    return (NoteNodeSet) simultaneousNodes;
                 } else {
                     return NoteNodeSet.empty();
                 }
@@ -78,19 +78,19 @@ public class HomophonicNoteNode extends PolyphonicNoteNode {
             @Implement
             @SuppressWarnings({ "unchecked", "rawtypes" })
             public NoteNodeSet<PolyphonicNoteNode> getNodesBeginningBefore() {
-                return (NoteNodeSet<PolyphonicNoteNode>) (NoteNodeSet) prevNodes;
+                return (NoteNodeSet) prevNodes;
             }
             
             @Implement
             @SuppressWarnings({ "unchecked", "rawtypes" })
             public NoteNodeSet<PolyphonicNoteNode> getNodesEndingAfter() {
-                return (NoteNodeSet<PolyphonicNoteNode>) (NoteNodeSet) nextNodes;
+                return (NoteNodeSet) nextNodes;
             }
             
             @Implement
             @SuppressWarnings({ "unchecked", "rawtypes" })
             public NoteNodeSet<PolyphonicNoteNode> getCompletelyOrPartiallyOverlappingNodes() {
-                return (NoteNodeSet<PolyphonicNoteNode>) (NoteNodeSet) simultaneousNodes;
+                return (NoteNodeSet) simultaneousNodes;
             }
         
             @Implement
@@ -130,24 +130,22 @@ public class HomophonicNoteNode extends PolyphonicNoteNode {
         super(note, new Neighbourhood.Impl(), new Neighbourhood.Impl());
     }
     
-    protected HomophonicNoteNode(RythmnValue value) {
+    protected HomophonicNoteNode(RhythmValue value) {
         super(value, new Neighbourhood.Impl(), new Neighbourhood.Impl());
     }
     
     protected HomophonicNoteNode(Note          note,
                                  Neighbourhood neighbourhoodSeparated,
                                  Neighbourhood neighbourhoodMerged) {
-        super(note,
-              neighbourhoodSeparated, 
-              neighbourhoodMerged);
+        
+        super(note, neighbourhoodSeparated, neighbourhoodMerged);
     }
     
-    protected HomophonicNoteNode(RythmnValue   value,
+    protected HomophonicNoteNode(RhythmValue   value,
                                  Neighbourhood neighbourhoodSeparated,
                                  Neighbourhood neighbourhoodMerged) {
-        super(value, 
-              neighbourhoodSeparated, 
-              neighbourhoodMerged);
+        
+        super(value, neighbourhoodSeparated, neighbourhoodMerged);
     }
     
     

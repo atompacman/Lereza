@@ -1,5 +1,7 @@
 package com.atompacman.lereza.core.piece.timeline;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 abstract class BarBasedPiecePropertyTimeline<T> extends PiecePropertyTimeline<T> {
 
     //
@@ -25,14 +27,13 @@ abstract class BarBasedPiecePropertyTimeline<T> extends PiecePropertyTimeline<T>
 
     @Override
     public void addPropertyChangeAtTU(int tu, T value) {
-        if (!tuToBar.isABarBeginning(tu)) {
-            throw new IllegalArgumentException("Property change must be at the begining of a bar");
-        }
+        checkArgument(tuToBar.isABarBeginning(tu), 
+                "Property change must be at the begining of a bar");
         super.addPropertyChangeAtTU(tu, value);
     }
     
     public void addPropertyChangeAtBar(int bar, T value) {
-        addPropertyChangeAtTU(tuToBar.convertBarToTu(bar), value);
+        super.addPropertyChangeAtTU(tuToBar.convertBarToTu(bar), value);
     }
     
 

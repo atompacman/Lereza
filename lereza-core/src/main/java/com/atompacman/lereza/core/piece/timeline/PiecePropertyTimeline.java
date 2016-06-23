@@ -1,5 +1,7 @@
 package com.atompacman.lereza.core.piece.timeline;
 
+import static com.google.common.base.Preconditions.checkElementIndex;
+
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -29,7 +31,7 @@ abstract class PiecePropertyTimeline<T> {
     //
 
     public void addPropertyChangeAtTU(int tu, T value) {
-        checkTimeunitRange(tu);
+        checkElementIndex(pieceLengthTU, tu, "Timeunit (" + tu + ") is not within piece range");
         if (propertyChanges.put(tu, value) != null) {
             throw new IllegalArgumentException("A value was already specified at timeunit " + tu);
         }
@@ -40,12 +42,6 @@ abstract class PiecePropertyTimeline<T> {
             addPropertyChangeAtTU(entry.getKey(), entry.getValue());
         }
     }
-
-    protected void checkTimeunitRange(int tu) {
-        if (tu < 0 || tu >= pieceLengthTU) {
-            throw new IllegalArgumentException("Timeunit (" + tu + ") is not within piece range");
-        }
-    }
     
 
     //
@@ -53,11 +49,20 @@ abstract class PiecePropertyTimeline<T> {
     //
 
     public T getValueAtTimeunit(int tu) {
-        checkTimeunitRange(tu);
+        checkElementIndex(pieceLengthTU, tu, "Timeunit (" + tu + ") is not within piece range");
         return propertyChanges.floorEntry(tu).getValue();
     }
     
     public Set<Integer> getTimeunits() {
         return propertyChanges.keySet();
+    }
+    
+    
+    //
+    //  ~  STATE  ~  //
+    //
+    
+    public int pieceLengthTU() {
+        return pieceLengthTU;
     }
 }

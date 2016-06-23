@@ -14,9 +14,7 @@ abstract interface MusicalStructure {
         String name = getClass().getName();
         for (ComplexityHierarchyRank rank : ComplexityHierarchyRank.values()) {
             String subStr = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, rank.toString());
-            String altStr = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, 
-                            rank.getAlternativeName());
-            if (name.startsWith(subStr) || name.startsWith(altStr)) {
+            if (name.contains(subStr)) {
                 return rank;
             }
         }
@@ -29,7 +27,7 @@ abstract interface MusicalStructure {
         String name = getClass().getName();
         for (StructuralHierarchyRank rank : StructuralHierarchyRank.values()) {
             String subStr = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, rank.toString());
-            if (name.endsWith(subStr)) {
+            if (name.contains(subStr)) {
                 return rank;
             }
         }

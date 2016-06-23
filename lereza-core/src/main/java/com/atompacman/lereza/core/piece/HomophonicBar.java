@@ -10,7 +10,7 @@ public class HomophonicBar extends PolyphonicBar {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     HomophonicBar(List<HomophonicBarSlice> slices) {
-        super((List<PolyphonicBarSlice>) (List) slices);
+        super((List) slices);
     }
     
     

@@ -3,7 +3,7 @@ package com.atompacman.lereza.core.theory;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum RythmnValue {
+public enum RhythmValue {
 
     SIXTYFORTH, 
     THIRTYSECONTH, 
@@ -18,7 +18,7 @@ public enum RythmnValue {
     //  ~  INIT  ~  //
     //
 
-    public static RythmnValue fromTimeunit(int length) {
+    public static RhythmValue fromTimeunit(int length) {
         double exponent = Math.log10(length) / Math.log10(2);
         if ((exponent - (int) exponent) != 0) {
             throw new IllegalArgumentException("Length \"" + length + 
@@ -41,8 +41,8 @@ public enum RythmnValue {
     //  ~  SPLIT INTO VALUES  ~  //
     //
 
-    public static List<RythmnValue> splitIntoValues(int length) {
-        List<RythmnValue> values = new ArrayList<>();
+    public static List<RhythmValue> splitIntoValues(int length) {
+        List<RhythmValue> values = new ArrayList<>();
 
         while (length > WHOLE.toTimeunit()) {
             values.add(WHOLE);

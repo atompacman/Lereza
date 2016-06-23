@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkElementIndex;
 
 import java.util.List;
 
-import com.atompacman.lereza.core.theory.RythmnValue;
+import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.toolkat.annotations.DerivableFrom;
 import com.google.common.collect.ImmutableList;
 
@@ -66,6 +66,11 @@ public class PolyphonicBar implements MusicalStructure {
     //  ~  SERIALIZATION  ~  //
     //
 
+    @Override
+    public String toString() {
+        return toStaccato();
+    }
+    
     public String toStaccato() {
         StringBuilder sb = new StringBuilder();
         int rests = 0;
@@ -74,7 +79,7 @@ public class PolyphonicBar implements MusicalStructure {
             if (slice.hasBeginningNodes()) {
                 if (rests > 0) {
                     sb.append('R');
-                    for (RythmnValue value : RythmnValue.splitIntoValues(rests)) {
+                    for (RhythmValue value : RhythmValue.splitIntoValues(rests)) {
                         sb.append(value.toStaccato());
                     }
                     sb.append(' ');
@@ -82,7 +87,7 @@ public class PolyphonicBar implements MusicalStructure {
                 sb.append(slice.toStaccato()).append(' ');
                 rests = 0;
 
-            } else if (!slice.hasBeginningNodes()){
+            } else {
                 ++rests;
             }
         }

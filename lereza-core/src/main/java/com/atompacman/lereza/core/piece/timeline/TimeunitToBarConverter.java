@@ -1,13 +1,15 @@
 package com.atompacman.lereza.core.piece.timeline;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkElementIndex;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import com.atompacman.lereza.core.theory.TimeSignature;
-
-import java.util.TreeMap;
 
 public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
     
@@ -45,20 +47,16 @@ public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
         
         this.barToTu = new ArrayList<>();
 
-        if (timeSignChangesTU.isEmpty()) {
-            throw new IllegalArgumentException("Expecting at least one time signature change");
-        }
+        checkArgument(!timeSignChangesTU.isEmpty(), "Expecting at least one time signature change");
         
         Iterator<Entry<Integer, TimeSignature>> it = timeSignChangesTU.entrySet().iterator();
         Entry<Integer, TimeSignature> entry = it.next();
-        int           tu       = entry.getKey();
-        int           bar      = 0;
+        int tu  = entry.getKey();
+        int bar = 0;
         TimeSignature timeSign = entry.getValue();
         
-        if (entry.getKey() != 0) {
-            throw new IllegalArgumentException("Expecting a time signature change at timeunit 0");
+        checkArgument(entry.getKey() == 0, "Expecting a time signature change at timeunit 0");
 
-        }
         propertyChanges.put(tu, bar);
         barToTu.add(tu);
         
@@ -66,14 +64,12 @@ public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
             entry = it.next();
             while (tu < entry.getKey()) {
                 tu += timeSign.timeunitsInABar();
-                checkTimeunitRange(tu);
+                checkElementIndex(pieceLengthTU, tu, "Timeunit ("+tu+") is not within piece range");
                 propertyChanges.put(tu, ++bar);
                 barToTu.add(tu);
             }
-            if (tu > entry.getKey() && tu != pieceLengthTU) {
-                throw new IllegalArgumentException("Time signature "
-                        + "change is not at the begining of a bar");
-            }
+            checkArgument(tu <= entry.getKey() || tu == pieceLengthTU, 
+                    "Time signature change is not at the begining of a bar");
             timeSign = entry.getValue();
         }
     }
@@ -88,9 +84,7 @@ public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
     }
     
     public int convertBarToTu(int bar) {
-        if (bar < 0 || bar >= propertyChanges.size()) {
-            throw new IllegalArgumentException("Bar (" + bar + ") is not within piece range");
-        }
+        checkElementIndex(bar, propertyChanges.size(), "Bar ("+ bar +") is not within piece range");
         return barToTu.get(bar);
     }
     
@@ -108,6 +102,7 @@ public class TimeunitToBarConverter extends PiecePropertyTimeline<Integer> {
     }
     
     public int getBarLengthTUFromBar(int bar) {
+        checkElementIndex(bar, propertyChanges.size(), "Bar ("+ bar +") is not within piece range");
         if (bar == barToTu.size() - 1) {
             return pieceLengthTU - barToTu.get(bar);
         } else {

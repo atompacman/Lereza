@@ -10,7 +10,7 @@ public class HomophonicPart extends PolyphonicPart {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     HomophonicPart(List<HomophonicBar> bars) {
-        super((List<PolyphonicBar>) (List) bars);
+        super((List) bars);
     }
     
 
@@ -18,6 +18,7 @@ public class HomophonicPart extends PolyphonicPart {
     //  ~  GETTERS  ~  //
     //
 
+    @Override
     public HomophonicBar getBar(int bar) {
         return (HomophonicBar) super.getBar(bar);
     }

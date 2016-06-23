@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public final class TestRythmnValue {
+public final class TestRhythmValue {
 
     //
     //  ~  INIT  ~  //
@@ -12,12 +12,12 @@ public final class TestRythmnValue {
 
     @Test
     public void Init_ValidArg_ValidInstState() {
-        assertEquals(RythmnValue.THIRTYSECONTH, RythmnValue.fromTimeunit(2));
+        assertEquals(RhythmValue.THIRTYSECONTH, RhythmValue.fromTimeunit(2));
     }
 
     @Test  (expected = IllegalArgumentException.class)
     public void Init_InvalidArg_Throw() {
-        RythmnValue.fromTimeunit(7);
+        RhythmValue.fromTimeunit(7);
     }
 
 
@@ -27,7 +27,7 @@ public final class TestRythmnValue {
 
     @Test
     public void SingleMethod_toTimeunit_ValidInst_ValidReturnedValue() {
-        assertEquals(16, RythmnValue.QUARTER.toTimeunit());
+        assertEquals(16, RhythmValue.QUARTER.toTimeunit());
     }
 
 
@@ -37,7 +37,7 @@ public final class TestRythmnValue {
 
     @Test
     public void SingleMethod_splitIntoValues_ValidArg_ValidReturnedValue() {
-        assertEquals(4, RythmnValue.splitIntoValues( 77).size());
-        assertEquals(2, RythmnValue.splitIntoValues(128).size());
+        assertEquals(4, RhythmValue.splitIntoValues( 77).size());
+        assertEquals(2, RhythmValue.splitIntoValues(128).size());
     }
 }

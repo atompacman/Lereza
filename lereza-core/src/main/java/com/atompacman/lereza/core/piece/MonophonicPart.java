@@ -10,7 +10,7 @@ public final class MonophonicPart extends HomophonicPart {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     MonophonicPart(List<MonophonicBar> bars) {
-        super((List<HomophonicBar>) (List) bars);
+        super((List) bars);
     }
     
 
@@ -18,6 +18,7 @@ public final class MonophonicPart extends HomophonicPart {
     //  ~  GETTERS  ~  //
     //
 
+    @Override
     public MonophonicBar getBar(int bar) {
         return (MonophonicBar) super.getBar(bar);
     }

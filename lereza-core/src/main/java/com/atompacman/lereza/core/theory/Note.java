@@ -12,7 +12,7 @@ public abstract class Note {
     //
 
     public abstract Pitch             getPitch();
-    public abstract RythmnValue       getRythmnValue();
+    public abstract RhythmValue       getRhythmValue();
     public abstract Optional<Dynamic> getDynamic();
     
 
@@ -20,15 +20,15 @@ public abstract class Note {
     //  ~  INIT  ~  //
     //
 
-    public static Note of(String pitch, RythmnValue value) {
+    public static Note of(String pitch, RhythmValue value) {
         return new AutoValue_Note(Pitch.of(pitch), value, Optional.empty());
     }
 
-    public static Note of(Pitch pitch, RythmnValue value) {
+    public static Note of(Pitch pitch, RhythmValue value) {
         return new AutoValue_Note(pitch, value, Optional.empty());
     }
 
-    public static Note of(Pitch pitch, RythmnValue value, Dynamic dynamic) {
+    public static Note of(Pitch pitch, RhythmValue value, Dynamic dynamic) {
         return new AutoValue_Note(pitch, value, Optional.of(dynamic));
     }
     
@@ -39,13 +39,13 @@ public abstract class Note {
 
     @Override
     public String toString() {
-        return getPitch().toString();
+        return toStaccato();
     }
 
     public String toStaccato() {
         StringBuilder sb = new StringBuilder();
         sb.append(getPitch().toStaccato());
-        sb.append(getRythmnValue().toStaccato());
+        sb.append(getRhythmValue().toStaccato());
         Optional<Dynamic> dynamic = getDynamic();
         if (dynamic.isPresent()) {
             sb.append('a').append(dynamic.get().getVelocity());

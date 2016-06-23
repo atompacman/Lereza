@@ -42,7 +42,7 @@ public abstract class TimeSignature {
 
     public int timeunitsInABar() {
         double tu = ((double)getMeterNumerator() / (double)getMeterDenominator()) 
-                * RythmnValue.WHOLE.toTimeunit();
+                * RhythmValue.WHOLE.toTimeunit();
         checkState(Double.compare(tu, Math.floor(tu)) == 0, "Invalid time signature");
         return (int)Math.floor(tu);
     }

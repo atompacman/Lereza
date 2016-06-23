@@ -49,7 +49,10 @@ public final class NoteNodeSet<T extends PolyphonicNoteNode> implements Iterable
     
     public static <T extends PolyphonicNoteNode> NoteNodeSet<T> of(Set<T> nodes) {       
         if (nodes.size() == 1) {
-            return of(nodes.iterator().next());
+            T node = nodes.iterator().next();
+            if (node.isRest()) {
+                return new NoteNodeSet<>(nodes.iterator().next());
+            }
         }
         
         Map<Pitch, T> perPitch = new HashMap<>();

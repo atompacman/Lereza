@@ -1,0 +1,47 @@
+Empty bar
+
+Single full note 4/4
+4 4
+0
+C3 64
+
+Single full note 3/4
+3 4
+0
+Eb3 48
+
+Single full note 5/8
+5 8
+0
+B6 40
+
+Single quarter note at bar beginning
+4 4
+0
+C2 16
+
+Single quarter note at bar middle
+3 4
+16
+D1 16
+
+Single quarter note at bar end
+4 4
+48
+D1 16
+
+Single note with ties
+4 4
+17
+F3 37
+
+MonophonicStandard34
+3 4
+0
+Bb4 8
+0
+D#5 16
+8
+Ab4 8
+0
+G4 8
