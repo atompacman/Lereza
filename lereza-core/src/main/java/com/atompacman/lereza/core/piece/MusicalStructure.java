@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.pieceGEWD;
+package com.atompacman.lereza.core.piece;
 
 import com.atompacman.toolkat.annotations.Implement;
 import com.google.common.base.CaseFormat;

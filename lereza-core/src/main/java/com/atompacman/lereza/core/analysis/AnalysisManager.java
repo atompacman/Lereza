@@ -18,7 +18,7 @@ public final class AnalysisManager {
     // ~ FIELDS ~ //
     //
 
-    private final AnalysisComponentSet components;
+    //private final AnalysisComponentSet components;
 
     
     //
@@ -26,13 +26,15 @@ public final class AnalysisManager {
     //
 
     private AnalysisManager() throws IOException {
-        this.components = loadAnalysisComponents(new HashSet<>());
+        /*this.components = */loadAnalysisComponents(new HashSet<>());
     }
 
     private static AnalysisComponentSet loadAnalysisComponents(Set<URL> plugginJarURLs) 
                                                                                 throws IOException {
         ClassLoader currCL = Thread.currentThread().getContextClassLoader();
-        URLClassLoader urlCL = new URLClassLoader((URL[]) plugginJarURLs.toArray(), currCL);
+        URL[] urls = new URL[plugginJarURLs.size()];
+        plugginJarURLs.toArray(urls);
+        URLClassLoader urlCL = new URLClassLoader(urls, currCL);
         ImmutableSet<ClassInfo> classes = ClassPath.from(urlCL).getAllClasses();
         AnalysisComponentSet components = new AnalysisComponentSet();
         classes.stream().forEach(c -> components.addIfValid(c.load()));

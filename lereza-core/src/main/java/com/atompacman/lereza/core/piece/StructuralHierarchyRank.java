@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.pieceGEWD;
+package com.atompacman.lereza.core.piece;
 
 public enum StructuralHierarchyRank {
 

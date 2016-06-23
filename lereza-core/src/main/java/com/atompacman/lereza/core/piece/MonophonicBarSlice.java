@@ -1,41 +1,74 @@
 package com.atompacman.lereza.core.piece;
 
-import com.atompacman.lereza.core.piece2.AutoValue_MonophonicBarSlice;
 import com.atompacman.toolkat.annotations.Implement;
-import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableSet;
 
-@AutoValue
-public abstract class MonophonicBarSlice extends BarSlice<MonophonicNoteNode> {
+public interface MonophonicBarSlice extends HomophonicBarSlice {
 
     //
-    //  ~  FIELDS  ~  //
+    //  ~  INNER TYPES  ~  //
     //
-
-    public    abstract MonophonicNoteNode getNoteNode();
-    protected abstract boolean            isBeginning();
-
-
-    //
-    //  ~  INIT  ~  //
-    //
-
-    static MonophonicBarSlice of(MonophonicNoteNode node, boolean isBeginning) {
-        return new AutoValue_MonophonicBarSlice(node, isBeginning);
+    
+    final class Impl extends AbstractBarSlice implements MonophonicBarSlice {
+    
+        //
+        //  ~  FIELDS  ~  //
+        //
+    
+        private final MonophonicNoteNode node;
+        private final boolean            isBeginning;
+    
+    
+        //
+        //  ~  INIT  ~  //
+        //
+    
+        Impl(MonophonicNoteNode node, boolean isBeginning) {
+            this.node        = node;
+            this.isBeginning = isBeginning;
+            
+            postInit();
+        }
+    
+    
+        //
+        //  ~  GETTERS  ~  //
+        //
+    
+        @Implement
+        public NoteNodeSet<PolyphonicNoteNode> getBeginningNodes() {
+            return isBeginning ? NoteNodeSet.of(node) : NoteNodeSet.empty();
+        }
+    
+        @Implement
+        public NoteNodeSet<PolyphonicNoteNode> getPlayingNodes() {
+            return NoteNodeSet.of(node);
+        }
+        
+        @Implement
+        public NoteNodeSet<HomophonicNoteNode> getNodes() {
+            return NoteNodeSet.of(node);
+        }
+        
+        @Implement
+        public MonophonicNoteNode getNode() {
+            return node;
+        }
+        
+        
+        //
+        //  ~  STATE  ~  //
+        //
+    
+        @Implement
+        public boolean areNodesBeginning() {
+            return isBeginning;
+        }
     }
 
-
+    
     //
     //  ~  GETTERS  ~  //
     //
-
-    @Implement
-    public ImmutableSet<MonophonicNoteNode> getBeginningNoteNodes() {
-        return isBeginning() ? ImmutableSet.of(getNoteNode()) : ImmutableSet.of();
-    }
-
-    @Implement
-    public ImmutableSet<MonophonicNoteNode> getPlayingNoteNodes() {
-        return isRest() ? ImmutableSet.of() : ImmutableSet.of(getNoteNode());
-    }
+    
+    MonophonicNoteNode getNode();
 }

@@ -6,9 +6,9 @@
  * <h2> A two-dimensional class hierarchy </h2>
  * 
  * Musical structure classes are all immutable (and hence, created via builder classes) and 
- * implement the {@link com.atompacman.lereza.core.pieceGEWD.MusicalStructure MusicalStructure} 
- * interface. Those structures follow a 2D hierarchy where the first axis is the {@link com.atompacman.lereza.core.pieceGEWD.StructuralHierarchyRank structural hierarchy} and the second axis 
- * is the {@link com.atompacman.lereza.core.pieceGEWD.ComplexityHierarchyRank complexity hierarchy}. 
+ * implement the {@link com.atompacman.lereza.core.piece.MusicalStructure MusicalStructure} 
+ * interface. Those structures follow a 2D hierarchy where the first axis is the {@link com.atompacman.lereza.core.piece.StructuralHierarchyRank structural hierarchy} and the second axis 
+ * is the {@link com.atompacman.lereza.core.piece.ComplexityHierarchyRank complexity hierarchy}. 
  * The relationship between classes on the first axis is composition (a part is made of bars) and on 
  * the second axis is inheritance (a  <i> monophonic </i> structure is also <i> homophonic</i>). 
  * Classes are named so that the prefix is the position in the <i> complexity hierarchy</i> 
@@ -25,19 +25,19 @@
  * 
  * <ul>
  * <li>
- * {@link com.atompacman.lereza.core.pieceGEWD.ComplexityHierarchyRank#POLYPHONIC Polyphonic} <br> 
+ * {@link com.atompacman.lereza.core.piece.ComplexityHierarchyRank#POLYPHONIC Polyphonic} <br> 
  * <i> Any number </i> of notes can be playing simultaneously (ex.: piano, harp). <br> 
  * <pre>    ↑  <br> extends </pre>
  * </li>
  * <li>
- * {@link com.atompacman.lereza.core.pieceGEWD.ComplexityHierarchyRank#HOMOPHONIC Homophonic} <br> 
+ * {@link com.atompacman.lereza.core.piece.ComplexityHierarchyRank#HOMOPHONIC Homophonic} <br> 
  * <i> Any number </i> of notes can be playing simultaneously, but groups of simultaneous notes 
  * must <i> always </i> start and end simultaneously (ex.: playing straight chords produces music 
  * that is "homophonic" in this sense - which is not really what homophonic means in music theory).
  * <pre>    ↑  <br> extends </pre>
  * </li>
  * <li>
- * {@link com.atompacman.lereza.core.pieceGEWD.ComplexityHierarchyRank#MONOPHONIC Monophonic} <br> 
+ * {@link com.atompacman.lereza.core.piece.ComplexityHierarchyRank#MONOPHONIC Monophonic} <br> 
  * <i> At most </i> one note can be playing at all time (ex.: trumpet, human voice).
  * </li>
  * </ul>
@@ -56,7 +56,7 @@
  * 
  * <h2> Structural hierarchy </h2>
  * Not all levels in the <i> structural hierarchy </i> have the same inheritance complexity. The
- * {@link com.atompacman.lereza.core.pieceGEWD.Piece Piece} class "family" has no inheritance at all,
+ * {@link com.atompacman.lereza.core.piece.Piece Piece} class "family" has no inheritance at all,
  * some families have a linear class hierarchy with three levels (one class per <i> complexity 
  * level</i>) and some have a more complex inheritance trees with 7 classes in them (but with only
  * three public interfaces) .
@@ -64,28 +64,28 @@
  * 
  * <ul>
  * <li>
- * {@link com.atompacman.lereza.core.pieceGEWD.Piece Piece} <br>
- * Simple, unpolymorphic top-level class that simply as an iterable list of {@link com.atompacman.lereza.core.pieceGEWD.PolyphonicPart parts}. Those can be of any <i> complexity </i>.
+ * {@link com.atompacman.lereza.core.piece.Piece Piece} <br>
+ * Simple, unpolymorphic top-level class that simply as an iterable list of {@link com.atompacman.lereza.core.piece.PolyphonicPart parts}. Those can be of any <i> complexity </i>.
  * </li><br>
  * <li>
- * {@link com.atompacman.lereza.core.pieceGEWD.StructuralHierarchyRank#PART Part} <br>
- * Three-level linear hierarchy of classes that acts as lists of {@link com.atompacman.lereza.core.pieceGEWD.PolyphonicBar bars}. Those are <i> always of the same complexity level </i> as their 
+ * {@link com.atompacman.lereza.core.piece.StructuralHierarchyRank#PART Part} <br>
+ * Three-level linear hierarchy of classes that acts as lists of {@link com.atompacman.lereza.core.piece.PolyphonicBar bars}. Those are <i> always of the same complexity level </i> as their 
  * parent part.
  * </li><br>
  * <li>
- * {@link com.atompacman.lereza.core.pieceGEWD.StructuralHierarchyRank#BAR Bar} <br>
- * Three-level linear hierarchy of classes that acts as lists of {@link com.atompacman.lereza.core.pieceGEWD.PolyphonicBarSlice bar slices}. Those are <i> always of the same complexity level </i> as 
+ * {@link com.atompacman.lereza.core.piece.StructuralHierarchyRank#BAR Bar} <br>
+ * Three-level linear hierarchy of classes that acts as lists of {@link com.atompacman.lereza.core.piece.PolyphonicBarSlice bar slices}. Those are <i> always of the same complexity level </i> as 
  * their parent bar.
  * </li><br>
  * <li>
- * {@link com.atompacman.lereza.core.pieceGEWD.StructuralHierarchyRank#BAR_SLICE BarSlice} <br>
+ * {@link com.atompacman.lereza.core.piece.StructuralHierarchyRank#BAR_SLICE BarSlice} <br>
  * Complex 7-member hierarchy of classes that contains the {@link com.atompacman.lereza.core.piece2.
- *com.atompacman.lereza.core.piece2.NoteNodeSet sets} of {@link com.atompacman.lereza.core.pieceGEWD.PolyphonicNoteNode note nodes} that 
+ *com.atompacman.lereza.core.piece2.NoteNodeSet sets} of {@link com.atompacman.lereza.core.piece.PolyphonicNoteNode note nodes} that 
  * contains the notes that are playing at a specific time. Those nodes are <i> always of the same 
  * complexity level </i> as their parent bar slice.
  * </li><br>
  * <li>
- * {@link com.atompacman.lereza.core.pieceGEWD.StructuralHierarchyRank#NOTE_NODE NoteNode} <br>
+ * {@link com.atompacman.lereza.core.piece.StructuralHierarchyRank#NOTE_NODE NoteNode} <br>
  * Complex 7-member hierarchy of classes that represents either a note or a rest in a graph of nodes 
  * linked together via various {@link com.atompacman.lereza.core.piece2.AbstractNoteNode.
  * TemporalRelationship temporal relationships}. This is where the <i> complexity hierarchy</i> 
@@ -99,4 +99,4 @@
  * for choosing the right <i> complexity level</i> depending on the input it received (it always 
  * aims for the lowest level possible in the hierarchy).
  */
-package com.atompacman.lereza.core.pieceGEWD;
+package com.atompacman.lereza.core.piece;

@@ -1,7 +1,7 @@
 package com.atompacman.lereza.core.analysis.filter;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.atompacman.lereza.core.analysis.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.PieceStudySet;
@@ -17,15 +17,9 @@ public abstract class PerStructureFilter<A> implements Filter<A> {
     public <M extends MusicalStructure> Set<M> apply(Set<M>        structures, 
                                                      PieceStudySet studies, 
                                                      A             annotationData) {
-        
-        Set<M> set = new HashSet<>();
-        structures.stream().forEach(m ->
-        {
-            if (apply(m, studies, annotationData)) {
-                set.add(m);
-            }
-        });
-        return set;
+        return structures.stream()
+                         .filter(m -> apply(m, studies, annotationData))
+                         .collect(Collectors.toSet());
     }
     
     protected abstract boolean apply(MusicalStructure structure, 

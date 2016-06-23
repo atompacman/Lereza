@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.pieceGEWD;
+package com.atompacman.lereza.core.piece;
 
 import com.atompacman.lereza.core.piece.AutoValue_PBT;
 import com.google.auto.value.AutoValue;

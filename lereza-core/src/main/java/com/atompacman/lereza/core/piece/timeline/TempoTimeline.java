@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.pieceGEWD.timeline;
+package com.atompacman.lereza.core.piece.timeline;
 
 public final class TempoTimeline extends PiecePropertyTimeline<Double> {
 

@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.pieceGEWD;
+package com.atompacman.lereza.core.piece;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

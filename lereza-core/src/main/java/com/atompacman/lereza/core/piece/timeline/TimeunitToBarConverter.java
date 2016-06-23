@@ -1,4 +1,4 @@
-package com.atompacman.lereza.core.pieceGEWD.timeline;
+package com.atompacman.lereza.core.piece.timeline;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;

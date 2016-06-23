@@ -11,18 +11,10 @@ import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.atompacman.lereza.core.pieceGEWD.BarBuilder;
-import com.atompacman.lereza.core.pieceGEWD.MonophonicBar;
-import com.atompacman.lereza.core.pieceGEWD.MonophonicBarSlice;
-import com.atompacman.lereza.core.pieceGEWD.MonophonicNoteNode;
-import com.atompacman.lereza.core.pieceGEWD.PartBuilder;
-import com.atompacman.lereza.core.pieceGEWD.PolyphonicBar;
-import com.atompacman.lereza.core.pieceGEWD.PolyphonicNoteNode.TiedNoteStatus;
+import com.atompacman.lereza.core.piece.PolyphonicNoteNode.TiedNoteStatus;
 import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.lereza.core.theory.TimeSignature;
-import com.atompacman.toolkat.task.Task;
-import com.atompacman.toolkat.task.TaskLogger;
 import com.atompacman.toolkat.test.AbstractTest;
 
 public final class TestBarBuilder extends AbstractTest {
@@ -71,8 +63,8 @@ public final class TestBarBuilder extends AbstractTest {
             String[] nums = timeSig.split(" ");
             TimeSignature sign = TimeSignature.of(Integer.parseInt(nums[0]), 
                                                   Integer.parseInt(nums[1]));
-TaskLogger tl = new TaskLogger();
-            BarBuilder builder = BarBuilder.of(sign, tl);
+
+            BarBuilder builder = BarBuilder.of(sign);
             
             // Parse note entries
             int currTU = 0;
@@ -136,9 +128,7 @@ TaskLogger tl = new TaskLogger();
             } catch (Throwable e) {
                 throw new Exception("Failed scenario \"" + testName + "\"", e);
             }
-for (Task task : tl.getCompletedTasks()) {
-    System.out.println(task.toString());
-}
+
             // Global assertions
             assertTrue(bar.hasPlayingNote());
             assertTrue(bar.hasBeginningNote());
