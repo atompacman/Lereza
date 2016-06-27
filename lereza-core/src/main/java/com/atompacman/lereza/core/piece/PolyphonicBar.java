@@ -8,7 +8,7 @@ import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.toolkat.annotations.DerivableFrom;
 import com.google.common.collect.ImmutableList;
 
-public class PolyphonicBar implements MusicalStructure {
+public class PolyphonicBar implements StandardMusicalStructure {
 
     //
     //  ~  FIELDS  ~  //

@@ -1,5 +1,6 @@
 package com.atompacman.lereza.core.analysis.filter;
 
+import java.lang.annotation.Annotation;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -7,7 +8,7 @@ import com.atompacman.lereza.core.analysis.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.PieceStudySet;
 import com.atompacman.toolkat.annotations.Implement;
 
-public abstract class PerStructureFilter<A> implements Filter<A> {
+public abstract class PerStructureFilter<A extends Annotation> extends Filter<A> {
 
     //
     //  ~  APPLY  ~  //

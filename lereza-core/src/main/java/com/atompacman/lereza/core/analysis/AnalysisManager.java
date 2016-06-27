@@ -7,46 +7,111 @@ import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.atompacman.lereza.core.analysis.proxy.AnalysisComponentProxySet;
 import com.atompacman.lereza.core.piece.Piece;
+import com.atompacman.toolkat.task.TaskMonitor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
+import autovalue.shaded.com.google.common.common.collect.Sets;
+
 public final class AnalysisManager {
-
-    //
-    // ~ FIELDS ~ //
-    //
-
-    //private final AnalysisComponentSet components;
-
     
     //
-    // ~ INIT ~ //
+    //  ~  FIELDS  ~  //
     //
 
-    private AnalysisManager() throws IOException {
-        /*this.components = */loadAnalysisComponents(new HashSet<>());
-    }
+    private final TaskMonitor monitor;
 
-    private static AnalysisComponentSet loadAnalysisComponents(Set<URL> plugginJarURLs) 
+    private final AnalysisComponentProxySet proxies;
+    
+    
+    //
+    //  ~  INIT  ~  //
+    //
+
+    private AnalysisManager(Set<URL> plugginJarURLs, TaskMonitor monitor) throws IOException {
+        this.monitor = monitor;
+        
+        this.proxies = monitor.executeSubtask("Create analysis component proxies", mon -> {
+            return createAnalysisComponentProxies(plugginJarURLs, mon);            
+        });
+    }
+    
+    private static AnalysisComponentProxySet createAnalysisComponentProxies(
+            Set<URL> plugginJarURLs, TaskMonitor monitor) throws IOException {
+                    
+        ImmutableSet<ClassInfo> classes = 
+        monitor.executeSubtask("Read pluggin jars content", mon -> {
+            return readPlugginJarsContent(plugginJarURLs);
+        });
+        
+        Set<Class<? extends AnalysisComponent>> components =
+        monitor.executeSafeSubtask("Load analysis component classes", mon -> {
+            return loadPlugginAnalysisComponentClasses(plugginJarURLs, classes);
+        });
+        
+        return monitor.executeSafeSubtask("Create component proxies", submon -> {
+            return new AnalysisComponentProxySet(components);
+        });
+    }
+    
+    private static ImmutableSet<ClassInfo> readPlugginJarsContent(Set<URL> plugginJarURLs) 
                                                                                 throws IOException {
-        ClassLoader currCL = Thread.currentThread().getContextClassLoader();
         URL[] urls = new URL[plugginJarURLs.size()];
         plugginJarURLs.toArray(urls);
-        URLClassLoader urlCL = new URLClassLoader(urls, currCL);
-        ImmutableSet<ClassInfo> classes = ClassPath.from(urlCL).getAllClasses();
-        AnalysisComponentSet components = new AnalysisComponentSet();
-        classes.stream().forEach(c -> components.addIfValid(c.load()));
-        return components;
+        URLClassLoader urlCL = new URLClassLoader(urls);
+        return ClassPath.from(urlCL).getAllClasses();
     }
-
-
+    
+    @SuppressWarnings("unchecked")
+    private static Set<Class<? extends AnalysisComponent>> loadPlugginAnalysisComponentClasses(
+                                         Set<URL> plugginJarURLs, ImmutableSet<ClassInfo> classes) {
+        
+        Set<Class<? extends AnalysisComponent>> componentClasses = new HashSet<>();
+        for (ClassInfo info : classes) {
+            String fileName = info.url().getFile();
+            boolean isFileInJars = false;
+            for (URL url : plugginJarURLs) {
+                if (fileName.contains(url.getPath())) {
+                    isFileInJars = true;
+                    break;
+                }
+            }
+            if (!isFileInJars) {
+                continue;
+            }
+            Class<?> clazz;
+            try {
+                clazz = info.load();
+            } catch (LinkageError e) {
+                // TODO
+                throw new IllegalArgumentException(e);
+            }
+            if (AnalysisComponent.class.isAssignableFrom(clazz)) {
+                componentClasses.add((Class<? extends AnalysisComponent>) clazz);
+            }
+        }
+        
+        return componentClasses;
+    }
+    
+    
     //
-    // ~ ANALYZE ~ //
+    //  ~  ANALYZE  ~  //
     //
 
     public void analyze(Piece piece) throws MalformedURLException {
 
+    }
+
+    public static void main(String[] args) throws IOException {
+        TaskMonitor monitor = TaskMonitor.of("Test");
+        monitor.executeSubtask("Lol", mon -> {
+            URL url = new URL("file:\\C:\\Users\\Utilisateur\\Dev\\Lereza\\Lereza\\lereza-"
+                    + "builtin-analysis\\target\\lereza-builtin-analysis-0.0.1-SNAPSHOT.jar");
+            return new AnalysisManager(Sets.newHashSet(url), mon);
+        });
     }
 }

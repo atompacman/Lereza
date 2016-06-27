@@ -1,4 +1,4 @@
-package com.atompacman.lereza.builtin.analysis.testPiece;
+package com.atompacman.lereza.builtin.analysis.structure;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -6,7 +6,7 @@
  * <h2> A two-dimensional class hierarchy </h2>
  * 
  * Musical structure classes are all immutable (and hence, created via builder classes) and 
- * implement the {@link com.atompacman.lereza.core.piece.MusicalStructure MusicalStructure} 
+ * implement the {@link com.atompacman.lereza.core.piece.StandardMusicalStructure MusicalStructure} 
  * interface. Those structures follow a 2D hierarchy where the first axis is the {@link com.atompacman.lereza.core.piece.StructuralHierarchyRank structural hierarchy} and the second axis 
  * is the {@link com.atompacman.lereza.core.piece.ComplexityHierarchyRank complexity hierarchy}. 
  * The relationship between classes on the first axis is composition (a part is made of bars) and on 

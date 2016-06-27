@@ -1,6 +1,6 @@
 package com.atompacman.lereza.core.analysis;
 
-public abstract class MusicalStructure {
+public abstract class MusicalStructure implements AnalysisComponent {
 
     //
     //  ~  STATIC FIELDS  ~  //

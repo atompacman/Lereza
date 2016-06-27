@@ -14,7 +14,7 @@ import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.toolkat.annotations.DerivableFrom;
 import com.atompacman.toolkat.annotations.Implement;
 
-public class PolyphonicNoteNode implements MusicalStructure {
+public class PolyphonicNoteNode implements StandardMusicalStructure {
 
     //
     //  ~  CONSTANTS  ~  //

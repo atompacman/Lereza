@@ -20,8 +20,7 @@ import com.atompacman.toolkat.annotations.Implement;
 
 import autovalue.shaded.com.google.common.common.collect.Sets;
 
-public final class ScoreBasedNumberOfEntryFilter 
-    implements Filter<LimitNumberOfEntriesBasedOnScore> {
+public final class ScoreBasedNumberOfEntryFilter extends Filter<LimitNumberOfEntriesBasedOnScore> {
 
     //
     //  ~  INNER TYPES  ~  //

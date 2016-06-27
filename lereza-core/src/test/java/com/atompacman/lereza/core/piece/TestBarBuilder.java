@@ -1,20 +1,5 @@
 package com.atompacman.lereza.core.piece;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-
-import com.atompacman.lereza.core.piece.PolyphonicNoteNode.TiedNoteStatus;
-import com.atompacman.lereza.core.theory.Pitch;
-import com.atompacman.lereza.core.theory.RhythmValue;
-import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.test.AbstractTest;
 
 public final class TestBarBuilder extends AbstractTest {
@@ -22,7 +7,7 @@ public final class TestBarBuilder extends AbstractTest {
     //
     //  ~  LIMIT CASES  ~  //
     //
-    
+/*    
     @Test
     public void LimitCase_Build_NoEntries_EmptyBar() {
         TimeSignature ts = TimeSignature.STANDARD_4_4;
@@ -179,7 +164,6 @@ public final class TestBarBuilder extends AbstractTest {
     }
     
     // TODO MOVE OUTTA HERE
-    /**
     @Test
     public void Scenario_StandardMonophonic_ValidArgs_ValidReturnValue() throws IOException {
         TimeSignature timeSign = TimeSignature.of(3, 4);
@@ -237,6 +221,5 @@ public final class TestBarBuilder extends AbstractTest {
         baos.flush();
         assertArrayEquals(groundTruth, baos.toByteArray());
     }
-    */
-    int lol;
+*/
 }

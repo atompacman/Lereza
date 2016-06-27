@@ -1,8 +1,8 @@
 package com.atompacman.lereza.builtin.analysis.analyzer;
 
+import com.atompacman.lereza.builtin.analysis.structure.Country;
 import com.atompacman.lereza.builtin.analysis.study.BirthRateStudy;
 import com.atompacman.lereza.builtin.analysis.study.DemographicStudy;
-import com.atompacman.lereza.builtin.analysis.testPiece.Country;
 import com.atompacman.lereza.core.analysis.analyzer.Analyzer;
 import com.atompacman.lereza.core.analysis.filter.ScoreBasedNumberOfEntryFilter.LimitNumberOfEntriesBasedOnScore;
 import com.atompacman.lereza.core.analysis.filter.ScoredStudyFilter.MinimumScore;

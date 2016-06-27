@@ -10,7 +10,7 @@ import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.toolkat.annotations.DerivableFrom;
 import com.atompacman.toolkat.annotations.Implement;
 
-public interface PolyphonicBarSlice extends MusicalStructure {
+public interface PolyphonicBarSlice extends StandardMusicalStructure {
 
     //
     //  ~  INNER TYPES  ~  //

@@ -17,7 +17,7 @@ public abstract class ExtractionResult<M  extends MusicalStructure,
     //
     
     public abstract Set<StudyStructurePair<M, S1>> getExtractedSubstructures();
-    public abstract S2                             getExtractionAnalysis();
+    public abstract S2                             getExtractionStudy();
     
     
     //
@@ -26,8 +26,8 @@ public abstract class ExtractionResult<M  extends MusicalStructure,
     
     public static <M extends MusicalStructure, S1 extends Study, S2 extends Study> 
     ExtractionResult<M, S1, S2> of(Set<StudyStructurePair<M, S1>> extractionSubstructures, 
-                                   S2                             extractionAnalysis) {
+                                   S2                             extractionStudy) {
         
-        return new AutoValue_ExtractionResult<M,S1,S2>(extractionSubstructures, extractionAnalysis);
+        return new AutoValue_ExtractionResult<M,S1,S2>(extractionSubstructures, extractionStudy);
     }
 }

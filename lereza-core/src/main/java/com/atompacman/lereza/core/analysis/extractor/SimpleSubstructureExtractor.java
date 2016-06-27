@@ -9,7 +9,7 @@ import com.atompacman.lereza.core.analysis.MusicalStructure;
 
 public abstract class SimpleSubstructureExtractor<M1 extends MusicalStructure, 
                                                   M2 extends MusicalStructure>   
-    implements SubstructureExtractor<M1, M2, NoStudy, NoStudy>{
+    extends SubstructureExtractor<M1, M2, NoStudy, NoStudy> {
 
     //
     //  ~  EXTRACT  ~  //

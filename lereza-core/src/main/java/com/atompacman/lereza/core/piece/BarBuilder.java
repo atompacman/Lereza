@@ -7,8 +7,8 @@ import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.Builder;
 import com.atompacman.toolkat.annotations.Implement;
-import com.atompacman.toolkat.task.Anomaly.Description;
 import com.atompacman.toolkat.task.Anomaly.Severity;
+import com.atompacman.toolkat.task.AnomalyDescription;
 import com.atompacman.toolkat.task.TaskLogger;
 
 public final class BarBuilder extends Builder<PolyphonicBar> {
@@ -19,7 +19,7 @@ public final class BarBuilder extends Builder<PolyphonicBar> {
     
     private enum Anomaly {
         
-        @Description (name          = "Note is out of bar scope", 
+        @AnomalyDescription (name          = "Note is out of bar scope", 
                       consequences  = "Ignoring notes on additional bars",
                       severity      = Severity.MODERATE)
         NOTE_OUT_OF_BAR

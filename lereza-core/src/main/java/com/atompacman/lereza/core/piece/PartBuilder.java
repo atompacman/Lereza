@@ -23,9 +23,8 @@ import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.Builder;
 import com.atompacman.toolkat.annotations.Implement;
-import com.atompacman.toolkat.task.Anomaly.Description;
 import com.atompacman.toolkat.task.Anomaly.Severity;
-import com.atompacman.toolkat.task.Task.NameFormat;
+import com.atompacman.toolkat.task.AnomalyDescription;
 import com.atompacman.toolkat.task.TaskLogger;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedListMultimap;
@@ -98,37 +97,37 @@ public final class PartBuilder extends Builder<PolyphonicPart> {
 
     private enum Task {
         
-        @NameFormat("Build part")
+        @AnomalyDescription("Build part")
         BUILD_PART,
         
-        @NameFormat("Determine layout")
+        @AnomalyDescription("Determine layout")
         DETERMINE_LAYOUT,
         
-        @NameFormat("Find complexity rank")
+        @AnomalyDescription("Find complexity rank")
         FIND_COMPLEXITY_RANK,
         
-        @NameFormat("Build bar slices")
+        @AnomalyDescription("Build bar slices")
         BUILD_BAR_SLICES,
         
-        @NameFormat("Assemble bar slices")
+        @AnomalyDescription("Assemble bar slices")
         ASSEMBLE_BAR_SLICES
     }
     
     private enum Anomaly {
         
-        @Description (name          = "Note is out of bar scope", 
+        @AnomalyDescription (name          = "Note is out of bar scope", 
                       detailsFormat = "Beg: %d, End: %d ",
                       consequences  = "Ignoring note",
                       severity      = Severity.MODERATE)
         NOTE_OUT_OF_SCOPE,
         
-        @Description (name          = "Note timeunit length is not positive", 
+        @AnomalyDescription (name          = "Note timeunit length is not positive", 
                       detailsFormat = "Length: %d",
                       consequences  = "Ignoring note",
                       severity      = Severity.MODERATE)
         NOTE_LENGTH_NOT_POSITIVE,
 
-        @Description (name = "Simultaneous notes with the same pitch")
+        @AnomalyDescription (name = "Simultaneous notes with the same pitch")
         SIMULTANEOUS_NOTES_WITH_SAME_PITCH
     }
     

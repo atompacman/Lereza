@@ -3,9 +3,11 @@ package com.atompacman.lereza.core.piece;
 import java.util.Iterator;
 import java.util.List;
 
+import com.atompacman.lereza.core.analysis.MusicalStructure;
 import com.google.common.collect.ImmutableList;
 
-public final class Piece implements MusicalStructure, Iterable<PolyphonicPart> {
+public final class Piece extends MusicalStructure 
+    implements StandardMusicalStructure, Iterable<PolyphonicPart> {
 
     //
     //  ~  FIELDS  ~  //

@@ -3,7 +3,7 @@ package com.atompacman.lereza.core.piece;
 import com.atompacman.toolkat.annotations.Implement;
 import com.google.common.base.CaseFormat;
 
-abstract interface MusicalStructure {
+interface StandardMusicalStructure {
 
     //
     //  ~  STATE  ~  //

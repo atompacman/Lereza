@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-public class PolyphonicPart implements MusicalStructure {
+public class PolyphonicPart implements StandardMusicalStructure {
 
     //
     //  ~  FIELDS  ~  //

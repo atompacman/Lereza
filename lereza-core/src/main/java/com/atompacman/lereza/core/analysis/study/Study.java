@@ -1,5 +1,7 @@
 package com.atompacman.lereza.core.analysis.study;
 
-public abstract class Study {
+import com.atompacman.lereza.core.analysis.AnalysisComponent;
+
+public abstract class Study implements AnalysisComponent {
 
 }
