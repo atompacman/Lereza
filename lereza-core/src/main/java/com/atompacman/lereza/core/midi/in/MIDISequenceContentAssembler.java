@@ -8,38 +8,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.logging.log4j.Level;
-
 import com.atompacman.lereza.core.piece.Piece;
 import com.atompacman.lereza.core.piece.PieceBuilder;
-import com.atompacman.lereza.core.piece.timeline.MIDIKeyTimeline;
-import com.atompacman.lereza.core.piece.timeline.TempoTimeline;
-import com.atompacman.lereza.core.piece.timeline.TimeSignatureTimeline;
 import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
-import com.atompacman.lereza.core.theory.Key;
 import com.atompacman.lereza.core.theory.TimeSignature;
-import com.atompacman.toolkat.exception.Throw;
-import com.atompacman.toolkat.exception.UnimplementedException;
+import com.atompacman.toolkat.annotations.Temporary;
 import com.atompacman.toolkat.task.AnomalyDescription;
-import com.atompacman.toolkat.task.BaseModule;
-import com.atompacman.toolkat.task.Module;
-import com.atompacman.toolkat.task.ProcedureDescription;
 import com.atompacman.toolkat.task.AnomalyDescription.Severity;
+import com.atompacman.toolkat.task.TaskMonitor;
+import com.google.common.collect.SetMultimap;
 
-public class MIDISequenceContentAssembler extends Module {
+public final class MIDISequenceContentAssembler {
 
-    //====================================== CONSTANTS ===========================================\\
-
+    //
+    //  ~  CONSTANTS  ~  //
+    //
+    
     private static final int TICK_OFFSET_CORREC_RADIUS     = 5;
     private static final int MAXIMUM_ACCEPTABLE_TICK_DELTA = 5;
 
-
     
-    //===================================== INNER TYPES ==========================================\\
-
+    //
+    //  ~  INNER TYPES  ~  //
+    //
+    
     private enum Anomaly {
         
         @AnomalyDescription (
@@ -82,100 +78,84 @@ public class MIDISequenceContentAssembler extends Module {
         CHAOTIC_TICK_SUBSEQUENCE;
     }
 
-    private enum Procedure {
+    
+    //
+    //  ~  FIELDS  ~  //
+    //
+    
+    private @Temporary TaskMonitor monitor;
+    
+    
+    //
+    //  ~  INIT  ~  //
+    //
 
-        @ProcedureDescription (nameFormat = "Converting MIDI ticks to timeunits")
-        CONVERT_TICKS_TO_TIMEUNITS,
-
-        @ProcedureDescription (nameFormat = "Building piece")
-        BUILD_PIECE,
-        
-        @ProcedureDescription (nameFormat = "Building track %s")
-        BUILD_TRACK;
+    public MIDISequenceContentAssembler() {
+        this.monitor = null;
     }
     
     
-    
-    //======================================= METHODS ============================================\\
+    //
+    //  ~  ASSEMBLE  ~  //
+    //
 
-    //------------------------------------- CONSTRUCTORS -----------------------------------------\\
-
-    public MIDISequenceContentAssembler(BaseModule parentModule) {
-        super(Level.DEBUG, parentModule);
-    }
-    
-
-    //--------------------------------------- ASSEMBLE -------------------------------------------\\
-
-    public Piece assemble(MIDISequenceContent content) throws MIDIFileLoaderException {
-        procedure(Procedure.CONVERT_TICKS_TO_TIMEUNITS);
-
-        // Create a map that links ticks to timeunits
-        Map<Long, Integer> conversionMap = createTickToTUConversionMap(
-                                               new ArrayList<>(createSortedPieceTickSet(content)), 
-                                               content.getNumTicksPer64thNote(), 
-                                               calculateAnacrusisCorrectionTick(content));
+    public Piece assemble(MIDISequenceContent content, TaskMonitor monitor) 
+                                                                    throws MIDIFileLoaderException {
         
-        // Convert piece properties to timeunits
-        TreeMap<Integer, TimeSignature> timeSignTU = convertTicksToTU(content.getTimeSignChanges(), 
-                                                                      conversionMap, 
-                                                                      TimeSignature.STANDARD_4_4, 
-                                                                      "time signature");
-        TreeMap<Integer, Double>        tempoTU    = convertTicksToTU(content.getTempoChanges(), 
-                                                                      conversionMap, 
-                                                                      120.0, 
-                                                                      "tempo");
-        TreeMap<Integer, Key>           keyTU      = convertTicksToTU(content.getKeyChanges(), 
-                                                                      conversionMap, 
-                                                                      Key.valueOf("C"), 
-                                                                      "key");
+        Map<Long, Integer> conversionMap = 
+        monitor.executeSubtaskExcep("Convert ticks to timeunits", mon -> {
+            this.monitor = mon;
+            Set<Long> sortedTicks = createSortedPieceTickSet(content);
+            int anacrusisCorrection = calculateAnacrusisCorrectionTick(content);
+            return createTickToTUConversionMap(new ArrayList<>(sortedTicks), 
+                                               content.getNumTicksPer64thNote(),
+                                               anacrusisCorrection);
+        });
+
+        TreeMap<Integer, TimeSignature> timeSignTU = 
+        monitor.executeSubtask("Convert piece properties to timeunits", mon -> {
+            this.monitor = mon;
+            return convertTicksToTU(content.getTimeSignChanges(), conversionMap, 
+                                    TimeSignature.STANDARD_4_4, "time signature");
+            // TODO BUILD THESE
+//          TreeMap<Integer, Double>        tempoTU    = convertTicksToTU(content.getTempoChanges(), 
+//          conversionMap, 
+//          120.0, 
+//          "tempo");
+//          TreeMap<Integer, Key>           keyTU      = convertTicksToTU(content.getKeyChanges(), 
+//          conversionMap, 
+//          Key.valueOf("C"), 
+//          "key");
+        });
 
         // Create timeline structures
-        int pieceLengthTU = calculatePieceLengthTU(content.getSequenceLengthTU(),
-                                                   timeSignTU.lastEntry());
-        TimeunitToBarConverter tuToBar = new TimeunitToBarConverter(timeSignTU, pieceLengthTU);
-
-        // TODO use these
-        new TimeSignatureTimeline(timeSignTU, tuToBar);
-        new TempoTimeline(tempoTU, pieceLengthTU);
-        new MIDIKeyTimeline(keyTU, pieceLengthTU);
+        TimeunitToBarConverter tuToBar = 
+        monitor.executeSubtask("Create timeline structures", mon -> {
+            int len = content.getSequenceLengthTU();
+            int pieceLengthTU = calculatePieceLengthTU(len, timeSignTU.lastEntry(), mon);
+            return TimeunitToBarConverter.of(timeSignTU, pieceLengthTU);
+            // TODO use these
+            //new TimeSignatureTimeline(timeSignTU, tuToBar);
+            //new TempoTimeline(tempoTU, pieceLengthTU);
+            //new MIDIKeyTimeline(keyTU, pieceLengthTU);
+        });
         
         // TODO fusionOddNotesWithTinyRests ?
         
-        procedure(Procedure.BUILD_PIECE);
-        PieceBuilder builder = new PieceBuilder(tuToBar, this);
-        List<MIDITrack> tracks = content.getTracks();
+        return monitor.executeSubtask("Build piece", mon -> {
+            PieceBuilder builder = PieceBuilder.of(tuToBar);
+            List<MIDITrack> tracks = content.getTracks();
 
-        for (int i = 0; i < tracks.size(); ++i) {
-            subprocedure(Procedure.BUILD_TRACK, i + 1);
-            buildTrack(i, tracks.get(i).getNotes(), conversionMap, builder);
-        }
+            for (int i = 0; i < tracks.size(); ++i) {
+                mon.executeSubtask("Build track " + (i + 1), i, (submon, j) -> {
+                    buildTrack(j, tracks.get(j).getNotes(), conversionMap, builder);
+                });
+            }
 
-        return builder.buildComponent();
+            return builder.build(mon);
+        });
     }
-    
-    private int calculateAnacrusisCorrectionTick(MIDISequenceContent content) {
-        TreeMap<Long, TimeSignature> timeSignChangesTick = content.getTimeSignChanges();
-        Iterator<Entry<Long, TimeSignature>> iter = timeSignChangesTick.entrySet().iterator();
-        
-        TimeSignature firstSign = iter.next().getValue();
-        
-        if (!iter.hasNext()) {
-            Throw.aRuntime(UnimplementedException.class, "Cannot calculate "
-                    + "anacrusis correction without at least two key changes");
-        }
-        
-        Long secondTick = iter.next().getKey();
-        long numTicksPerBar = firstSign.timeunitsInABar() * content.getNumTicksPer64thNote();
-        int anacrusis = (int)(numTicksPerBar - (secondTick % numTicksPerBar));
-        if (anacrusis == numTicksPerBar) {
-            anacrusis = 0;
-        }
-        log("Anacrusis correction length: %d ticks", anacrusis);
-        
-        return anacrusis;
-    }
-    
+
     private static TreeSet<Long> createSortedPieceTickSet(MIDISequenceContent content) {
         TreeSet<Long> tickSet = new TreeSet<>();
 
@@ -190,10 +170,34 @@ public class MIDISequenceContentAssembler extends Module {
         
         return tickSet;
     }
+
+    private int calculateAnacrusisCorrectionTick(MIDISequenceContent content) {
+        SortedMap<Long, TimeSignature> timeSignChangesTick = content.getTimeSignChanges();
+        Iterator<Entry<Long, TimeSignature>> iter = timeSignChangesTick.entrySet().iterator();
+        
+        TimeSignature firstSign = iter.next().getValue();
+        
+        if (!iter.hasNext()) {
+            // TODO
+            //throw new RuntimeException("Cannot calculate anacrusis "
+              //      + "correction without at least two key changes");
+            return 0;
+        }
+        
+        Long secondTick = iter.next().getKey();
+        long numTicksPerBar = firstSign.timeunitsInABar() * content.getNumTicksPer64thNote();
+        int anacrusis = (int)(numTicksPerBar - (secondTick % numTicksPerBar));
+        if (anacrusis == numTicksPerBar) {
+            anacrusis = 0;
+        }
+        monitor.log("Anacrusis correction length: %d ticks", anacrusis);
+        
+        return anacrusis;
+    }
     
-    private Map<Long, Integer> createTickToTUConversionMap(List<Long> ticks, 
-                                                           int        ticksPer64thNote, 
-                                                           int        anacrusisCorrTick)
+    private Map<Long, Integer> createTickToTUConversionMap(List<Long>  ticks, 
+                                                           int         ticksPer64thNote, 
+                                                           int         anacrusisCorrTick)
                                                                throws MIDIFileLoaderException {
         
         int currDeltaTick = 0;
@@ -218,8 +222,8 @@ public class MIDISequenceContentAssembler extends Module {
             
             // If tick delta did not change
             if (deltaTick == currDeltaTick) {
-                log("Tick:%6d >>%6d | Delta tick: %s >> %s| Timeunit: %d", tick, roundedTick, 
-                        formatDelta(currDeltaTick), formatDelta(deltaTick), roundedTU);
+                monitor.log("Tick:%6d >>%6d | Delta tick: %s >> %s| Timeunit: %d", tick, 
+                        roundedTick, formatDelta(currDeltaTick), formatDelta(deltaTick), roundedTU);
                 continue;
             }
 
@@ -238,15 +242,15 @@ public class MIDISequenceContentAssembler extends Module {
             Anomaly anomaly = Math.abs(deltaDelta) > MAXIMUM_ACCEPTABLE_TICK_DELTA ? 
                     Anomaly.MAJOR_TICK_ROUNDING : Anomaly.MINOR_TICK_ROUNDING;
 
-            signal(anomaly, tick, roundedTick, formatDelta(currDeltaTick), 
+            monitor.signal(anomaly, tick, roundedTick, formatDelta(currDeltaTick), 
                     formatDelta(deltaTick), formatDelta(deltaDelta), roundedTU);
 
             // If majority of future deltas are the same than current delta 
             if (deltaOcc.get(deltaTick) > (TICK_OFFSET_CORREC_RADIUS - 1) / 2) {
-                signal(Anomaly.TICK_OFFSET_CHANGE);
+                monitor.signal(Anomaly.TICK_OFFSET_CHANGE);
                 currDeltaTick = deltaTick;
             } else if (deltaOcc.size() >= TICK_OFFSET_CORREC_RADIUS) {
-                signal(Anomaly.CHAOTIC_TICK_SUBSEQUENCE, tick, deltaOcc.keySet()); 
+                monitor.signal(Anomaly.CHAOTIC_TICK_SUBSEQUENCE, tick, deltaOcc.keySet()); 
             }
         }
         return tickToTU;
@@ -256,7 +260,7 @@ public class MIDISequenceContentAssembler extends Module {
         return String.format("%s%-2d", delta < 0 ? "-" : "+", Math.abs(delta));
     }
     
-    private <T> TreeMap<Integer, T> convertTicksToTU(TreeMap<Long, T>   tickChanges,
+    private <T> TreeMap<Integer, T> convertTicksToTU(SortedMap<Long, T> tickChanges,
                                                      Map<Long, Integer> conversionMap,
                                                      T                  defaultInitValue,
                                                      String             propertyName) {
@@ -265,7 +269,7 @@ public class MIDISequenceContentAssembler extends Module {
         Entry<Long, T> entry = it.hasNext() ? it.next() : null;
         
         if (entry == null || entry.getKey() != 0L) {
-            signal(Anomaly.MISSING_INITIAL_MIDI_EVENT, propertyName);
+            monitor.signal(Anomaly.MISSING_INITIAL_MIDI_EVENT, propertyName);
             entry.setValue(defaultInitValue);
         }
         
@@ -281,7 +285,8 @@ public class MIDISequenceContentAssembler extends Module {
     }
     
     private int calculatePieceLengthTU(int                           sequenceLengthTU,
-                                       Entry<Integer, TimeSignature> lastTimeSignEntry) {
+                                       Entry<Integer, TimeSignature> lastTimeSignEntry,
+                                       TaskMonitor                   monitor) {
         
         if (lastTimeSignEntry.getKey() >= sequenceLengthTU) {
             throw new IllegalArgumentException("Last time signature "
@@ -295,15 +300,15 @@ public class MIDISequenceContentAssembler extends Module {
             endTU += tuInLastBar;
         }
         
-        log("Piece length: %d timeunits", endTU);
+        monitor.log("Piece length: %d timeunits", endTU);
 
         return endTU;
     }
     
-    private static void buildTrack(int                      partNum,
-                                   Map<Long, Set<MIDINote>> notes, 
-                                   Map<Long, Integer>       conversionMap, 
-                                   PieceBuilder             builder) {
+    private static void buildTrack(int                         partNum,
+                                   SetMultimap<Long, MIDINote> notes, 
+                                   Map<Long, Integer>          conversionMap, 
+                                   PieceBuilder                builder) {
 
         for (long tick : conversionMap.keySet()) {
             Set<MIDINote> noteSet = notes.get(tick);

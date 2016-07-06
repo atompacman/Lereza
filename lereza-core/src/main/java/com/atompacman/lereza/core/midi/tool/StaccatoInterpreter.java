@@ -10,29 +10,31 @@ import java.util.Set;
 import org.jfugue.midi.MidiDictionary;
 import org.jfugue.player.Player;
 
-import com.atompacman.lereza.core.midi.MIDIInstrument;
-import com.atompacman.lereza.core.midi.MIDIInstrument.Family;
+import com.atompacman.lereza.core.midi.in.MIDIInstrument;
+import com.atompacman.lereza.core.midi.in.MIDIInstrument.Family;
 
 public class StaccatoInterpreter {
 
-    //====================================== CONSTANTS ===========================================\\
-
+    //
+    //  ~  CONSTANTS  ~  //
+    //
+    
     private static final Set<String> EXIT_KEYWORDS = new HashSet<>(Arrays.asList("exit, quit"));
     private static final String INSTRUMENT_SELECTION_KEYWORD = "I";
 
-
-
-    //==================================== STATIC FIELDS =========================================\\
+    
+    //
+    //  ~  STATIC FIELDS  ~  //
+    //
 
     private static Player  staccatoPlayer;
     private static Scanner keyboard;
     private static String  instrument;
 
 
-
-    //======================================= METHODS ============================================\\
-
-    //---------------------------------------- MAIN ----------------------------------------------\\
+    //
+    //  ~  MAIN  ~  //
+    //
 
     public static void main(String[] args) {
         // Init

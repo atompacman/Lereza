@@ -10,7 +10,20 @@ import javax.sound.midi.MidiSystem;
 import org.jfugue.midi.MidiParserListener;
 import org.staccato.StaccatoParser;
 
-public class StaccatoUtils {
+public final class StaccatoUtils {
+
+    //
+    //  ~  INIT  ~  //
+    //
+
+    private StaccatoUtils() {
+        
+    }
+    
+    
+    //
+    //  ~  WRITE  ~  //
+    //
 
     public static void writeToFile(String staccato, File path) throws IOException {
         writeToOutput(staccato, new FileOutputStream(path));

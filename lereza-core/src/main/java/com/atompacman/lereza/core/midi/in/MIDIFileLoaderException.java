@@ -1,7 +1,7 @@
 package com.atompacman.lereza.core.midi.in;
 
 @SuppressWarnings("serial")
-public class MIDIFileLoaderException extends Exception {
+public final class MIDIFileLoaderException extends Exception {
 
     //
     //  ~  INIT  ~  //

@@ -11,7 +11,7 @@ import java.util.Optional;
 import com.atompacman.toolkat.annotations.DerivableFrom;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 
 public final class MIDITrack {
@@ -138,12 +138,12 @@ public final class MIDITrack {
     //  ~  GETTERS  ~  //
     //
 
-    public ImmutableMultimap<Long, MIDINote> getNotes() {
-        return ImmutableMultimap.copyOf(startingNotes);
+    public ImmutableSetMultimap<Long, MIDINote> getNotes() {
+        return ImmutableSetMultimap.copyOf(startingNotes);
     }
 
-    public ImmutableMultimap<Long, MIDINote> getEndingNotes() {
-        return ImmutableMultimap.copyOf(endingNotes);
+    public ImmutableSetMultimap<Long, MIDINote> getEndingNotes() {
+        return ImmutableSetMultimap.copyOf(endingNotes);
     }
 
     public long getStartTick() {

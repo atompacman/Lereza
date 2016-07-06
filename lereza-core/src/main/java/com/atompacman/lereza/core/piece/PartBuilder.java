@@ -23,9 +23,9 @@ import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.Builder;
 import com.atompacman.toolkat.annotations.Implement;
-import com.atompacman.toolkat.task.Anomaly.Severity;
 import com.atompacman.toolkat.task.AnomalyDescription;
-import com.atompacman.toolkat.task.TaskLogger;
+import com.atompacman.toolkat.task.AnomalyDescription.Severity;
+import com.atompacman.toolkat.task.TaskMonitor;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
@@ -95,36 +95,18 @@ public final class PartBuilder extends Builder<PolyphonicPart> {
         }
     }
 
-    private enum Task {
-        
-        @AnomalyDescription("Build part")
-        BUILD_PART,
-        
-        @AnomalyDescription("Determine layout")
-        DETERMINE_LAYOUT,
-        
-        @AnomalyDescription("Find complexity rank")
-        FIND_COMPLEXITY_RANK,
-        
-        @AnomalyDescription("Build bar slices")
-        BUILD_BAR_SLICES,
-        
-        @AnomalyDescription("Assemble bar slices")
-        ASSEMBLE_BAR_SLICES
-    }
-    
     private enum Anomaly {
         
         @AnomalyDescription (name          = "Note is out of bar scope", 
-                      detailsFormat = "Beg: %d, End: %d ",
-                      consequences  = "Ignoring note",
-                      severity      = Severity.MODERATE)
+                             detailsFormat = "Beg: %d, End: %d ",
+                             consequences  = "Ignoring note",
+                             severity      = Severity.MODERATE)
         NOTE_OUT_OF_SCOPE,
         
         @AnomalyDescription (name          = "Note timeunit length is not positive", 
-                      detailsFormat = "Length: %d",
-                      consequences  = "Ignoring note",
-                      severity      = Severity.MODERATE)
+                             detailsFormat = "Length: %d",
+                             consequences  = "Ignoring note",
+                             severity      = Severity.MODERATE)
         NOTE_LENGTH_NOT_POSITIVE,
 
         @AnomalyDescription (name = "Simultaneous notes with the same pitch")
@@ -153,28 +135,22 @@ public final class PartBuilder extends Builder<PolyphonicPart> {
     //
 
     public static PartBuilder of() {
-        return of(InfiniteTimeunitToBarConverter.of());
+        return new PartBuilder(InfiniteTimeunitToBarConverter.of());
     }
     
     public static PartBuilder of(TimeSignature timeSign) {
-        return of(InfiniteTimeunitToBarConverter.of(timeSign));
+        return new PartBuilder(InfiniteTimeunitToBarConverter.of(timeSign));
     }
     
     public static PartBuilder of(int pieceLengthTU) {
-        return of(TimeunitToBarConverter.of(pieceLengthTU));
+        return new PartBuilder(TimeunitToBarConverter.of(pieceLengthTU));
     }
-    
-    public static PartBuilder of(TimeunitToBarConverter tuToBar) {
-        return new PartBuilder(tuToBar, Optional.empty());
-    }
-    
-    public static PartBuilder of(TimeunitToBarConverter tuToBar, TaskLogger taskLogger) {
-        return new PartBuilder(tuToBar, Optional.of(taskLogger));
-    }
-    
-    PartBuilder(TimeunitToBarConverter tuToBar, Optional<TaskLogger> taskLogger) {
-        super(taskLogger);
 
+    public static PartBuilder of(TimeunitToBarConverter tuToBar) {
+        return new PartBuilder(tuToBar);
+    }
+    
+    PartBuilder(TimeunitToBarConverter tuToBar) {
         // Lifetime
         this.tuToBar = tuToBar;
 
@@ -232,29 +208,36 @@ public final class PartBuilder extends Builder<PolyphonicPart> {
     //
 
     @Implement
-    protected PolyphonicPart buildImpl() {
-        taskLogger.startTask(Task.BUILD_PART);
-        
-        taskLogger.startSubtaskOf(Task.BUILD_PART, Task.DETERMINE_LAYOUT);
-        List<List<LayoutEntry>> layout = determineLayout();
-        
-        taskLogger.startSubtaskOf(Task.BUILD_PART, Task.FIND_COMPLEXITY_RANK);
-        ComplexityHierarchyRank rank = findComplexityRank(layout);
-        
-        taskLogger.startSubtaskOf(Task.BUILD_PART, Task.BUILD_BAR_SLICES);
-        List<PolyphonicBarSlice> slices;
-        switch (rank) {
-        case MONOPHONIC : slices = buildMonophonicBarSlices();       break;
-        case HOMOPHONIC : slices = buildHomophonicBarSlices(layout); break;
-        case POLYPHONIC : slices = buildPolyphonicBarSlices(layout); break;
-        default:          throw new RuntimeException();
-        }
-        
-        taskLogger.startSubtaskOf(Task.BUILD_PART, Task.ASSEMBLE_BAR_SLICES);
-        return assembleBarSlices(slices);
+    protected PolyphonicPart buildImpl(TaskMonitor monitor) {
+        return monitor.executeSubtask("Build part", mon -> {
+            
+            List<List<LayoutEntry>> layout = 
+            mon.executeSubtask("Determine layout", submon -> {
+                return determineLayout(submon);
+            });
+            
+            ComplexityHierarchyRank rank = 
+            mon.executeSubtask("Find complexity rank", submon -> {
+               return findComplexityRank(layout);
+            });
+            
+            List<PolyphonicBarSlice> slices =
+            mon.executeSubtask("Build slices", submon -> {
+                switch (rank) {
+                case MONOPHONIC : return buildMonophonicBarSlices();
+                case HOMOPHONIC : return buildHomophonicBarSlices(layout);
+                case POLYPHONIC : return buildPolyphonicBarSlices(layout);
+                default:          throw new RuntimeException();
+                }
+            });
+
+            return mon.executeSubtask("Assemble slices", submon -> {
+                return assembleBarSlices(slices);
+            });
+        });
     }
 
-    private List<List<LayoutEntry>> determineLayout() {
+    private List<List<LayoutEntry>> determineLayout(TaskMonitor monitor) {
         // Create empty layout
         List<List<LayoutEntry>> layout = new ArrayList<>(tuToBar.pieceLengthTU());
         for (int i = 0; i < tuToBar.pieceLengthTU(); ++i) {
@@ -270,13 +253,13 @@ public final class PartBuilder extends Builder<PolyphonicPart> {
             int end = beg + len;
             
             if (len < 1) {
-                taskLogger.signal(Anomaly.NOTE_LENGTH_NOT_POSITIVE, len);
+                monitor.signal(Anomaly.NOTE_LENGTH_NOT_POSITIVE, len);
                 continue;
             }
             
             // Check if note fits in the part
             if (beg < 0 || end > tuToBar.pieceLengthTU()) {
-                taskLogger.signal(Anomaly.NOTE_OUT_OF_SCOPE, beg, end);
+                monitor.signal(Anomaly.NOTE_OUT_OF_SCOPE, beg, end);
                 continue;
             }
             

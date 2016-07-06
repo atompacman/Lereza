@@ -1,15 +1,13 @@
 package com.atompacman.lereza.core.piece;
 
-import java.util.Optional;
-
 import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
 import com.atompacman.lereza.core.theory.Pitch;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.Builder;
 import com.atompacman.toolkat.annotations.Implement;
-import com.atompacman.toolkat.task.Anomaly.Severity;
 import com.atompacman.toolkat.task.AnomalyDescription;
-import com.atompacman.toolkat.task.TaskLogger;
+import com.atompacman.toolkat.task.AnomalyDescription.Severity;
+import com.atompacman.toolkat.task.TaskMonitor;
 
 public final class BarBuilder extends Builder<PolyphonicBar> {
     
@@ -19,9 +17,9 @@ public final class BarBuilder extends Builder<PolyphonicBar> {
     
     private enum Anomaly {
         
-        @AnomalyDescription (name          = "Note is out of bar scope", 
-                      consequences  = "Ignoring notes on additional bars",
-                      severity      = Severity.MODERATE)
+        @AnomalyDescription (name         = "Note is out of bar scope", 
+                             consequences = "Ignoring notes on additional bars",
+                             severity     = Severity.MODERATE)
         NOTE_OUT_OF_BAR
     }
     
@@ -38,22 +36,16 @@ public final class BarBuilder extends Builder<PolyphonicBar> {
     //
 
     public static BarBuilder of() {
-        return new BarBuilder(TimeSignature.STANDARD_4_4, Optional.empty());
+        return new BarBuilder(TimeSignature.STANDARD_4_4);
     }
     
     public static BarBuilder of(TimeSignature timeSig) {
-        return new BarBuilder(timeSig, Optional.empty());
+        return new BarBuilder(timeSig);
     }
     
-    public static BarBuilder of(TimeSignature timeSig, TaskLogger taskLogger) {
-        return new BarBuilder(timeSig, Optional.of(taskLogger));
-    }
-    
-    private BarBuilder(TimeSignature timeSig, Optional<TaskLogger> taskLogger) {
-        super(taskLogger);
-        
+    private BarBuilder(TimeSignature timeSig) {       
         TimeunitToBarConverter t2b = TimeunitToBarConverter.of(timeSig, timeSig.timeunitsInABar());
-        this.builder = new PartBuilder(t2b, taskLogger);
+        this.builder = new PartBuilder(t2b);
     }
 
 
@@ -107,10 +99,10 @@ public final class BarBuilder extends Builder<PolyphonicBar> {
     //
 
     @Implement
-    protected PolyphonicBar buildImpl() {
-        PolyphonicPart part = builder.build();
+    protected PolyphonicBar buildImpl(TaskMonitor monitor) {
+        PolyphonicPart part = builder.build(monitor);
         if (part.numBars() > 1) {
-            taskLogger.signal(Anomaly.NOTE_OUT_OF_BAR);
+            monitor.signal(Anomaly.NOTE_OUT_OF_BAR);
         }
         return part.getBar(0);
     }

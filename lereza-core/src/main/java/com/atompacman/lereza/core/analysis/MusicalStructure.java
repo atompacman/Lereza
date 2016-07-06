@@ -21,7 +21,7 @@ public abstract class MusicalStructure implements AnalysisComponent {
     //
     
     protected MusicalStructure() {
-        this.id = ++currId;
+        this.id = currId++;
     }
     
     

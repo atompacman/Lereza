@@ -11,6 +11,8 @@ import java.util.TreeMap;
 import com.atompacman.lereza.core.theory.Key;
 import com.atompacman.lereza.core.theory.NoteLetter;
 import com.atompacman.lereza.core.theory.TimeSignature;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedMap;
 
 public final class MIDISequenceContent {
 
@@ -112,32 +114,34 @@ public final class MIDISequenceContent {
     //  ~  GETTERS  ~  //
     //
 
-    public List<MIDITrack> getTracks() {
-        return tracks;
+    public ImmutableList<MIDITrack> getTracks() {
+        return ImmutableList.copyOf(tracks);
     }
     
     public File getSourceFile() {
         return srcFile;
     }
 
-    public TreeMap<Long, Double> getTempoChanges() {
-        return tempoChanges;
+    public ImmutableSortedMap<Long, Double> getTempoChanges() {
+        return ImmutableSortedMap.copyOf(tempoChanges);
     }
     
-    public TreeMap<Long, TimeSignature> getTimeSignChanges() {
-        return timeSignChanges;
+    public ImmutableSortedMap<Long, TimeSignature> getTimeSignChanges() {
+        return ImmutableSortedMap.copyOf(timeSignChanges);
     }
 
-    public TreeMap<Long, Key> getKeyChanges() {
-        return keySignChanges;
+    public ImmutableSortedMap<Long, Key> getKeyChanges() {
+        return ImmutableSortedMap.copyOf(keySignChanges);
     }
 
-    public Optional<Integer> getNumTicksPer64thNote() {
-        return ticksPer64thNote;
+    public int getNumTicksPer64thNote() {
+        checkArgument(ticksPer64thNote.isPresent(),"Num of ticks per 64th note should've been set");
+        return ticksPer64thNote.get();
     }
 
-    public Optional<Integer> getSequenceLengthTU() {
-        return lengthTU;
+    public int getSequenceLengthTU() {
+        checkArgument(lengthTU.isPresent(),"Sequence timeunit length should've been set");
+        return lengthTU.get();
     }
     
     public Optional<String> getCopyrightNotice() {

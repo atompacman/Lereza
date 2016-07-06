@@ -1,13 +1,15 @@
 package com.atompacman.lereza.core.midi.in;
 
+import static com.atompacman.lereza.core.midi.in.MIDIFileLoader.Anomaly.*;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
+import java.util.Arrays;
 
-import javax.annotation.Nullable;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
+import javax.sound.midi.MidiFileFormat;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Sequence;
@@ -22,15 +24,12 @@ import com.atompacman.lereza.core.theory.Key;
 import com.atompacman.lereza.core.theory.Quality;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.lereza.core.theory.Tone;
-import com.atompacman.toolkat.Log;
+import com.atompacman.toolkat.annotations.HelperMethod;
+import com.atompacman.toolkat.annotations.SubMethodOf;
 import com.atompacman.toolkat.annotations.Temporary;
-import com.atompacman.toolkat.task.Anomaly;
-import com.atompacman.toolkat.task.Anomaly.Severity;
-import com.atompacman.toolkat.task.Task;
-import com.atompacman.toolkat.task.TaskLogger;
-import static com.atompacman.lereza.core.midi.in.MIDIFileLoader.TaskType.*;
-
-import static com.atompacman.lereza.core.midi.in.MIDIFileLoader.AnomalyType.*;
+import com.atompacman.toolkat.task.AnomalyDescription;
+import com.atompacman.toolkat.task.AnomalyDescription.Severity;
+import com.atompacman.toolkat.task.TaskMonitor;
 
 public final class MIDIFileLoader {
 
@@ -55,24 +54,16 @@ public final class MIDIFileLoader {
         SMPTE_OFFSET        (0x54),
         TIME_SIGNATURE      (0x58),
         KEY_SIGNATURE       (0x59),
-        SEQUENCER_SPECIFIC  (0x7F);
+        SEQUENCER_SPECIFIC  (0x7F),
+        UNKNOWN             (0xFF);
 
-        private final int typeByte;
+        
+        //
+        //  ~  INIT  ~  //
+        //
 
         private MetaMessageType(int typeByte) {
-            this.typeByte = typeByte;
-        }
-
-        public static Optional<MetaMessageType> of(MetaMessage msg) {
-            int metaType = msg.getType();
-
-            for (MetaMessageType type : MetaMessageType.values()) {
-                if (metaType == type.typeByte) {
-                    return Optional.of(type);
-                }
-            }
-            Log.error("Unknown meta message type \"%s\"", metaType);
-            return Optional.empty();
+            META_MSG_TYPES[typeByte] = this;
         }
     }
 
@@ -85,78 +76,70 @@ public final class MIDIFileLoader {
         PROGRAM_CHANGE      (ShortMessage.PROGRAM_CHANGE),
         CHANNEL_PRESSURE    (ShortMessage.CHANNEL_PRESSURE),
         PITCH_BEND          (ShortMessage.PITCH_BEND),
-        SYSTEM_MESSAGE      (0xF0);
+        SYSTEM_MESSAGE      (0xF0),
+        UNKNOWN             (0xFF);
 
-        private final int signifByte;
+        
+        //
+        //  ~  INIT  ~  //
+        //
 
-        private ChannelMessageCmd(int signifByte) {
-            this.signifByte = signifByte;
-        }
-
-        public static Optional<ChannelMessageCmd> of(ShortMessage msg) {
-            int msgCmd = msg.getCommand();
-
-            for (ChannelMessageCmd cmd : ChannelMessageCmd.values()) {
-                if (msgCmd == cmd.signifByte) {
-                    return Optional.of(cmd);
-                }
-            }
-            Log.error("Unknown channel message command \"%s\"", msgCmd);
-            return Optional.empty();
+        private ChannelMessageCmd(int typeByte) {
+            CHANNEL_MSG_CMDS[typeByte] = this;
         }
     }
 
     private enum SystemCommonMessageType {
 
-        MIDI_TIME_CODE          (ShortMessage.MIDI_TIME_CODE),
-        SONG_POSITION_POINTER   (ShortMessage.SONG_POSITION_POINTER),
-        SONG_SELECT             (ShortMessage.SONG_SELECT),
-        TUNE_REQUEST            (ShortMessage.TUNE_REQUEST),
-        END_OF_EXCLUSIVE        (ShortMessage.END_OF_EXCLUSIVE),
-        TIMING_CLOCK            (ShortMessage.TIMING_CLOCK),
-        START                   (ShortMessage.START),
-        CONTINUE                (ShortMessage.CONTINUE),
-        STOP                    (ShortMessage.STOP),
-        ACTIVE_SENSING          (ShortMessage.ACTIVE_SENSING),
-        SYSTEM_RESET            (ShortMessage.SYSTEM_RESET);
+        MIDI_TIME_CODE        (ShortMessage.MIDI_TIME_CODE),
+        SONG_POSITION_POINTER (ShortMessage.SONG_POSITION_POINTER),
+        SONG_SELECT           (ShortMessage.SONG_SELECT),
+        TUNE_REQUEST          (ShortMessage.TUNE_REQUEST),
+        END_OF_EXCLUSIVE      (ShortMessage.END_OF_EXCLUSIVE),
+        TIMING_CLOCK          (ShortMessage.TIMING_CLOCK),
+        START                 (ShortMessage.START),
+        CONTINUE              (ShortMessage.CONTINUE),
+        STOP                  (ShortMessage.STOP),
+        ACTIVE_SENSING        (ShortMessage.ACTIVE_SENSING),
+        SYSTEM_RESET          (ShortMessage.SYSTEM_RESET),
+        UNKNOWN               (0xFF);
 
-        private final int statusByte;
+        
+        //
+        //  ~  INIT  ~  //
+        //
 
-        private SystemCommonMessageType(int statusByte) {
-            this.statusByte = statusByte;
-        }
-
-        public static Optional<SystemCommonMessageType> of(ShortMessage msg) {
-            int status = msg.getStatus();
-
-            for (SystemCommonMessageType scmt : SystemCommonMessageType.values()) {
-                if (status == scmt.statusByte) {
-                    return Optional.of(scmt);
-                }
-            }
-            Log.error("Unknown system common message \"%s\"", status);
-            return Optional.empty();
+        private SystemCommonMessageType(int typeByte) {
+            SYS_COMMON_MSG_TYPES[typeByte] = this;
         }
     }
 
-    enum AnomalyType {
+    // Not private to allow static import
+    enum Anomaly {
         
-        @Anomaly.Description (
-                name          = "Invalid MIDI file",
-                detailsFormat = "Could not load MIDI sequence at \"%s\"",
-                description   = "MIDI file is either inexistant or of invalid format", 
+        @AnomalyDescription (
+                name          = "MIDI file not found",
+                detailsFormat = "Could not find file \"%s\"",
                 consequences  = "Cannot continue MIDI file reading",
                 severity      = Severity.FATAL)
-        INVALID_MIDI_FILE,
+        FILE_NOT_FOUND,
         
-        @Anomaly.Description (
+        @AnomalyDescription (
+                name          = "Invalid MIDI data",
+                detailsFormat = "Could not parse MIDI data in file \"%s\": %s",
+                consequences  = "Cannot continue MIDI file reading",
+                severity      = Severity.FATAL)
+        INVALID_MIDI_DATA,
+        
+        @AnomalyDescription (
                 name          = "Ignored MIDI event",
+                detailsFormat = "%s",
                 description   = "Processing for some MIDI event is not implemented", 
                 consequences  = "May contain useful information", 
                 severity      = Severity.MINIMAL)
         IGNORED_MIDI_EVENT,
 
-        @Anomaly.Description(
+        @AnomalyDescription(
                 name          = "Consecutive noteOn/noteOff event",
                 detailsFormat = "Note %s event at %d",
                 description   = "Track contained two consecutive noteOn/noteOff events",
@@ -165,19 +148,16 @@ public final class MIDIFileLoader {
         CONSECUTIVE_NOTE_ON_OR_OFF_EVENT;
     }
 
-    enum TaskType {
 
-        @Task.Description (nameFormat = "Loading MIDI file from disk")
-        LOAD_MIDI_FILE_FROM_DISK,
+    //
+    //  ~  CONSTANTS  ~  //
+    //
 
-        @Task.Description (nameFormat = "Processing MIDI events")
-        PROCESS_MIDI_EVENTS,
+    private static final MetaMessageType[]         META_MSG_TYPES;
+    private static final ChannelMessageCmd[]       CHANNEL_MSG_CMDS;
+    private static final SystemCommonMessageType[] SYS_COMMON_MSG_TYPES;
 
-        @Task.Description (nameFormat = "Processing track %d")
-        PROCESS_TRACK_MIDI_EVENTS;
-    }
-
-
+    
     //
     //  ~  FIELDS  ~  //
     //
@@ -186,81 +166,136 @@ public final class MIDIFileLoader {
     private @Temporary MIDITrack	       track;
     private @Temporary MIDINote[]          noteBuffer;
     
-    private @Nullable TaskLogger taskLog;
+    private @Temporary TaskMonitor monitor;
     
 
     //
     //  ~  INIT  ~  //
     //
 
-    public MIDIFileLoader() {
+    static {
+        META_MSG_TYPES       = new MetaMessageType        [256];
+        CHANNEL_MSG_CMDS     = new ChannelMessageCmd      [256];
+        SYS_COMMON_MSG_TYPES = new SystemCommonMessageType[256];
+        replaceEmptyByEnum(META_MSG_TYPES, MetaMessageType.UNKNOWN);
+        replaceEmptyByEnum(CHANNEL_MSG_CMDS, ChannelMessageCmd.UNKNOWN);
+        replaceEmptyByEnum(SYS_COMMON_MSG_TYPES, SystemCommonMessageType.UNKNOWN);
+    }
+    
+    private static <T extends Enum<?>> void replaceEmptyByEnum(T[] table, T value) {
+        for (int i = 0; i < table.length; ++i) {
+            if (table[i] == null) {
+                table[i] = value;
+            }
+        }
+    }
+    
+    public static MIDIFileLoader of() {
+        return new MIDIFileLoader();
+    }
+    
+    private MIDIFileLoader() {
         this.content    = null;
         this.track      = null;
         this.noteBuffer = null;
         
-        this.taskLog    = null;
+        this.monitor    = null;
     }
-
-
+    
+    
     //
     //  ~  LOAD  ~  //
     //
 
-    public MIDISequenceContent load(File midiFile) throws MIDIFileLoaderException {
+    public MIDISequenceContent load(File        midiFile, 
+                                    TaskMonitor monitor) throws MIDIFileLoaderException {
+        
         content = new MIDISequenceContent(midiFile);
         
-        taskLog = new TaskLogger(LOAD_MIDI_FILE_FROM_DISK);
-        Sequence apiSeq = loadSequenceFromDisk();
-
-        taskLog.startTask(PROCESS_MIDI_EVENTS);
-        for (int i = 0; i < apiSeq.getTracks().length; ++i) {
-            taskLog.startSubtask(PROCESS_TRACK_MIDI_EVENTS,  i + 1);
-            processMIDIEvents(apiSeq.getTracks()[i]);
-        }
+        Sequence apiSeq = monitor.executeSubtaskExcep("Load MIDI file from disk", mon -> {
+            this.monitor = mon;
+            return loadSequenceFromDisk();
+        });
+        
+        monitor.executeSubtaskExcep("Process MIDI events", mon -> {
+            for (int i = 0; i < apiSeq.getTracks().length; ++i) {
+                mon.executeSubtaskExcep("Track" + (i + 1), i, (submon, j) -> {
+                    this.monitor = submon;
+                    processMIDIEvents(apiSeq.getTracks()[j]);
+                });
+            }
+        });
 
         return content;
     }
 
+    @SubMethodOf("load")
     private Sequence loadSequenceFromDisk() throws MIDIFileLoaderException {
-        File file = content.getSourceFile();
-        String path = file.getAbsolutePath();
-        
-        taskLog.log(Level.INFO, "URL: \"%s\"", path);
+        // Get file path
+        final File   file = content.getSourceFile();
+        final String path = file.getAbsolutePath();
+        monitor.log(Level.INFO, "URL: \"%s\"", path);
 
-        Sequence seq = null;
-
+        // Read file format
+        MidiFileFormat format = null;
         try {
-            seq = MidiSystem.getSequence(file);
-        } catch (InvalidMidiDataException | IOException e) {
-            taskLog.signalException(INVALID_MIDI_FILE, MIDIFileLoaderException.class, e, path);
-        }
-
-        float divisionType = seq.getDivisionType();
-        if (divisionType != Sequence.PPQ) {
-            taskLog.signalException(INVALID_MIDI_FILE, MIDIFileLoaderException.class, 
-                    "SMPTE-based division type is unimplemented");
+            format = MidiSystem.getMidiFileFormat(file);
+        } catch (IOException e) {
+            return monitor.signalException(FILE_NOT_FOUND, MIDIFileLoaderException.class, e, path);
+        } catch (InvalidMidiDataException e) {
+            return monitor.signalException(INVALID_MIDI_DATA, MIDIFileLoaderException.class,e, path,
+                    "Could not determine MIDI file format");
         }
         
-        int resolution = seq.getResolution();
+        // Perform format checks
+        if (!MidiSystem.isFileTypeSupported(format.getType())) {
+            monitor.signalException(INVALID_MIDI_DATA, MIDIFileLoaderException.class, path, 
+                    "MIDI file type is not supported by installed reader");
+        }
+        
+        final float divisionType = format.getDivisionType();
+        if (divisionType != Sequence.PPQ) {
+            monitor.signalException(INVALID_MIDI_DATA, MIDIFileLoaderException.class, path, 
+                    "SMPTE-based division type is not implemented");
+        }
+        
+        final int resolution = format.getResolution();
         double ticksPer64thNote = resolution / (2 * MIDISequenceContent.NUM_32TH_NOTES_PER_BEAT);
         if (ticksPer64thNote - (int) ticksPer64thNote != 0) {
-            taskLog.signalException(INVALID_MIDI_FILE, MIDIFileLoaderException.class, 
+            monitor.signalException(INVALID_MIDI_DATA, MIDIFileLoaderException.class, path, 
                     "Sequence's num of ticks per 64th note is not integral");
         }
         content.setNumTicksPer64thNote((int) ticksPer64thNote);
-        content.setLengthTU((int) ((double) seq.getTickLength() / ticksPer64thNote));
         
-        double lengthSec = (double) seq.getMicrosecondLength() / 1000000.0;
-        
-        taskLog.log("Basic MIDI sequence info");
-        taskLog.log("%4s%-24s : %d", "", "Num of tracks", seq.getTracks().length);
-        taskLog.log("%4s%-24s : %.2f sec (%d ticks)","","Duration", lengthSec, seq.getTickLength());
-        taskLog.log("%4s%-24s : %d ticks per quarter note", "", "Timing resolution", resolution);
-        taskLog.log("%4s%-24s : %d", "", "Num ticks per 64th note", (int) ticksPer64thNote);
+        // Load sequence
+        Sequence seq = null;
+        try {            
+            seq = MidiSystem.getSequence(file);
+        } catch (IOException e) {
+            return monitor.signalException(FILE_NOT_FOUND, MIDIFileLoaderException.class, e, path);
+        } catch (InvalidMidiDataException e) {
+            return monitor.signalException(INVALID_MIDI_DATA, MIDIFileLoaderException.class,e, path, 
+                    "Data does not follow the MIDI specification");
+        }
+
+        // Set sequence timeunit length
+        content.setLengthTU((int)((double) seq.getTickLength() / content.getNumTicksPer64thNote()));
+
+        // Print basic information
+        final double lengthSec = (double) seq.getMicrosecondLength() / 1000000.0;        
+        final String BASE = "%4s%-24s : ";
+        monitor.setDefaultVerbose(Level.DEBUG);
+        monitor.log("Basic MIDI sequence info");
+        monitor.log(BASE + "%d", "", "Num of tracks", seq.getTracks().length);
+        monitor.log(BASE + "%d", "", "Size (bytes)", (int)(format.getByteLength()));
+        monitor.log(BASE + "%.2f sec (%d ticks)","","Duration", lengthSec, seq.getTickLength());
+        monitor.log(BASE + "%d ticks per quarter note","","Timing resolution", seq.getResolution());
+        monitor.log(BASE + "%d", "", "Num ticks per 64th note", content.getNumTicksPer64thNote());
 
         return seq;
     }
 
+    @SubMethodOf("load")
     private void processMIDIEvents(Track apiTrack) throws MIDIFileLoaderException {
         // Create a MIDI track wrapper
         track = new MIDITrack();
@@ -284,7 +319,7 @@ public final class MIDIFileLoader {
 
         // Skip empty tracks
         if (track.getNotes().isEmpty()) {
-            taskLog.log("Ignoring empty track");
+            monitor.log(Level.INFO, "Ignoring empty track");
             return;
         }
         
@@ -292,14 +327,15 @@ public final class MIDIFileLoader {
         content.addTrack(track);
 
         // Log stats
-        taskLog.log(Level.INFO, "Track total number of notes: %d (Tick: %d-%d)", 
+        monitor.log(Level.INFO, "Track total number of notes: %d (Tick: %d-%d)", 
                 track.getNotes().size(), track.getStartTick(), track.getEndTick());
     }
 
+    @SubMethodOf("processMIDIEvents")
     private void processMessage(MetaMessage msg, long tick) throws MIDIFileLoaderException {
         byte[] data = msg.getData();
         String strData = new String(data);
-        MetaMessageType type = MetaMessageType.of(msg).orElse(null);
+        MetaMessageType type = META_MSG_TYPES[msg.getType()];
         boolean ignored = false;
 
         switch(type) {
@@ -316,9 +352,10 @@ public final class MIDIFileLoader {
         
         case TIME_SIGNATURE:
             if (data[3] != MIDISequenceContent.NUM_32TH_NOTES_PER_BEAT) {
-                taskLog.signalException(INVALID_MIDI_FILE, MIDIFileLoaderException.class, 
-                        "Unimplemented tick adjustment for sequence with num of 32th notes "
-                        + "per beat different than " + MIDISequenceContent.NUM_32TH_NOTES_PER_BEAT);
+                monitor.signalException(INVALID_MIDI_DATA, MIDIFileLoaderException.class, 
+                        content.getSourceFile().getPath(), "Unimplemented tick adjustment for "
+                        + "sequence with num of 32th notes per beat different than " 
+                        + MIDISequenceContent.NUM_32TH_NOTES_PER_BEAT);
             }
             TimeSignature sign = TimeSignature.of((int) data[0], (int) Math.pow(2, data[1]));
             content.addTimeSignatureChange(sign, tick);
@@ -342,22 +379,24 @@ public final class MIDIFileLoader {
             break;
         }
 
-        logMIDIMessage("MetaMessage", type.name(), ignored, tick, strData, data, false);
+        logMIDIMessage("MetaMessage", type.name(), ignored, tick, strData, data, Level.DEBUG);
     }
     
+    @SubMethodOf("processMIDIEvents")
     private void processMessage(SysexMessage msg, long tick) {
         byte[] data = msg.getData();
         String msgType = msg.getStatus() == SysexMessage.SPECIAL_SYSTEM_EXCLUSIVE ? 
                 "SPECIAL SYST. EXCL." : "SYSTEM EXCLUSIVE";
-        logMIDIMessage("SysexMessage", msgType, true, tick, new String(data), data, false);
+        logMIDIMessage("SysexMessage", msgType, true, tick, new String(data), data, Level.DEBUG);
     }
-
+    
+    @SubMethodOf("processMIDIEvents")
     private void processMessage(ShortMessage msg, long tick) {
-        ChannelMessageCmd cmd = ChannelMessageCmd.of(msg).orElse(null);
+        ChannelMessageCmd cmd = CHANNEL_MSG_CMDS[msg.getCommand()];
         String strData = msg.getData1() + " " + msg.getData2();
         String msgCategory = "ChannelMessage";
         boolean ignored = false;
-        boolean traceLvl = false;
+        Level verbLvl = Level.DEBUG;
         
         switch(cmd) {
         
@@ -366,11 +405,11 @@ public final class MIDIFileLoader {
             byte velocity = (byte) msg.getData2();
 
             if (noteBuffer[hexNote] != null) {
-                taskLog.signal(CONSECUTIVE_NOTE_ON_OR_OFF_EVENT, "on", tick);
+                monitor.signal(CONSECUTIVE_NOTE_ON_OR_OFF_EVENT, "on", tick);
                 ignored = true;
             }
             noteBuffer[hexNote] = new MIDINote(hexNote, velocity, tick);
-            traceLvl = true;
+            verbLvl = Level.TRACE;
             break;
 
         case NOTE_OFF:
@@ -379,13 +418,13 @@ public final class MIDIFileLoader {
 
             MIDINote note = noteBuffer[hexNote];
             if (note == null) {
-                taskLog.signal(CONSECUTIVE_NOTE_ON_OR_OFF_EVENT, "off", tick);
+                monitor.signal(CONSECUTIVE_NOTE_ON_OR_OFF_EVENT, "off", tick);
                 ignored = true;
             } else {
                 note.setEndTick(tick);
                 track.addNote(note); 
                 noteBuffer[hexNote] = null;
-                traceLvl = true;
+                verbLvl = Level.TRACE;
             }
             break;
 
@@ -394,7 +433,7 @@ public final class MIDIFileLoader {
             break;
 
         case SYSTEM_MESSAGE:
-            strData = SystemCommonMessageType.of(msg).get().name();
+            strData = SYS_COMMON_MSG_TYPES[msg.getStatus()].name();
             msgCategory = "System Message";
             ignored = true;
             break;
@@ -403,26 +442,24 @@ public final class MIDIFileLoader {
             ignored = true;
         }
 
-        logMIDIMessage(msgCategory, cmd.name(), ignored, tick, strData, null, traceLvl);
+        logMIDIMessage(msgCategory, cmd.name(), ignored, tick, strData, null, verbLvl);
     }
 
+    @HelperMethod
     private void logMIDIMessage(String msgCategory, String msgType, boolean ignored, 
-                                Long tick, String strData, byte[] bytes, boolean traceLvl) {
+                                Long tick, String strData, byte[] bytes, Level verbLvl) {
 
         String msg = String.format("%s | %-14s | %-17s | %6d | %s %s", ignored ? " Ignored " : 
                      "Processed", msgCategory, msgType, tick, strData, msgBytesToString(bytes));
 
         if (ignored) {
-            taskLog.signal(IGNORED_MIDI_EVENT, msg);
+            monitor.signal(IGNORED_MIDI_EVENT, msg);
         } else {
-            if (traceLvl) {
-                taskLog.log(Level.TRACE, msg);
-            } else {
-                taskLog.log(1, msg);
-            }
+            monitor.log(verbLvl, 2, msg);
         }
     }
-
+    
+    @SubMethodOf("logMIDIMessage")
     private static String msgBytesToString(byte[] bytes) {
         if (bytes == null) {
             return "";

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.atompacman.lereza.core.analysis.proxy.AnalysisComponentProxySet;
 import com.atompacman.lereza.core.piece.Piece;
+import com.atompacman.toolkat.Log;
 import com.atompacman.toolkat.task.TaskMonitor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
@@ -34,7 +35,7 @@ public final class AnalysisManager {
     private AnalysisManager(Set<URL> plugginJarURLs, TaskMonitor monitor) throws IOException {
         this.monitor = monitor;
         
-        this.proxies = monitor.executeSubtask("Create analysis component proxies", mon -> {
+        this.proxies = monitor.executeSubtaskExcep("Create analysis component proxies", mon -> {
             return createAnalysisComponentProxies(plugginJarURLs, mon);            
         });
     }
@@ -43,17 +44,17 @@ public final class AnalysisManager {
             Set<URL> plugginJarURLs, TaskMonitor monitor) throws IOException {
                     
         ImmutableSet<ClassInfo> classes = 
-        monitor.executeSubtask("Read pluggin jars content", mon -> {
+        monitor.executeSubtaskExcep("Read pluggin jars content", mon -> {
             return readPlugginJarsContent(plugginJarURLs);
         });
         
         Set<Class<? extends AnalysisComponent>> components =
-        monitor.executeSafeSubtask("Load analysis component classes", mon -> {
+        monitor.executeSubtask("Load analysis component classes", mon -> {
             return loadPlugginAnalysisComponentClasses(plugginJarURLs, classes);
         });
         
-        return monitor.executeSafeSubtask("Create component proxies", submon -> {
-            return new AnalysisComponentProxySet(components);
+        return monitor.executeSubtask("Create component proxies", mon -> {
+            return new AnalysisComponentProxySet(components, mon);
         });
     }
     
@@ -107,9 +108,10 @@ public final class AnalysisManager {
     }
 
     public static void main(String[] args) throws IOException {
-        TaskMonitor monitor = TaskMonitor.of("Test");
-        monitor.executeSubtask("Lol", mon -> {
-            URL url = new URL("file:\\C:\\Users\\Utilisateur\\Dev\\Lereza\\Lereza\\lereza-"
+        Log.setIgnoredPackagePart("com.atompacman");
+        TaskMonitor monitor = TaskMonitor.of("Lereza");
+        monitor.executeSubtaskExcep("Analysis", mon -> {
+            URL url = new URL("file:\\B:\\Documents\\Dev\\Atompacman\\Lereza\\Lereza\\lereza-"
                     + "builtin-analysis\\target\\lereza-builtin-analysis-0.0.1-SNAPSHOT.jar");
             return new AnalysisManager(Sets.newHashSet(url), mon);
         });

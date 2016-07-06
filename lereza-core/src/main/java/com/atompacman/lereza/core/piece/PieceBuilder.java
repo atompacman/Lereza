@@ -3,7 +3,6 @@ package com.atompacman.lereza.core.piece;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import com.atompacman.lereza.core.piece.timeline.InfiniteTimeunitToBarConverter;
 import com.atompacman.lereza.core.piece.timeline.TimeunitToBarConverter;
@@ -13,7 +12,7 @@ import com.atompacman.lereza.core.theory.RhythmValue;
 import com.atompacman.lereza.core.theory.TimeSignature;
 import com.atompacman.toolkat.Builder;
 import com.atompacman.toolkat.annotations.Implement;
-import com.atompacman.toolkat.task.TaskLogger;
+import com.atompacman.toolkat.task.TaskMonitor;
 
 public final class PieceBuilder extends Builder<Piece> {
 
@@ -39,28 +38,22 @@ public final class PieceBuilder extends Builder<Piece> {
     //
 
     public static PieceBuilder of() {
-        return of(InfiniteTimeunitToBarConverter.of());
+        return new PieceBuilder(InfiniteTimeunitToBarConverter.of());
     }
     
     public static PieceBuilder of(TimeSignature timeSign) {
-        return of(InfiniteTimeunitToBarConverter.of(timeSign));
+        return new PieceBuilder(InfiniteTimeunitToBarConverter.of(timeSign));
     }
     
     public static PieceBuilder of(int pieceLengthTU) {
-        return of(TimeunitToBarConverter.of(pieceLengthTU));
+        return new PieceBuilder(TimeunitToBarConverter.of(pieceLengthTU));
     }
     
     public static PieceBuilder of(TimeunitToBarConverter tuToBar) {
-        return new PieceBuilder(tuToBar, Optional.empty());
+        return new PieceBuilder(tuToBar);
     }
     
-    public static PieceBuilder of(TimeunitToBarConverter tuToBar, TaskLogger taskLogger) {
-        return new PieceBuilder(tuToBar, Optional.of(taskLogger));
-    }
-    
-    private PieceBuilder(TimeunitToBarConverter tuToBar, Optional<TaskLogger> taskLogger) {
-        super(taskLogger);
-
+    private PieceBuilder(TimeunitToBarConverter tuToBar) {
         // Lifetime
         this.tuToBar = tuToBar;
 
@@ -79,12 +72,8 @@ public final class PieceBuilder extends Builder<Piece> {
     public PieceBuilder add(Pitch pitch, byte velocity, int part, int begTU, int lengthTU) {
         // Create missing part builders
         while (part >= builders.size()) {
-            builders.add(PartBuilder.of(tuToBar, taskLogger));
+            builders.add(PartBuilder.of(tuToBar));
         }
-
-        // Log info
-        taskLogger.log("Pitch: %3s | Velocity: %3d | Part: %2d | %8s | Beg: %4d | End: %4d |", 
-                pitch, (int) velocity, part, "", begTU, begTU + lengthTU);
 
         // Redirect note to a part builder
         builders.get(part).add(pitch, velocity, begTU, lengthTU);
@@ -134,13 +123,13 @@ public final class PieceBuilder extends Builder<Piece> {
     //
 
     @Implement
-    protected Piece buildImpl() {
+    protected Piece buildImpl(TaskMonitor monitor) {
         List<PolyphonicPart> parts = new LinkedList<>();
         
         // Build each part separately 
         // (this means they can be of different ranks in the complexity hierarchy)
         for (PartBuilder builder : builders) {
-            parts.add(builder.build());
+            parts.add(builder.build(monitor));
         }
         
         return new Piece(parts);
