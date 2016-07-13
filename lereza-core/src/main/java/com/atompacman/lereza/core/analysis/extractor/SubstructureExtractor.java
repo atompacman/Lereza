@@ -1,7 +1,7 @@
 package com.atompacman.lereza.core.analysis.extractor;
 
 import com.atompacman.lereza.core.analysis.AnalysisComponent;
-import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.Study;
 
 public abstract class SubstructureExtractor<M1 extends MusicalStructure, 

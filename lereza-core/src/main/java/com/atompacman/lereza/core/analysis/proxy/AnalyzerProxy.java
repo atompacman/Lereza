@@ -1,10 +1,11 @@
 package com.atompacman.lereza.core.analysis.proxy;
 
-import com.atompacman.lereza.core.analysis.MusicalStructure;
 import com.atompacman.lereza.core.analysis.analyzer.Analyzer;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.Study;
+import com.atompacman.toolkat.task.TaskMonitor;
 
-public final class AnalyzerProxy extends ActiveAnalysisComponentProxy<Analyzer<?, ?>> {
+public final class AnalyzerProxy extends FilterableAnalysisComponentProxy<Analyzer<?,?>> {
 
     //
     //  ~  FIELDS  ~  //
@@ -18,10 +19,13 @@ public final class AnalyzerProxy extends ActiveAnalysisComponentProxy<Analyzer<?
     //  ~  INIT  ~  //
     //
     
-    <M extends MusicalStructure, S extends Study, A extends Analyzer<M, S>> 
-    AnalyzerProxy(Class<A> analyzerClass, Class<M> structureClass, Class<S> studyClass) {
+    public <M extends MusicalStructure, S extends Study, A extends Analyzer<M, S>> 
+    AnalyzerProxy(Class<A>    analyzerClass, 
+                  Class<M>    structureClass, 
+                  Class<S>    studyClass, 
+                  TaskMonitor monitor) {
 
-        super(analyzerClass);
+        super(analyzerClass, monitor);
         
         this.structureClass = structureClass;
         this.studyClass     = studyClass;

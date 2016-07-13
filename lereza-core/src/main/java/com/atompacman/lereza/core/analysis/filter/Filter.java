@@ -4,16 +4,15 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import com.atompacman.lereza.core.analysis.AnalysisComponent;
-import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.PieceStudySet;
 
-public abstract class Filter<A extends Annotation> implements AnalysisComponent {
+public abstract class Filter<A extends Annotation, 
+                             M extends MusicalStructure> implements AnalysisComponent {
 
     //
     //  ~  APPLY  ~  //
     //
 
-    public abstract <M extends MusicalStructure> Set<M> apply(Set<M>        structures, 
-                                                              PieceStudySet studies, 
-                                                              A             annotationData);
+    public abstract Set<M> apply(Set<M> structures, PieceStudySet studies, A annotationData);
 }

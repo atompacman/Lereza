@@ -3,7 +3,7 @@ package com.atompacman.lereza.core.piece;
 import java.util.Iterator;
 import java.util.List;
 
-import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 import com.google.common.collect.ImmutableList;
 
 public final class Piece extends MusicalStructure 

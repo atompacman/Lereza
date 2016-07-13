@@ -1,6 +1,6 @@
 package com.atompacman.lereza.core.analysis.proxy;
 
-import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 
 public final class MusicalStructureProxy extends AnalysisComponentProxy<MusicalStructure> {
     
@@ -8,7 +8,7 @@ public final class MusicalStructureProxy extends AnalysisComponentProxy<MusicalS
     //  ~  INIT  ~  //
     //
     
-    MusicalStructureProxy(Class<? extends MusicalStructure> componentClass) {
+    public MusicalStructureProxy(Class<? extends MusicalStructure> componentClass) {
         super(componentClass);
     }
 }

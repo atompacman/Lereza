@@ -3,14 +3,16 @@ package com.atompacman.lereza.core.analysis.proxy;
 import java.lang.annotation.Annotation;
 
 import com.atompacman.lereza.core.analysis.filter.Filter;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 
-public final class FilterProxy extends ActiveAnalysisComponentProxy<Filter<?>> {
+public final class FilterProxy extends StudyDependentAnalysisComponentProxy<Filter<?,?>> {
 
     //
     //  ~  FIELDS  ~  //
     //
     
-    private final Class<? extends Annotation> annotationClass;
+    private final Class<? extends Annotation>       annotationClass;
+    private final Class<? extends MusicalStructure> structureClass;
     
     
     //
@@ -18,11 +20,12 @@ public final class FilterProxy extends ActiveAnalysisComponentProxy<Filter<?>> {
     //
     
     @SuppressWarnings("unchecked")
-    <A extends Annotation, F extends Filter<A>> 
-    FilterProxy(Class<F> filterClass, Class<A> annotationClass) {
+    public <A extends Annotation, M extends MusicalStructure, F extends Filter<A,M>> 
+    FilterProxy(Class<F> filterClass, Class<A> annotationClass, Class<M> structureClass) {
         
-        super((Class<Filter<?>>) filterClass);
+        super((Class<Filter<?,?>>) filterClass);
         this.annotationClass = annotationClass;
+        this.structureClass  = structureClass;
     }
 
     
@@ -32,5 +35,9 @@ public final class FilterProxy extends ActiveAnalysisComponentProxy<Filter<?>> {
     
     public Class<? extends Annotation> getAnnotationClass() {
         return annotationClass;
+    }
+    
+    public Class<? extends MusicalStructure> getStructureClass() {
+        return structureClass;
     }
 }

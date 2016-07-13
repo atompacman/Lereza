@@ -2,8 +2,8 @@ package com.atompacman.lereza.core.analysis.extractor;
 
 import java.util.Set;
 
-import com.atompacman.lereza.core.analysis.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.StudyStructurePair;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.Study;
 import com.google.auto.value.AutoValue;
 

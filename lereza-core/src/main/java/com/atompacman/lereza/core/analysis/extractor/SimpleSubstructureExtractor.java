@@ -3,9 +3,9 @@ package com.atompacman.lereza.core.analysis.extractor;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.NoStudy;
 import com.atompacman.lereza.core.analysis.study.StudyStructurePair;
-import com.atompacman.lereza.core.analysis.MusicalStructure;
 
 public abstract class SimpleSubstructureExtractor<M1 extends MusicalStructure, 
                                                   M2 extends MusicalStructure>   

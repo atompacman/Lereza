@@ -1,4 +1,6 @@
-package com.atompacman.lereza.core.analysis;
+package com.atompacman.lereza.core.analysis.structure;
+
+import com.atompacman.lereza.core.analysis.AnalysisComponent;
 
 public abstract class MusicalStructure implements AnalysisComponent {
 

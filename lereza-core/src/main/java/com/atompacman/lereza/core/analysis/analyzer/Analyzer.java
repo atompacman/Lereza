@@ -1,7 +1,7 @@
 package com.atompacman.lereza.core.analysis.analyzer;
 
 import com.atompacman.lereza.core.analysis.AnalysisComponent;
-import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 import com.atompacman.lereza.core.analysis.study.DependentStudySet;
 import com.atompacman.lereza.core.analysis.study.Study;
 

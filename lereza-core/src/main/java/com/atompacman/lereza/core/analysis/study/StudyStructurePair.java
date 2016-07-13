@@ -1,6 +1,6 @@
 package com.atompacman.lereza.core.analysis.study;
 
-import com.atompacman.lereza.core.analysis.MusicalStructure;
+import com.atompacman.lereza.core.analysis.structure.MusicalStructure;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
