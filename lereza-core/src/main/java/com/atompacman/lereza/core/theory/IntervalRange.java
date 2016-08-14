@@ -1,0 +1,99 @@
+package com.atompacman.lereza.core.theory;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public enum IntervalRange {
+
+    UNISON        (0.0),
+    SECOND        (1.5),
+    THIRD         (3.5),
+    FOURTH        (5.0),
+    FIFTH         (7.0),
+    SIXTH         (8.5),
+    SEVENTH       (10.5),
+    OCTAVE        (12.0),
+    NINTH         (13.5), 
+    TENTH         (15.5), 
+    ELEVENTH      (17.0), 
+    TWELVTH       (19.0), 
+    THIRTEENTH    (20.5), 
+    FOURTEENTH    (22.5), 
+    DOUBLE_OCTAVE (24.0);
+
+
+    //
+    //  ~  FIELDS  ~  //
+    //
+
+    private final double semitoneValue;
+
+
+    //
+    //  ~  INIT  ~  //
+    //
+
+    private IntervalRange(double semitoneValue) {
+        this.semitoneValue = semitoneValue;
+    }
+
+    public static List<IntervalRange> closestRangesFrom(int semitoneValue) {
+        checkArgument(semitoneValue >= 0, "Semitone value must be positive.");
+        List<IntervalRange> closestRanges = new ArrayList<IntervalRange>();
+
+        for (IntervalRange range : values()) {
+            if (range.isWithinSemitoneRangeOf(semitoneValue)) {
+                closestRanges.add(range);
+            }
+        }
+        if (closestRanges.isEmpty()) {
+            IntervalRange highest = IntervalRange.values()[IntervalRange.values().length - 1];
+            throw new IllegalArgumentException("Semitone value must equal to or smaller "
+                    + "than " + highest.semitoneValue() + " (" + highest.name() + ").");
+        }
+        return closestRanges;
+    }
+
+
+    //
+    //  ~  GETTERS  ~  //
+    //
+    
+    public Class<? extends IntervalQuality> getQualityType() {
+        return (semitoneValue == (int) semitoneValue) ? AdvancedQuality.class : Quality.class;
+    }
+
+
+    //
+    //  ~  VALUE  ~  //
+    //
+
+    public double semitoneValue() {
+        return semitoneValue;
+    }
+
+    public int diatonicTonesValue() {
+        return ordinal();
+    }
+
+    public boolean isWithinSemitoneRangeOf(int semitoneValue) {
+        double semitoneDelta = Math.abs(this.semitoneValue - (double) semitoneValue);
+        if (getQualityType().equals(Quality.class)) {
+            return semitoneDelta <= 0.5;
+        } else {
+            return semitoneDelta <= 1.0;
+        }
+    }
+
+
+    //
+    //  ~  SERIALIZATION  ~  //
+    //
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
+}
